@@ -1,0 +1,6 @@
+#Lines beginning with "#" are comments
+#Begin Thomas's data file
+WALK_LEFT=2,4,6,1
+WALK_RIGHT=0,0,45,187
+TEST_DATA=3,6,789,1
+#End Thomas' data file
