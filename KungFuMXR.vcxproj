@@ -149,11 +149,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="KungFuMXR.cpp" />
+    <ClCompile Include="SDLMan.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="SDLMan.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="FensoxUtils.h" />
     <ClInclude Include="Player.h" />

@@ -1,21 +1,29 @@
 # Kung Fu MXR - Standard Sprite Metadata File
-
-# - Lines beginning with # are comments. Leading and trailing whitespace is ignored.
-# - This metadata file contains key/value pairs of (action mode names)/(sprite sheet clip coordinates) in format: NAME=x, y, w, h.
-# - Coordinates are to an animation frame for that action. For multiple animation frames for the same action simply use same action mode name on each line (see example below).
-# - All metadata files need to contain a DEFAULT action mode name with coordinates for the first animation frame to be displayed.
-# - The sprite sheet image file is assumed to be named the same as this file without any extension. (This to be updated as a setable variable in future versions.)
-
-# i.e.	DEFAULT=0, 0, 30, 100
+#
+# File format description:
+#
+# 1) Lines beginning with # are comments. Blank lines along with leading and trailing whitespace is attempted to be ignored.
+#
+# 2) This metadata file contains key/value pairs of (action mode names)/(sprite sheet clip coordinates) in format: NAME=x, y, w, h.
+# Coordinates are a clip area holding an animation frame for that action. For multiple animation frames for the same action
+# simply use the same action mode name on each line (see example below).
+#
+# An example file:
+#
+# i.e.
 # 	WALK_LEFT=0, 0, 30, 100
 #	WALK_LEFT=31, 0, 30, 100
 #	WALK_LEFT=62, 0, 28, 100
 #	WALK_RIGHT=91, 0, 30, 100
 #	WALK_RIGHT=122, 0, 30, 100
+#	FACE_SCREEN=153, 0, 40, 100
+#
+# The above example will set the sprite up with three action modes. There are three frames of animation for the "WALK_LEFT"
+# action mode. They will be cycled through as the sprite "WALK_LEFT" action is animated, etc.
+#
+#####################################################################################################################################
 
-# The above example will set the sprite up with five frames of animation and two action modes. The "WALK_LEFT" action mode will cycle through the three frames listed here, etc.
-
-# Begin Thomas's data file
+# Begin Thomas' data file
 
 DEFAULT=0, 0, 0, 0
 WALK_LEFT=2,4,6,1
