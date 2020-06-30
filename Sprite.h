@@ -5,47 +5,64 @@
 #include <vector>
 #include <SDL.h>
 #include <tuple>
+#include <memory>
+#include "Texture.h"
 
-class Sprite
-{
+class Sprite {
+
 public:
-	// constructor that takes in sprite data filename and calls load() to load the sprite in
+	// Constructor that takes in sprite data filename and calls load() to load the sprite in. Default constructor deleted.
 	Sprite(std::string pFilename);
+	Sprite() = delete;
 
-	// returns the current texture to be rendered as a pointer to an SDL_Texture
-	SDL_Texture* getTextureToRender();
+	// Returns by reference the current texture to be rendered.
+	Texture& getTextureToRender();
 
-	// returns the current texture's collision rectangle as a pointer to an SDL_Rect
-	SDL_Rect* getCollisionRect();
+	/* Returns current texture's collision rectangle by value. Class Sprite creates a collision	box using the sprites
+	position, height, and width. For more accurate collision this function should be overidden by derived classes. */
+	SDL_Rect getCollisionRect();
 
-	// access function to get this sprite's position in 2D space
+	// Access function to get a reference to this sprite's position in 2D space as an SDL_Point object.
 	SDL_Point& getPosition();
 
 protected:
-	// position of sprite
-	SDL_Point mPosition{};
+	// A ClipsMap is a std::unordered_map container with the string name of an action (the key) mapped to a vector of SDL_Rect holding all sprite sheet clip information for that action.
+	typedef std::unordered_map<std::string, std::vector<SDL_Rect>> ClipsMap;
 	
-	// string filename to the data file for this sprite
-	std::string mFilename{};
+	// An AnimMap is a std::unordered_map container with the string name of an action (the key) mapped to a vector of SDL_Texture holding all animation frames for that action.
+	typedef std::unordered_map<std::string, std::vector<Texture>> AnimMap;
 
-	// string holding the current action mode this sprite is in
-	std::string mActionMode{};
+	// Position of sprite.
+	SDL_Point mPosition;
 
-	// int holding the current frame of animation we are in
-	int mFrame{};
+	// String holding the current action mode this sprite is in.
+	std::string mActionMode;
 
-	// unordered map to hold key/value pairs of actions and their animations
-	//std::unordered_map< std::string, std::vector<SDL_Texture> > mAnimations;
+	// int holding the current frame of animation for our action mode we are in.
+	std::size_t mCurrentFrame{};
+
+	// Unordered map to hold key/value pairs of action names (the key) and their animation textures in a vector of Texture objects (the value).
+	AnimMap mAnimations;
+
+	// Returns object represented as a std::string for debugging purposes.
+	std::string toString(ClipsMap actionFrames);
 
 private:
-	typedef std::unordered_map<std::string, std::vector<SDL_Rect>> ClipsMap;
+	// String filename to the data file for this sprite.
+	std::string mFilename{};
 
-	// load sprite data from files (typically called from constructor)
+	// load sprite data from files (called from constructor).
 	virtual bool load();
 
-	// load the initial data file in with action mode names and animation frame counts. Store in passed in map and return boolean success.
+	// Load the initial data file in with action mode names and animation frame counts. Store in passed in map and return boolean success.
 	bool loadDataFile(ClipsMap& actionsFrameCount);
+
+	// Using previously loaded action names and sprite sheet clip coordinates, load in all sprite sheet animations for this sprite and store in an AnimMap (see typedef in Sprite.h).
+	bool loadActionAnims();
 
 	// Helper function to split some of the file parsing work into smaller chunks. Takes a string of 4 int values, comma delimited, and returns an bool success and an SDL_Rect as a tuple.
 	std::tuple<bool, SDL_Rect> getRectFromCDV(std::string pCDV);
+
+	// Helper function to ge the width and height of an SDL_Texture. Returned in a SDL_Point type (x=width, y=height).
+	SDL_Point getSize(Texture text);
 };
