@@ -7,12 +7,18 @@
 #include <tuple>
 #include <memory>
 #include "Texture.h"
+#include "SDLMan.h"
 
 class Sprite {
 
 public:
-	// Constructor that takes in sprite data filename and calls load() to load the sprite in. Default constructor deleted.
-	Sprite();
+	/* Constructor calls load() to load the sprite data in. Derived classes should alter const mMetaFilename and const mSpriteSheet members for their specific sprite data.
+	 * Derived classes that supply their own constructor need to call this parent Sprite constructor to initialize and load the sprite correctly.
+	 */
+	Sprite(std::shared_ptr<SDLMan> sdlMan);
+
+	// Renders the sprite based on position, action mode, animation frame using a SDL_Renderer from SDLMan.
+	void render();
 
 	/* Returns current texture's collision rectangle by value. Class Sprite creates a collision	box using the sprites
 	position, height, and width. For more accurate collision this function should be overidden by derived classes. */
@@ -30,27 +36,33 @@ public:
 protected:
 	// A constant reference std::string holding the path and filename of the sprite's data files relative to executable. Overridden by derived classes for each sprite type.
 	const std::string mMetaFilename{ "data/thomas.dat" };
-	const std::string mSpriteSheet{ "data/thomas.gif" };
+	const std::string mSpriteSheet{ "data/thomas.png" };
 
 	// A ClipsMap is a std::unordered_map container with the string name of an action (the key) mapped to a vector of SDL_Rect holding all sprite sheet clip information for that action.
 	typedef std::unordered_map<std::string, std::vector<SDL_Rect>> ClipsMap;
 
 	// Position of sprite.
-	SDL_Point mPosition;
+	SDL_Point mPosition{};
 
 	// String holding the current action mode this sprite is in.
-	std::string mActionMode;
+	std::string mActionMode{"DEFAULT"};
 
 	// int holding the current frame of animation for our action mode we are in.
 	std::size_t mCurrentFrame{};
 
 	// Unordered map to hold key/value pairs of action names (the key) and their animation frame coordinates on the sprite sheet (the value).
-	ClipsMap mAnimMap;
+	ClipsMap mAnimMap{};
 
 	// Returns our ClipsMap object represented as a std::string for debugging purposes.
 	std::string toString();
 
 private:
+	// Smart pointer to the Texture holding our sprite's sprite sheet.
+	std::shared_ptr<Texture> mTexture{ nullptr };
+	
+	// Smart pointer to the SDLMan object passed in during construction.
+	std::shared_ptr<SDLMan> mSDLMan{ nullptr };
+
 	// Holds the depth of this Sprite. Used for rendering of things in front/behind each other.
 	int mDepth{};
 

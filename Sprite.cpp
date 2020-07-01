@@ -1,5 +1,6 @@
 #include "Sprite.h"
 #include "FensoxUtils.h"
+#include "SDLMan.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <iostream>
@@ -9,24 +10,34 @@
 #include <sstream>
 #include <tuple>
 #include <memory>
+#include <vector>
 
-// Constructor for a new Sprite object. Takes a filename string to the Sprite's data filename.
-Sprite::Sprite() {
+/* Constructor calls load() to load the sprite data in. Derived classes should alter const mMetaFilename and const mSpriteSheet members for their specific sprite data.
+ * Derived classes that supply their own constructor need to call this parent Sprite constructor to initialize and load the sprite correctly.
+ */
+Sprite::Sprite(std::shared_ptr<SDLMan> sdlMan) {
+    // store the SDLMan smart pointer
+    mSDLMan = sdlMan;
+
+    // default starting position
     mPosition.x = 0;
     mPosition.y = 0;
 
+    // load in the data for our sprite
     load();
 }
 
 /* Returns current texture's collision rectangle by value. Class Sprite creates a collision	box using the sprites
 position, height, and width. For more accurate collision this function should be overidden by derived classes. */
 SDL_Rect Sprite::getCollisionRect() {
-    SDL_Point tmpPoint = getSize(getTextureToRender());
     SDL_Rect colRect{};
+    /*
+    SDL_Point tmpPoint = getSize(getTextureToRender());
     colRect.x = mPosition.x;
     colRect.y = mPosition.y;
     colRect.w = tmpPoint.x;
     colRect.h = tmpPoint.y;
+    */
     return colRect;
 }
 
@@ -141,20 +152,17 @@ std::tuple<bool, SDL_Rect> Sprite::getRectFromCDV(std::string strCDV) {
     // build our SDL_Rect
     SDL_Rect rect{};
     if (success) {
-        rect.x = intRect[0];
-        rect.y = intRect[1];
-        rect.w = intRect[2];
-        rect.h = intRect[3];
+        rect = { intRect[0], intRect[1], intRect[2], intRect[3] };
     }
 
     return std::tuple<bool, SDL_Rect> {success, rect};
 }
 
 // Load in the sprite sheet specified in the const string mSpriteSheet. Return boolean success.
-bool loadSpriteSheet() {
-
+bool Sprite::loadSpriteSheet() {    
+    mTexture = mSDLMan->loadImage(mSpriteSheet);
+    return true;
 }
-
 
 // Returns object represented as a std::string for debugging purposes.
 std::string Sprite::toString() {
@@ -182,4 +190,24 @@ int Sprite::getDepth() {
 
 void Sprite::setDepth(int depth) {
     mDepth = depth;
+}
+
+// Renders the sprite based on position, action mode, animation frame using a SDL_Renderer from SDLMan.
+void Sprite::render() {
+    // get our SDL_Rect for the current animation frame
+    std::vector<SDL_Rect>& tmpVect = mAnimMap[mActionMode];
+    SDL_Rect& clip = tmpVect[mCurrentFrame];
+    
+    // create a destination rect based on position and our frame size
+    SDL_Rect dest { mPosition.x, mPosition.y, clip.w, clip.h };
+    
+    //Render to screen
+    SDL_RenderCopyEx(   &mSDLMan->getRenderer(),
+                        mTexture->getTexture(),
+                        &clip,
+                        &dest,
+                        0,
+                        NULL,
+                        SDL_FLIP_NONE);
+    
 }

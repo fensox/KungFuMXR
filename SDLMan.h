@@ -2,6 +2,8 @@
 
 #include <SDL.h>
 #include <string>
+#include "Texture.h"
+#include <memory>
 
 /* SDLMan - SDL Manager Utility Class
  *
@@ -39,10 +41,32 @@ public:
 	// Set's the window width.
 	void setWindowW(int windowW);
 
+	// Set's the window fullscreen boolean value
+	void setFullscreen(bool fs);
+
+	// Draws the screen
+	void refresh();
+
+	// Load in a Texture object using the passed in filename and SDL_Image functions. Returns a smart pointer to a Texture object.
+	std::unique_ptr<Texture> loadImage(std::string fileName);
+
+	// Provide a reference to our renderer for others to use to draw themselves.
+	SDL_Renderer& getRenderer();
+
 private:
 	// Store's the caption for the window.
 	std::string mWindowCaption{};
 
 	// Store's the window width and height with defaults.
-	int mWindowW{ 640 }, mWindowH{ 480 };
+	//int mWindowW{ 1024 }, mWindowH{ 576 };
+	int mWindowW{ 256 }, mWindowH{ 240 }; // NES Resolution
+
+	// Full screen window or not
+	bool mWindowFull{ false };
+
+	// Pointer holding the SDL_Window we'll be rendering to
+	SDL_Window* mWindow{ nullptr };
+
+	// Pointer holding the SDL_Renderer for our window.
+	SDL_Renderer* mRenderer{ nullptr };
 };
