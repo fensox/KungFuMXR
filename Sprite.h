@@ -16,6 +16,7 @@ public:
 	 * Derived classes that supply their own constructor need to call this parent Sprite constructor to initialize and load the sprite correctly.
 	 */
 	Sprite(std::shared_ptr<SDLMan> sdlMan);
+	Sprite() = delete;
 
 	// Renders the sprite based on position, action mode, animation frame using a SDL_Renderer from SDLMan.
 	void render();
@@ -33,10 +34,27 @@ public:
 	// Access function to set the depth of this sprite as an int.
 	void setDepth(int depth);
 
+	// Returns the name of this sprite from the global mName constant.
+	std::string getName();
+
+	// Returns information about the Sprite object represented as a std::string for debugging purposes.
+	std::string toString();
+
 protected:
-	// A constant reference std::string holding the path and filename of the sprite's data files relative to executable. Overridden by derived classes for each sprite type.
-	const std::string mMetaFilename{ "data/thomas.dat" };
-	const std::string mSpriteSheet{ "data/thomas.png" };
+	/**********************************************************************************
+	 *         SPRITE SPECIFIC MEMBERS TO BE SET BY EACH DERIVED CLASS                *
+	 *                                                                                *
+	 * Two constant std::string members holding the paths and filenames of the        *
+	 * sprite's data files relative to executable. Overridden by derived classes for  *
+	 * each sprite type. The SDL_Color set's the transparency for the sprite sheet.   *
+	 * The mName string is simply a name for the sprite (i.e. Ninja, Ghost, etc.)     *
+	 * primarily used to identify debugging output.                                   *
+	 **********************************************************************************/
+	std::string mMetaFilename		{ "data/thomas.dat" };
+	std::string mSpriteSheet		{ "data/thomas.png" };
+	SDL_Color mTrans				{ 255, 0, 255, 0 };
+	std::string mName				{ "Sprite" };
+	/**********************************************************************************/
 
 	// A ClipsMap is a std::unordered_map container with the string name of an action (the key) mapped to a vector of SDL_Rect holding all sprite sheet clip information for that action.
 	typedef std::unordered_map<std::string, std::vector<SDL_Rect>> ClipsMap;
@@ -52,9 +70,6 @@ protected:
 
 	// Unordered map to hold key/value pairs of action names (the key) and their animation frame coordinates on the sprite sheet (the value).
 	ClipsMap mAnimMap{};
-
-	// Returns our ClipsMap object represented as a std::string for debugging purposes.
-	std::string toString();
 
 private:
 	// Smart pointer to the Texture holding our sprite's sprite sheet.
@@ -72,7 +87,7 @@ private:
 	// Load the initial data file in with action mode names and animation frame counts. Store in passed in map and return boolean success.
 	bool loadDataFile();
 
-	// Load in the sprite sheet specified in the const string mSpriteSheet. Return boolean success.
+	// Load in the sprite sheet specified in the const string mSpriteSheet and set transparency. Return boolean success.
 	bool loadSpriteSheet();
 
 	// Helper function to split some of the file parsing work into smaller chunks. Takes a string of 4 int values, comma delimited, and returns an bool success and an SDL_Rect as a tuple.

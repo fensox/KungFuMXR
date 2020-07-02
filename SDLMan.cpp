@@ -116,16 +116,19 @@ void SDLMan::setFullscreen(bool fs) {
 }
 
 // Load in a Texture object using the passed in filename and SDL_Image functions. Returns a smart pointer to a Texture object.
-std::unique_ptr<Texture> SDLMan::loadImage(std::string fileName) {
-	//The SDL texture object we will wrap with Texture class and return
-	SDL_Texture* newTexture{ nullptr };
+std::unique_ptr<Texture> SDLMan::loadImage(std::string fileName, SDL_Color color) {
+	//Pointer to the SDL texture object we will wrap with Texture class and return
+	SDL_Texture* newTexture {nullptr};
 
-	//Load image at specified path
+	// Load image at specified path
 	SDL_Surface* loadedSurface{ IMG_Load(fileName.c_str()) };
 	if (!loadedSurface) {
 		std::cerr << "Failed in SDLMan::loadImage trying to perform IMG_Load on: \"" << fileName << "\"\nSDL_Image Error: " << IMG_GetError() << std::endl;
 		return nullptr;
 	}
+
+	// Set the transparency color
+	SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, color.r, color.g, color.b));
 		
 	//Create texture from surface pixels
 	newTexture = SDL_CreateTextureFromSurface(mRenderer, loadedSurface);
@@ -144,7 +147,7 @@ std::unique_ptr<Texture> SDLMan::loadImage(std::string fileName) {
 	return std::make_unique<Texture>(newTexture);
 }
 
-// Provide a smart pointer to our renderer for others to use to draw themselves.
+// Provide a reference to the renderer for others to use to draw themselves.
 SDL_Renderer& SDLMan::getRenderer() {
 	return *mRenderer;
 }

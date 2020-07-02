@@ -48,7 +48,7 @@ public:
 	void refresh();
 
 	// Load in a Texture object using the passed in filename and SDL_Image functions. Returns a smart pointer to a Texture object.
-	std::unique_ptr<Texture> loadImage(std::string fileName);
+	std::unique_ptr<Texture> loadImage(std::string fileName, SDL_Color color);
 
 	// Provide a reference to our renderer for others to use to draw themselves.
 	SDL_Renderer& getRenderer();

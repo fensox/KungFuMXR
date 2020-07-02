@@ -1,6 +1,7 @@
 #include "Sprite.h"
 #include "FensoxUtils.h"
 #include "SDLMan.h"
+#include "Globals.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <iostream>
@@ -54,8 +55,8 @@ bool Sprite::load() {
         return false;
     }
 
-    //***DEBUG
-    std::cout << toString();
+    //***DEBUG***
+    if (FuGlobals::DEBUG_MODE) std::cout << "Loaded Sprite:\n" << toString() << std::endl;
 
     // Second load in the sprite textures from the sprite sheet using our recently aquired action names and animation clip coordinates into a AnimMap map (see header for typedef).
     if (!loadSpriteSheet()) {
@@ -158,21 +159,19 @@ std::tuple<bool, SDL_Rect> Sprite::getRectFromCDV(std::string strCDV) {
     return std::tuple<bool, SDL_Rect> {success, rect};
 }
 
-// Load in the sprite sheet specified in the const string mSpriteSheet. Return boolean success.
+// Load in the sprite sheet specified in the const string mSpriteSheet and set transparency. Return boolean success.
 bool Sprite::loadSpriteSheet() {    
-    mTexture = mSDLMan->loadImage(mSpriteSheet);
+    mTexture = mSDLMan->loadImage(mSpriteSheet, mTrans);
     return true;
 }
 
-// Returns object represented as a std::string for debugging purposes.
+// Returns a string representation of the sprite information
 std::string Sprite::toString() {
+    SDL_Rect cr = getCollisionRect();
     std::ostringstream output;
-    for (std::pair<std::string, std::vector<SDL_Rect>> action : mAnimMap) {
-        output << "ClipsMap actionFrames[" << action.first << "] has " << action.second.size() << " animation frames.\n";
-        for (int i{ 0 }; i < action.second.size(); ++i) {
-            output << "\t" << action.second[i].x << ", " << action.second[i].y << ", " << action.second[i].w << ", " << action.second[i].h << "\n";
-        }
-    }
+    output << "Sprite name: " << mName << ", Position: " << mPosition.x << ", " << mPosition.y << ", Depth: " << mDepth << ", ";
+    output << "# of action modes: " << mAnimMap.size() << ", "<< "Current ation mode: " << mActionMode << ", Collision rect: ";
+    output << cr.x << ", " << cr.y << ", " << cr.w << ", " << cr.h << std::endl;
 
     return output.str();
 }
@@ -190,6 +189,11 @@ int Sprite::getDepth() {
 
 void Sprite::setDepth(int depth) {
     mDepth = depth;
+}
+
+// Returns the name of this sprite from the global mName constant.
+std::string Sprite::getName() {
+    return mName;
 }
 
 // Renders the sprite based on position, action mode, animation frame using a SDL_Renderer from SDLMan.
