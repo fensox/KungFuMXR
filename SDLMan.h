@@ -50,6 +50,12 @@ public:
 	// Clears the drawing buffer so we have a clean area to draw on.
 	void clearBackBuffer();
 
+	// Load in a music file. Does not play immediately. Use playMusic(bool) to start and stop loaded music.
+	void loadMusic(std::string musicFile);
+
+	// Play the music file that is loaded in or resume it if it is paused. If it is already playing, pause it.
+	void toggleMusic(bool play);
+
 	// Load in a Texture object using the passed in filename and SDL_Image functions. Returns a smart pointer to a Texture object.
 	std::unique_ptr<Texture> loadImage(std::string fileName, SDL_Color color);
 
@@ -60,21 +66,24 @@ public:
 	void outputFPS();
 
 private:
-	// Store's the caption for the window.
-	std::string mWindowCaption{};
-
-	// Store's the window width and height with defaults.
-	//int mWindowW{ 1024 }, mWindowH{ 576 };
-	int mWindowW{ 256 }, mWindowH{ 240 }; // NES Resolution
-
-	// Full screen window or not
-	bool mWindowFull{ false };
+	// Holds the music that will be played in the background
+	Mix_Music* gMusic{ nullptr };
 
 	// Pointer holding the SDL_Window we'll be rendering to
 	SDL_Window* mWindow{ nullptr };
 
 	// Pointer holding the SDL_Renderer for our window.
 	SDL_Renderer* mRenderer{ nullptr };
+
+	// Store's the caption for the window.
+	std::string mWindowCaption{};
+
+	// Store's the window width and height with defaults.
+	int mWindowW{ 1024 }, mWindowH{ 576 };
+	//int mWindowW{ 256 }, mWindowH{ 240 }; // NES Resolution
+
+	// Full screen window or not
+	bool mWindowFull{ false };
 
 	// An array to store frame times for averaging FPS to smooth out calculation
 	Uint32 fpsTimes[10];

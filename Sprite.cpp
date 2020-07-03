@@ -199,8 +199,8 @@ void Sprite::render() {
     std::vector<SDL_Rect>& tmpVect = mAnimMap[mActionMode];
     SDL_Rect& clip = tmpVect[mCurrentFrame];
     
-    // create a destination rect based on position and our frame size
-    SDL_Rect dest { mPosition.x, mPosition.y, clip.w, clip.h };
+    // create a destination rect based on position, and our frame size multiplied by mScale factor member
+    SDL_Rect dest { mPosition.x, mPosition.y, clip.w * mScale, clip.h * mScale };
     
     //Render to screen
     SDL_RenderCopyEx(   &mSDLMan->getRenderer(),

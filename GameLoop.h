@@ -19,6 +19,9 @@ public:
 	// Handles input events. Returns true on a quit game event.
 	bool handleEvents();
 
+	// Load in level data from file passed in by parameter. Filepath relative to executable. Return bool success.
+	bool loadLevel(std::string lvlDataFile);
+
 private:
 	// The SDLMan class that wraps most SDL functionality for us.
 	std::shared_ptr<SDLMan> mSDL{ nullptr };

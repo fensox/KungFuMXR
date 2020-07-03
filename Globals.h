@@ -6,8 +6,8 @@
 namespace FuGlobals {
 	
 	// Turn on all debug output
-	constexpr bool DEBUG_MODE{ true };
+	constexpr bool DEBUG_MODE{ false };
 
-	// FPS target for game loop as milliseconds per frame
-	constexpr Uint32 FPS_TARGET{ 16 };
+	// FPS target for game loop as milliseconds per frame (0 for unlimited).
+	constexpr Uint32 FPS_TARGET{ 0 };
 }

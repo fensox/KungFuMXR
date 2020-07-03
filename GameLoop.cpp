@@ -26,6 +26,15 @@ bool GameLoop::loadGameData() {
 	return (sprites && player);
 }
 
+// Load in the current level
+bool GameLoop::loadLevel(std::string lvlDataFile) {
+	// load level code here
+
+	// TEMP TO TEST MUSCIC
+	mSDL->loadMusic("data/KungFu_Original.ogg");
+	mSDL->toggleMusic();
+}
+
 // Runs the main game loop.
 void GameLoop::runGameLoop() {
 	// Show the window
@@ -57,6 +66,9 @@ void GameLoop::runGameLoop() {
 
 			//***DEBUG***
 			if (FuGlobals::DEBUG_MODE) mSDL->outputFPS();
+
+			// if FPS target is set to 0 break out as we are going for as many as we can
+			if (FuGlobals::FPS_TARGET == 0) break;
 		}
 
 		// render to back buffer

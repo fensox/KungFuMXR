@@ -9,6 +9,13 @@ Thomas::Thomas(std::shared_ptr<SDLMan> sdlMan) : Sprite(sdlMan) {
 	mSpriteSheet = "data/thomas.png";
 	mTrans = SDL_Color{ 255, 0, 255, 0 };
 	mName = "Thomas";
+    mScale = 4;
+
+    // set our position
+    int startWidth{ mAnimMap[mActionMode].at(0).w };
+    int startHeight{ mAnimMap[mActionMode].at(0).h };
+    mPosition.x = sdlMan->getWindowW() - (startWidth * mScale);
+    mPosition.y = sdlMan->getWindowH() - (startHeight * mScale);
 };
 
 // Custom sprite move function
@@ -39,21 +46,52 @@ void Thomas::move(SDL_Keycode key) {
 
 // Handles the player requesting to move to the right.
 void Thomas::moveRight() {
-    mActionMode = "WALK_RIGHT";
-    advanceFrame();
+    // if the previous action was different set new mActionMode, mCurrentFrame 0, and don't move player position
+    if (mActionMode != "WALK_RIGHT") {
+        mActionMode = "WALK_RIGHT";
+        mCurrentFrame = 0;
+    } else {
+        //attempts to move the player the given amount if enough time has passed
+        if (mCurrentFrame == 0) {
+            attemptWalk(mWalkDistance);
+        } else {
+            attemptWalk(0);
+        }
+    }
 }
 
 // Handles the player requesting to move to the left.
 void Thomas::moveLeft() {
-    mActionMode = "WALK_LEFT";
-    advanceFrame();
+    // if the previous action was different set new mActionMode, mCurrentFrame 0, and don't move player position
+    if (mActionMode != "WALK_LEFT") {
+        mActionMode = "WALK_LEFT";
+        mCurrentFrame = 0;
+    } else {
+        //attempts to move the player the given amount if enough time has passed
+        if (mCurrentFrame == 0) {
+            attemptWalk(-mWalkDistance);
+        } else {
+            attemptWalk(0);
+        }
+    }
+}
+
+// Check if enough time has passed to walk and move player given amount if so
+void Thomas::attemptWalk(int amount) {
+    // we are walking - check if enough time has passed before taking a step
+    Uint32 currentTime{ SDL_GetTicks() };
+    if (currentTime - mLastWalkTime >= mWalkWaitTime) {
+            advanceFrame();
+            mPosition.x += amount;
+            mLastWalkTime = currentTime;
+    }
 }
 
 // Advances the current animation frame ahead or loops to beginning if at end of animation.
 void Thomas::advanceFrame() {
     // get the number of frames this animation has
-    int count = mAnimMap[mActionMode].size();
-    
+    std::size_t count = mAnimMap[mActionMode].size();
+
     // increment the animation ahead or loop back to beginning if we reach the end of the frames available
     if (++mCurrentFrame >= count) mCurrentFrame = 0;
 }

@@ -2,6 +2,7 @@
 #include "Texture.h"
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 #include <iostream>
 #include <string>
 #include <memory>
@@ -15,27 +16,32 @@ SDLMan::SDLMan(std::string windowCaption) {
 
 // Destructor. Close down SDL.
 SDLMan::~SDLMan() {
-	//Destroy window	
+	// Destroy window	
 	SDL_DestroyRenderer(mRenderer);
 	SDL_DestroyWindow(mWindow);
 	mWindow = nullptr;
 	mRenderer = nullptr;
 
-	//Quit SDL subsystems
+	// Free music
+	Mix_FreeMusic(gMusic);
+	gMusic = nullptr;
+
+	// Quit SDL subsystems
 	SDL_Quit();
 	IMG_Quit();
+	Mix_Quit();
 }
 
 // Initilizes SDL, creates the window and renderer but does not show the window until a call to showWindow is made.
 bool SDLMan::init() {
 	// Attempt to initialize SDL returning false on failure and logging an error.
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
 		std::cerr << "Failed in SDLMan::init: SDL could not initialize. SDL Error: \n" << SDL_GetError();
 		return false;
 	}
 
 	// Try to set texture filtering to linear. Warn if unable.
-	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) std::cerr << "Warning in SDLMan::init: Linear Texture filtering not enabled!" << std::endl;
+	//if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) std::cerr << "Warning in SDLMan::init: Linear Texture filtering not enabled!" << std::endl;
 	
 	// Set up some window creation flags. Start window hidden (can be shown with a call to showWindow), borderless, and whethar full screen or not.
 	int flags = SDL_WINDOW_HIDDEN;
@@ -56,7 +62,14 @@ bool SDLMan::init() {
 	}
 	
 	// Initialize renderer color for clearing the screen
-	SDL_SetRenderDrawColor(mRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+	SDL_SetRenderDrawColor(mRenderer, 100, 0, 100, SDL_ALPHA_OPAQUE);
+
+	// Initialize SDL_mixer for sound support
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+	{
+		printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+		return false;
+	}
 
 	// Initialize variables used for FPS calculation
 	memset(fpsTimes, 0, sizeof(fpsTimes));
@@ -164,6 +177,30 @@ std::unique_ptr<Texture> SDLMan::loadImage(std::string fileName, SDL_Color color
 SDL_Renderer& SDLMan::getRenderer() {
 	return *mRenderer;
 }
+
+// Load in a music file. Does not play immediately. Use playMusic(bool) to start and stop loaded music.
+void SDLMan::loadMusic(std::string musicFile) {
+	gMusic = Mix_LoadMUS(musicFile.c_str());
+	if (!gMusic)
+	{
+		std::cerr << "Failed in SDLMan::loadMusic. SDL_mixer Error: \n" << Mix_GetError() << std::endl;
+	}
+}
+
+void SDLMan::toggleMusic() {
+	//If there is no music playing
+	if (!Mix_PlayingMusic()) {
+		Mix_PlayMusic(gMusic, -1);
+	} else {
+		//If the music is paused
+		if (Mix_PausedMusic()) {
+			Mix_ResumeMusic();
+		} else {
+			Mix_PauseMusic();
+		}
+	}
+}
+
 
 // Outputs the FPS count to console using an averaging method.
 void SDLMan::outputFPS() {
