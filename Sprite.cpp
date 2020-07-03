@@ -55,9 +55,6 @@ bool Sprite::load() {
         return false;
     }
 
-    //***DEBUG***
-    if (FuGlobals::DEBUG_MODE) std::cout << "Loaded Sprite:\n" << toString() << std::endl;
-
     // Second load in the sprite textures from the sprite sheet using our recently aquired action names and animation clip coordinates into a AnimMap map (see header for typedef).
     if (!loadSpriteSheet()) {
         std::cerr << "Failed in Sprite::load. Sprite::loadActionAnims returned false. Filename attempted was:" << mSpriteSheet << std::endl;

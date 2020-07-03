@@ -47,11 +47,17 @@ public:
 	// Draws the screen
 	void refresh();
 
+	// Clears the drawing buffer so we have a clean area to draw on.
+	void clearBackBuffer();
+
 	// Load in a Texture object using the passed in filename and SDL_Image functions. Returns a smart pointer to a Texture object.
 	std::unique_ptr<Texture> loadImage(std::string fileName, SDL_Color color);
 
 	// Provide a reference to our renderer for others to use to draw themselves.
 	SDL_Renderer& getRenderer();
+
+	// Outputs the FPS count to console using an averaging method.
+	void outputFPS();
 
 private:
 	// Store's the caption for the window.
@@ -69,4 +75,16 @@ private:
 
 	// Pointer holding the SDL_Renderer for our window.
 	SDL_Renderer* mRenderer{ nullptr };
+
+	// An array to store frame times for averaging FPS to smooth out calculation
+	Uint32 fpsTimes[10];
+
+	// Last calculated SDL_GetTicks
+	Uint32 fpsLast;
+
+	// total frames rendered
+	Uint32 fpsCount;
+
+	// the value you want
+	float fps;
 };

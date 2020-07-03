@@ -148,6 +148,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Events.cpp" />
+    <ClCompile Include="GameLoop.cpp" />
     <ClCompile Include="KungFuMXR.cpp" />
     <ClCompile Include="SDLMan.cpp" />
     <ClCompile Include="Sprite.cpp" />
@@ -156,6 +158,8 @@
     <ClCompile Include="Thomas.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Events.h" />
+    <ClInclude Include="GameLoop.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="SDLMan.h" />
     <ClInclude Include="Sprite.h" />

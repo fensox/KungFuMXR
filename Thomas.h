@@ -10,12 +10,16 @@ public:
 	Thomas(std::shared_ptr<SDLMan> sdlMan);
 
 	// custom sprite move function
-	void move();
+	void move(SDL_Keycode key);
 
-protected:
-	const std::string mMetaFilename{ "data/thomas.dat" };
-	const std::string mSpriteSheet{ "data/thomas.png" };
-	const SDL_Color mTrans{ 255, 0, 255, SDL_ALPHA_OPAQUE };
-	const std::string mName{ "Thomas" };
+private:
+	// Handles the player requesting to move to the right.
+	void moveRight();
+
+	// Handles the player requesting to move to the right.
+	void moveLeft();
+
+	// Advances the current animation frame ahead or loops to beginning if at end of animation.
+	void advanceFrame();
 };
 

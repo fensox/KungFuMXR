@@ -38,7 +38,7 @@ public:
 	std::string getName();
 
 	// Returns information about the Sprite object represented as a std::string for debugging purposes.
-	std::string toString();
+	virtual std::string toString();
 
 protected:
 	/**********************************************************************************
@@ -48,12 +48,12 @@ protected:
 	 * sprite's data files relative to executable. Overridden by derived classes for  *
 	 * each sprite type. The SDL_Color set's the transparency for the sprite sheet.   *
 	 * The mName string is simply a name for the sprite (i.e. Ninja, Ghost, etc.)     *
-	 * primarily used to identify debugging output.                                   *
+	 * primarily used to identify debugging output. Defaults below.                   *
 	 **********************************************************************************/
 	std::string mMetaFilename		{ "data/thomas.dat" };
 	std::string mSpriteSheet		{ "data/thomas.png" };
 	SDL_Color mTrans				{ 255, 0, 255, 0 };
-	std::string mName				{ "Sprite" };
+	std::string	mName				{ "Sprite" };
 	/**********************************************************************************/
 
 	// A ClipsMap is a std::unordered_map container with the string name of an action (the key) mapped to a vector of SDL_Rect holding all sprite sheet clip information for that action.

@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include <vector>
+#include "Globals.h"
 
 // Constructor. Takes title string to use as window caption if needed.
 SDLMan::SDLMan(std::string windowCaption) {
@@ -56,12 +58,23 @@ bool SDLMan::init() {
 	// Initialize renderer color for clearing the screen
 	SDL_SetRenderDrawColor(mRenderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 
+	// Initialize variables used for FPS calculation
+	memset(fpsTimes, 0, sizeof(fpsTimes));
+	fpsCount = 0;
+	fps = 0;
+	fpsLast = SDL_GetTicks();
+
 	return true;
 }
 
 // Draws the screen
 void SDLMan::refresh() {
+	// Flip backbuffer to display
 	SDL_RenderPresent(mRenderer);
+}
+
+void SDLMan::clearBackBuffer() {
+	SDL_RenderClear(mRenderer);
 }
 
 // Show or hide the window. Returns false if SDL hasn't been initialized yet.
@@ -150,4 +163,41 @@ std::unique_ptr<Texture> SDLMan::loadImage(std::string fileName, SDL_Color color
 // Provide a reference to the renderer for others to use to draw themselves.
 SDL_Renderer& SDLMan::getRenderer() {
 	return *mRenderer;
+}
+
+// Outputs the FPS count to console using an averaging method.
+void SDLMan::outputFPS() {
+	// fpsIndex is the position in the FPS averaging array. It ranges from 0 to 10 and rotates back to 0 after reaching 10.
+	Uint32 fpsIndex{ fpsCount % 10 };
+	
+	// store the current time
+	Uint32 getticks{ SDL_GetTicks() };
+
+	// save the frame time value
+	fpsTimes[fpsIndex] = getticks - fpsLast;
+
+	// save the last frame time for the next fpsthink
+	fpsLast = getticks;
+
+	// increment the frame count
+	++fpsCount;
+
+	// test to see if the whole array has been written to or not. Stops strange values first 10 frames
+	Uint32 count;
+	if (fpsCount < 10) {
+		count = fpsCount;
+	} else {
+		count = 10;
+	}
+
+	// add up all the values and divide to get the average frame time.
+	fps = 0;
+	for (Uint32 i = 0; i < count; i++) fps += fpsTimes[i];
+	fps /= count;
+
+	// now to make it an actual frames per second value
+	fps = 1000.f / fps;
+
+	// output
+	std::cout << fps << "\n";
 }

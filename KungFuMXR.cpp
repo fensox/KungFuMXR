@@ -1,28 +1,20 @@
-#include <iostream>
-#include "Thomas.h"
-#include "SDLMan.h"
-#include "Globals.h"
-#include "Sprite.h"
+#include <memory>
+#include "GameLoop.h"
 
 int main(int argc, char* argv[]) {
 	bool success = true;
-	
-	// Initialize our SDL wrapper class ad a shared smart pointer to manage SDL things
-	std::shared_ptr<SDLMan> sdl{ std::make_shared<SDLMan>("Kung Fu Mr. X's Revenge") };
-	success = sdl->init();
-	sdl->setFullscreen(false);
 
-	// Load in all the sprites
-	if (success) {
-		// Load the player
-		Thomas player = Thomas(sdl);
-		
-		sdl->showWindow(true);
-		player.render();
-		sdl->refresh();
-		SDL_Delay(5000);
+	// Create a main game object.
+	std::unique_ptr<GameLoop> game{ std::make_unique<GameLoop>() };
 
-	}
+	// Call our function to initialize our graphics and sound systems
+	success = game->initGameSystems();
+
+	// If we succeeded in initializing graphics systems then load in game data
+	if (success) success = game->loadGameData();
+
+	// Start the game
+	if (success) game->runGameLoop();
 
 	return 0;
 }
