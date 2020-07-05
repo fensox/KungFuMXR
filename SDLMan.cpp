@@ -143,7 +143,7 @@ void SDLMan::setFullscreen(bool fs) {
 }
 
 // Load in a Texture object using the passed in filename and SDL_Image functions. Returns a smart pointer to a Texture object.
-std::unique_ptr<Texture> SDLMan::loadImage(std::string fileName, SDL_Color color) {
+std::unique_ptr<Texture> SDLMan::loadImage(std::string fileName, SDL_Color color, bool useTrans) {
 	//Pointer to the SDL texture object we will wrap with Texture class and return
 	SDL_Texture* newTexture {nullptr};
 
@@ -154,8 +154,8 @@ std::unique_ptr<Texture> SDLMan::loadImage(std::string fileName, SDL_Color color
 		return nullptr;
 	}
 
-	// Set the transparency color
-	SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, color.r, color.g, color.b));
+	// Set the transparency color if the useTrans switch is true
+	if (useTrans) SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, color.r, color.g, color.b));
 		
 	//Create texture from surface pixels
 	newTexture = SDL_CreateTextureFromSurface(mRenderer, loadedSurface);
@@ -180,12 +180,16 @@ SDL_Renderer& SDLMan::getRenderer() {
 }
 
 // Load in a music file. Does not play immediately. Use playMusic(bool) to start and stop loaded music.
-void SDLMan::loadMusic(std::string musicFile) {
+bool SDLMan::loadMusic(std::string musicFile) {
+	bool success{ true };
+
 	gMusic = Mix_LoadMUS(musicFile.c_str());
-	if (!gMusic)
-	{
+	if (!gMusic) {
+		success = false;
 		std::cerr << "Failed in SDLMan::loadMusic. SDL_mixer Error: \n" << Mix_GetError() << std::endl;
 	}
+
+	return success;
 }
 
 // Play the music file that is loaded in or resume it if it is paused. If it is already playing, pause it.

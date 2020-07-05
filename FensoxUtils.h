@@ -46,8 +46,10 @@ public:
 
     // Static function to convert a string to uppercase
     static inline std::string strToUpper(std::string str) {
-        std::locale loc;
-        for (std::string::size_type i = 0; i < str.length(); ++i) std::toupper(str[i], loc);
+        // convert string to upper case
+        std::for_each(str.begin(), str.end(), [](char& c) {
+            c = ::toupper(c);
+        });
         return str;
     }
 

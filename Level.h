@@ -25,6 +25,9 @@ public:
 	// Return player start position
 	SDL_Point getPlayStart();
 
+	// Render the level
+	void render();
+
 	// Outputs the object information represented as a string
 	std::string toString();
 
@@ -41,8 +44,17 @@ private:
 	// Holds the path and filename to the level's background graphic (720 pixels tall graphics for a 1280x720 viewport)
 	std::string mBGFile{};
 
-	// Player starting coordinates as an SDL_Point to the BOTTOM-RIGHT of player iamge
+	// Holds the SDL_Texture of the level background
+	std::unique_ptr<Texture> mBGTexture{ nullptr };
+
+	// Holds the transparency color for the background texture
+	SDL_Color mTrans{};
+
+	// Player starting coordinates as an SDL_Point in reference to the top left corner of player image
 	SDL_Point mPlayStart{};
+
+	// The starting viewport for the level
+	SDL_Rect mViewport{};
 
 	// Smart pointer to an SDLMan object used to draw the level
 	std::shared_ptr<SDLMan> mSDLMan{ nullptr };
@@ -52,4 +64,19 @@ private:
 
 	// Helper function to take a comma delimited value, convert to an SDL_Rect, and store in our ColRects member. Returns success or failure.
 	bool storeColRect(std::string value);
+
+	// Helper function to take comma delimited value from metadata file, convert to an SDL_Rect, and store in our mViewport member. Returns success or failure.
+	bool storeViewport(std::string value);
+
+	// Helper function to take a comma delimited value from metadata file, convert to an SDL_Color, and store in our mTrans member. Returns success or failure.
+	bool storeTrans(std::string value);
+
+	// Load in the level's metadata file. Returns success.
+	bool loadDataFile();
+
+	// Load in the level's background texture. Returns success.
+	bool loadBGTexture();
+
+	// Load in the level's music file. Returns Success.
+	bool loadMusicFile();
 };

@@ -22,16 +22,14 @@ bool GameLoop::loadGameData() {
 	sprites = std::make_unique<std::vector<Sprite>>();
 
 	// Load the player
-	player = std::make_unique<Thomas>(mSDL);
-	if (!player->load()) success = false;
+	mPlayer = std::make_unique<Thomas>(mSDL);
+	if (!mPlayer->load()) success = false;
 
 	//***DEBUG***
 	// This needs to be replaced with loading game level information from a game metafile not hardcoded like this
 	// Load the first level
 	if (!loadLevel("data/level1.dat")) success = false;
-	if (FuGlobals::DEBUG_MODE) std::cout << mLevel->toString();
 
-	std::cout << "Success: " << success << std::endl;
 	// Return successful loading of game data.
 	return (sprites && success);
 }
@@ -47,8 +45,8 @@ bool GameLoop::loadLevel(std::string lvlDataFile) {
 		std::cerr << "Failed in GameLoop::loadLevel. Level::load returned false." << std::endl;
 	} else {
 		// set player starting position as given by level
-		if (player) {
-			player->setStartPosition(mLevel->getPlayStart());
+		if (mPlayer) {
+			mPlayer->setStartPosition(mLevel->getPlayStart());
 		} else {
 			success = false;
 		}
@@ -84,7 +82,7 @@ void GameLoop::runGameLoop() {
 			quit = handleEvents();
 
 			// process movements of sprites. For the player this is a physics movement (movement to player not initiated by player!)
-			player->move();
+			mPlayer->move();
 			for (int i{ 0 }; i < sprites->size(); ++i) sprites->at(i).move();
 			
 			// update our time lag calculations
@@ -98,7 +96,8 @@ void GameLoop::runGameLoop() {
 		}
 
 		// render to back buffer
-		player->render();
+		mLevel->render();
+		mPlayer->render();
 
 		// update the screen
 		mSDL->refresh();
@@ -117,7 +116,7 @@ bool GameLoop::handleEvents() {
             quit = true;
         } else if (e.type == SDL_KEYDOWN) {
 			// Handle keyboard presses
-            player->playerInput(e.key.keysym.sym);
+            mPlayer->playerInput(e.key.keysym.sym);
         }
     }
 

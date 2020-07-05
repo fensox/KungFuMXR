@@ -52,13 +52,13 @@ public:
 	void clearBackBuffer();
 
 	// Load in a music file. Does not play immediately. Use playMusic(bool) to start and stop loaded music.
-	void loadMusic(std::string musicFile);
+	bool loadMusic(std::string musicFile);
 
 	// Play the music file that is loaded in or resume it if it is paused. If it is already playing, pause it.
 	void toggleMusic();
 
-	// Load in a Texture object using the passed in filename and SDL_Image functions. Returns a smart pointer to a Texture object.
-	std::unique_ptr<Texture> loadImage(std::string fileName, SDL_Color color);
+	// Load in a Texture object using the passed in filename, transparancy color, and transparancy on/off switch. Returns a smart pointer to a Texture object.
+	std::unique_ptr<Texture> loadImage(std::string fileName, SDL_Color color, bool useTrans);
 
 	// Provide a reference to our renderer for others to use to draw themselves.
 	SDL_Renderer& getRenderer();

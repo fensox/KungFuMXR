@@ -11,7 +11,7 @@ Thomas::Thomas(std::shared_ptr<SDLMan> sdlMan) : Sprite(sdlMan) {
     mActionMode = "WALK_LEFT";
 	mTrans = SDL_Color{ 255, 0, 255, 0 };
 	mName = "Thomas";
-    mScale = 8;
+    mScale = 4;
 };
 
 // Custom sprite move function

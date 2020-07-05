@@ -6,7 +6,7 @@
 namespace FuGlobals {
 	
 	// Turn on all debug output
-	constexpr bool DEBUG_MODE{ true };
+	constexpr bool DEBUG_MODE{ false };
 
 	// Turn on FPS readout
 	constexpr bool SHOW_FPS{ false };

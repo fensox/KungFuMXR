@@ -19,9 +19,6 @@
 Sprite::Sprite(std::shared_ptr<SDLMan> sdlMan) {
     // store the SDLMan smart pointer
     mSDLMan = sdlMan;
-
-    //***DEBUG***
-    FensoxUtils::strToUpper("test of strToUpper function from Sprite constructor. hello.");
 }
 
 /* Returns current texture's collision rectangle by value. Class Sprite creates a collision	box using the sprites
@@ -109,8 +106,9 @@ bool Sprite::loadDataFile() {
 
 // Load in the sprite sheet specified in the const string mSpriteSheet and set transparency. Return boolean success.
 bool Sprite::loadSpriteSheet() {    
-    mTexture = mSDLMan->loadImage(mSpriteSheet, mTrans);
-    return true;
+    mTexture = mSDLMan->loadImage(mSpriteSheet, mTrans, true);
+    
+    return (!(mTexture==nullptr));
 }
 
 // Returns a string representation of the sprite information
@@ -144,12 +142,9 @@ std::string Sprite::getName() {
     return mName;
 }
 
-// Set's the position of the sprite.
+// Set's the position of the sprite in reference to top left corner.
 void Sprite::setStartPosition(SDL_Point start) {
-    int startWidth{ mAnimMap[mActionMode].at(0).w };
-    int startHeight{ mAnimMap[mActionMode].at(0).h };
-    mPosition.x = mSDLMan->getWindowW() - (startWidth * mScale);
-    mPosition.y = mSDLMan->getWindowH() - (startHeight * mScale);
+    mPosition = start;
 }
 
 // Advances the current action mode animation frame ahead or loops to beginning if at end of animation frames.
