@@ -12,11 +12,14 @@
 class Sprite {
 
 public:
-	/* Constructor calls load() to load the sprite data in. Derived classes should alter const mMetaFilename and const mSpriteSheet members for their specific sprite data.
-	 * Derived classes that supply their own constructor need to call this parent Sprite constructor to initialize and load the sprite correctly.
-	 */
+	/* Constructor. Derived classes should have a constructor that fills in all their sprite specific variables. See section in Sprite.h.
+	   After the Sprite derived is constructed a call to load() must be made before any other function calls will operate correctly.
+	*/
 	Sprite(std::shared_ptr<SDLMan> sdlMan);
 	Sprite() = delete;
+
+	// Load sprite data from files - Needs to be called before any other functions can be called.
+	bool load();
 
 	// Renders the sprite based on position, action mode, animation frame using a SDL_Renderer from SDLMan.
 	void render();
@@ -37,6 +40,12 @@ public:
 	// Returns the name of this sprite from the global mName constant.
 	std::string getName();
 
+	// Set's the position of the sprite.
+	void setStartPosition(SDL_Point start);
+
+	// Handle movement of the sprite. Purely virtual function as all sprites move differently.
+	virtual void move() = 0;
+
 	// Returns information about the Sprite object represented as a std::string for debugging purposes.
 	virtual std::string toString();
 
@@ -46,15 +55,17 @@ protected:
 	 *                                                                                *
 	 * Two constant std::string members holding the paths and filenames of the        *
 	 * sprite's data files relative to executable. Overridden by derived classes for  *
-	 * each sprite type. The SDL_Color set's the transparency for the sprite sheet.   *
+	 * each sprite type. The mActionMode needs to be set to the starting action mode  *
+	 * for the sprite. The SDL_Color set's the transparency for the sprite sheet.     *
 	 * The mName string is simply a name for the sprite (i.e. Ninja, Ghost, etc.)     *
 	 * primarily used to identify debugging output. mScale is a multiplyer to scale   *
 	 * the sprite by when rendering. Defaults below.                                  *
 	 **********************************************************************************/
-	std::string mMetaFilename		{ "data/thomas.dat" };
-	std::string mSpriteSheet		{ "data/thomas.png" };
+	std::string mMetaFilename		{ "data/example.dat" };
+	std::string mSpriteSheet		{ "data/example_sheet.png" };
+	std::string mActionMode			{ "WALK_LEFT" };
 	SDL_Color mTrans				{ 255, 0, 255, 0 };
-	std::string	mName				{ "Sprite" };
+	std::string	mName				{ "Example Man" };
 	int mScale						{ 1 };
 	/**********************************************************************************/
 
@@ -62,16 +73,25 @@ protected:
 	typedef std::unordered_map<std::string, std::vector<SDL_Rect>> ClipsMap;
 
 	// Position of sprite.
-	SDL_Point mPosition{};
-
-	// String holding the current action mode this sprite is in.
-	std::string mActionMode{"DEFAULT"};
+	SDL_Point mPosition{0, 0};
 
 	// int holding the current frame of animation for our action mode we are in.
 	std::size_t mCurrentFrame{};
 
 	// Unordered map to hold key/value pairs of action names (the key) and their animation frame coordinates on the sprite sheet (the value).
 	ClipsMap mAnimMap{};
+
+	// Advances the current action mode animation frame ahead or loops to beginning if at end of animation frames.
+	void advanceFrame();
+
+	// Holds velocity/momentum for the four 2d directions. These modify speed/position in jumps, falls, etc.
+	// Gravity, friction, hits taken, etc can also modify these in return.
+	struct velocity {
+		int up{ 0 };
+		int down{ 0 };
+		int left{ 1 };
+		int right{ 0 };
+	};
 
 private:
 	// Smart pointer to the Texture holding our sprite's sprite sheet.
@@ -83,17 +103,11 @@ private:
 	// Holds the depth of this Sprite. Used for rendering of things in front/behind each other.
 	int mDepth{};
 
-	// load sprite data from files (called from constructor). Return boolean success.
-	bool load();
-
 	// Load the initial data file in with action mode names and animation frame counts. Store in passed in map and return boolean success.
 	bool loadDataFile();
 
 	// Load in the sprite sheet specified in the const string mSpriteSheet and set transparency. Return boolean success.
 	bool loadSpriteSheet();
-
-	// Helper function to split some of the file parsing work into smaller chunks. Takes a string of 4 int values, comma delimited, and returns an bool success and an SDL_Rect as a tuple.
-	std::tuple<bool, SDL_Rect> getRectFromCDV(std::string pCDV);
 
 	// Helper function to ge the width and height of an SDL_Texture. Returned in a SDL_Point type (x=width, y=height).
 	SDL_Point getSize(Texture text);

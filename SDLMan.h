@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL.h>
+#include <SDL_mixer.h>
 #include <string>
 #include "Texture.h"
 #include <memory>
@@ -54,7 +55,7 @@ public:
 	void loadMusic(std::string musicFile);
 
 	// Play the music file that is loaded in or resume it if it is paused. If it is already playing, pause it.
-	void toggleMusic(bool play);
+	void toggleMusic();
 
 	// Load in a Texture object using the passed in filename and SDL_Image functions. Returns a smart pointer to a Texture object.
 	std::unique_ptr<Texture> loadImage(std::string fileName, SDL_Color color);
@@ -79,7 +80,7 @@ private:
 	std::string mWindowCaption{};
 
 	// Store's the window width and height with defaults.
-	int mWindowW{ 1024 }, mWindowH{ 576 };
+	int mWindowW{ 1280 }, mWindowH{ 720 };
 	//int mWindowW{ 256 }, mWindowH{ 240 }; // NES Resolution
 
 	// Full screen window or not

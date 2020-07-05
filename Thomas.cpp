@@ -2,28 +2,24 @@
 #include "SDLMan.h"
 #include <memory>
 #include <iostream>
+#include "Globals.h"
 
 Thomas::Thomas(std::shared_ptr<SDLMan> sdlMan) : Sprite(sdlMan) {
 	// set our Thomas specific members
 	mMetaFilename = "data/thomas.dat";
-	mSpriteSheet = "data/thomas.png";
+	mSpriteSheet = "data/spritesheet.png";
+    mActionMode = "WALK_LEFT";
 	mTrans = SDL_Color{ 255, 0, 255, 0 };
 	mName = "Thomas";
-    mScale = 4;
-
-    // set our position
-    int startWidth{ mAnimMap[mActionMode].at(0).w };
-    int startHeight{ mAnimMap[mActionMode].at(0).h };
-    mPosition.x = sdlMan->getWindowW() - (startWidth * mScale);
-    mPosition.y = sdlMan->getWindowH() - (startHeight * mScale);
+    mScale = 8;
 };
 
 // Custom sprite move function
-void Thomas::move(SDL_Keycode key) {
+void Thomas::playerInput(SDL_Keycode key) {
     switch (key)
     {
     case SDLK_UP:
-
+        
         break;
 
     case SDLK_DOWN:
@@ -51,7 +47,7 @@ void Thomas::moveRight() {
         mActionMode = "WALK_RIGHT";
         mCurrentFrame = 0;
     } else {
-        //attempts to move the player the given amount if enough time has passed
+        // only move position on Thomas' stepping frame not standing frame for better looking animation
         if (mCurrentFrame == 0) {
             attemptWalk(mWalkDistance);
         } else {
@@ -84,14 +80,14 @@ void Thomas::attemptWalk(int amount) {
             advanceFrame();
             mPosition.x += amount;
             mLastWalkTime = currentTime;
+
+            //***DEBUG***
+            if (FuGlobals::DEBUG_MODE) std::cout << "mActionMode: " << mActionMode << ", Frame: " << mCurrentFrame << std::endl;
     }
 }
 
-// Advances the current animation frame ahead or loops to beginning if at end of animation.
-void Thomas::advanceFrame() {
-    // get the number of frames this animation has
-    std::size_t count = mAnimMap[mActionMode].size();
-
-    // increment the animation ahead or loop back to beginning if we reach the end of the frames available
-    if (++mCurrentFrame >= count) mCurrentFrame = 0;
+// Player control is handled by playerInput() but this checks for other influnces on the player. Namely velocity that needs to be factored in.
+void Thomas::move() {
+    // handle gravity
+    
 }

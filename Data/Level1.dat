@@ -1,0 +1,52 @@
+# Kung Fu MXR - Standard Level Metadata File
+#
+# File format description:
+#
+# 1) Lines beginning with # are comments. Blank lines along with leading and trailing whitespace is attempted to be ignored.
+#
+# 2) This metadata file contains key/value pairs of information on game levels. The available settins for the game are:
+#
+#	NAME=level name			- The name of the level.
+#
+#	BACKGROUND=./filename		- This is the path and filename (game executable relative) of the level background graphic.
+#					- Only include one of these per metafile.
+#
+#	MUSIC=./filename		- Background music to play on a loop during this level. File path rules same as for background.
+#					- Only include one of these per metafile.
+#
+#	PLAYER_START=900, 400		- The starting coordinates for the player on this level given as X, Y coordinates to
+#					  the BOTTOM-RIGHT of the player image. We don't always know the height of the player
+#					  and many times wish them to start on solid ground.
+#
+#	COLRECT=0, 1200, 1000, 80	- Collision rectangles in the level. Include as many of these lines as needed per level.
+#					  Rectangles are specified as: Top Left X position, Top Left Y position, Width, Height
+#
+# 3) Note all level design is based on a 720 pixel tall background resolution with a 1280 pixel wide scrolling viewport.
+#    Larger/smaller game windows scale this up or down to fit.
+#
+# An example file:
+#
+# i.e.
+#	NAME=Tower of Terror
+#	BACKGROUND=data/level1.png
+#	MUSIC=data/kung_fu_music.ogg
+#	PLAYER_START=1280, 720
+# 	COLRECT=0, 0, 7000, 100
+#	COLRECT=31, 0, 30, 100
+#	COLRECT=62, 0, 28, 100
+#	COLRECT=91, 0, 30, 100
+#
+#########################################################################################################################################
+
+# Begin Level 1's data file
+
+#Name and paths
+NAME=Level 1
+BACKGROUND=level1.png
+MUSIC=data/kung_fu_music.ogg
+PLAYER_START=1280, 720
+
+#Floor
+COLRECT=0, 1200, 1000, 80
+
+# End data file

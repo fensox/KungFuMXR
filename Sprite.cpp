@@ -13,19 +13,15 @@
 #include <memory>
 #include <vector>
 
-/* Constructor calls load() to load the sprite data in. Derived classes should alter const mMetaFilename and const mSpriteSheet members for their specific sprite data.
- * Derived classes that supply their own constructor need to call this parent Sprite constructor to initialize and load the sprite correctly.
- */
+/* Constructor. Derived classes should have a constructor that fills in all their sprite specific variables. See section in Sprite.h.
+   After the Sprite derived is constructed a call to load() must be made before any other function calls will operate correctly.
+*/
 Sprite::Sprite(std::shared_ptr<SDLMan> sdlMan) {
     // store the SDLMan smart pointer
     mSDLMan = sdlMan;
 
-    // default starting position
-    mPosition.x = 0;
-    mPosition.y = 0;
-
-    // load in the data for our sprite
-    load();
+    //***DEBUG***
+    FensoxUtils::strToUpper("test of strToUpper function from Sprite constructor. hello.");
 }
 
 /* Returns current texture's collision rectangle by value. Class Sprite creates a collision	box using the sprites
@@ -47,7 +43,7 @@ SDL_Point& Sprite::getPosition() {
 	return mPosition;
 }
 
-// load sprite data from file - called from constructor
+// Load sprite data from files - Needs to be called before any other functions can be called.
 bool Sprite::load() {
     // First load in sprite metadata file. Read it into a ClipsMap map (see header for typedef).
     if (!loadDataFile()) {
@@ -85,7 +81,7 @@ bool Sprite::loadDataFile() {
 
             // we have the key now get the rest of the string and, using a helper function, turn comma delimited values into our SDL_Rect
             std::getline(stream, value); // get remaining string to right of = sign
-            std::tuple<bool, SDL_Rect> tplRect = getRectFromCDV(value);
+            std::tuple<bool, SDL_Rect> tplRect = FensoxUtils::getRectFromCDV(value);
             if (std::get<0>(tplRect)) {               
                 // check if action is same as last one. If so just add new SDL_Rect to vector otherwise clear the vector and start accumulating clips for a new action mode.
                 if (key == lastKey) {
@@ -109,51 +105,6 @@ bool Sprite::loadDataFile() {
     }
 
     return true;
-}
-
-// Helper function to split some of the file parsing work into smaller chunks. Takes a string of 4 int values, comma delimited, and returns an bool success and an SDL_Rect as a tuple.
-std::tuple<bool, SDL_Rect> Sprite::getRectFromCDV(std::string strCDV) {
-    bool success{ true };
-    int intRect[4]{ -1, -1, -1, -1 }; // temp array to hold SDL_Rect values. In a later check if any of these are left as -1 our load in failed.
-
-    // convert string parameter to a stream and loop through grabbing int values and storing in temp array
-    if (!strCDV.empty()) {
-        std::istringstream stream(strCDV);
-        std::string strTmp;
-        int count{ 0 };
-        while ( (std::getline(stream, strTmp, ',')) && (count < 4) ) {
-            //convert substring we got into an int and catch any errors
-            try {
-                intRect[count] = std::stoi(strTmp);
-                ++count;
-            } catch (const std::exception& e) {
-                std::cerr << "Failed in Sprite::getRectFromCDV converting str to int.\nError: " << e.what() << std::endl;
-                success = false;
-                break;
-            }
-        }
-    } else {
-        std::cerr << "Failed in Sprite::getRectFromCDV: function string parameter is empty." << std::endl;
-        success = false;
-    }
-
-    // check if all four ints have been set
-    if (success) {
-        for (int i{ 0 }; i < 4; ++i) {
-            if (intRect[i] == -1) {
-                std::cerr << "Failed in Sprite::getRectFromCDV: Value " << i << " was -1 (meaning left unset or set incorrectly from file)." << std::endl;
-                success = false;
-            }
-        }
-    }
-
-    // build our SDL_Rect
-    SDL_Rect rect{};
-    if (success) {
-        rect = { intRect[0], intRect[1], intRect[2], intRect[3] };
-    }
-
-    return std::tuple<bool, SDL_Rect> {success, rect};
 }
 
 // Load in the sprite sheet specified in the const string mSpriteSheet and set transparency. Return boolean success.
@@ -191,6 +142,23 @@ void Sprite::setDepth(int depth) {
 // Returns the name of this sprite from the global mName constant.
 std::string Sprite::getName() {
     return mName;
+}
+
+// Set's the position of the sprite.
+void Sprite::setStartPosition(SDL_Point start) {
+    int startWidth{ mAnimMap[mActionMode].at(0).w };
+    int startHeight{ mAnimMap[mActionMode].at(0).h };
+    mPosition.x = mSDLMan->getWindowW() - (startWidth * mScale);
+    mPosition.y = mSDLMan->getWindowH() - (startHeight * mScale);
+}
+
+// Advances the current action mode animation frame ahead or loops to beginning if at end of animation frames.
+void Sprite::advanceFrame() {
+    // get the number of frames this animation has
+    std::size_t count = mAnimMap[mActionMode].size();
+
+    // increment the animation ahead or loop back to beginning if we reach the end of the frames available
+    if (++mCurrentFrame >= count) mCurrentFrame = 0;
 }
 
 // Renders the sprite based on position, action mode, animation frame using a SDL_Renderer from SDLMan.

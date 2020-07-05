@@ -9,15 +9,20 @@ public:
 	// Use base Sprite constructor
 	Thomas(std::shared_ptr<SDLMan> sdlMan);
 
-	// custom sprite move function
-	void move(SDL_Keycode key);
+	// Handles input from the player and performs sprite actions accordingly
+	void playerInput(SDL_Keycode key);
+
+	// Implementation of Sprite class virtual function. Handle movement of Thomas not initiated by the player
+	// i.e. outside forces acting on player.
+	void move();
 
 private:
 	// Walk speed of player
-	Uint32 mWalkWaitTime{ 70 };
+	Uint32 mWalkWaitTime{ 50 };
 
 	// Walk distancec of player
-	int mWalkDistance{ 16 };
+	//int mWalkDistance{ 20 };
+	int mWalkDistance{ 35 };
 
 	// Last time we took a step in SDL ticks. Used to regulate walking speed.
 	Uint32 mLastWalkTime{};
@@ -27,9 +32,6 @@ private:
 
 	// Handles the player requesting to move to the right.
 	void moveLeft();
-
-	// Advances the current animation frame ahead or loops to beginning if at end of animation.
-	void advanceFrame();
 
 	// Check if enough time has passed to walk and move player given amount if so
 	void attemptWalk(int amount);

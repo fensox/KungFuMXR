@@ -40,6 +40,7 @@ bool SDLMan::init() {
 		return false;
 	}
 
+	//***DEBUG*** Turned off as transparency artifacts were halo'd around each sprite (what is linear texture filtering anyhow...)
 	// Try to set texture filtering to linear. Warn if unable.
 	//if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) std::cerr << "Warning in SDLMan::init: Linear Texture filtering not enabled!" << std::endl;
 	
@@ -67,7 +68,7 @@ bool SDLMan::init() {
 	// Initialize SDL_mixer for sound support
 	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
 	{
-		printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+		std::cout << "Failed in SDLMan::init, SDL_mixer could not initialize. SDL_mixer Error: \n" << Mix_GetError() << std::endl;;
 		return false;
 	}
 
@@ -187,6 +188,7 @@ void SDLMan::loadMusic(std::string musicFile) {
 	}
 }
 
+// Play the music file that is loaded in or resume it if it is paused. If it is already playing, pause it.
 void SDLMan::toggleMusic() {
 	//If there is no music playing
 	if (!Mix_PlayingMusic()) {
@@ -200,7 +202,6 @@ void SDLMan::toggleMusic() {
 		}
 	}
 }
-
 
 // Outputs the FPS count to console using an averaging method.
 void SDLMan::outputFPS() {

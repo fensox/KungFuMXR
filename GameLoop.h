@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Thomas.h"
+#include "Level.h"
 #include <memory>
 
 /* Runs the main game loop. */
@@ -25,6 +26,9 @@ public:
 private:
 	// The SDLMan class that wraps most SDL functionality for us.
 	std::shared_ptr<SDLMan> mSDL{ nullptr };
+
+	// The current game level the player is on.
+	std::unique_ptr<Level> mLevel{ nullptr };
 
 	// The Sprite for the player
 	std::unique_ptr<Thomas> player{ nullptr };

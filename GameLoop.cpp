@@ -16,30 +16,52 @@ bool GameLoop::initGameSystems() {
 
 // Loads in game data.
 bool GameLoop::loadGameData() {
+	bool success{ true };
+	
 	// initialize our Sprite holding vector. Holds all non-player sprites.
 	sprites = std::make_unique<std::vector<Sprite>>();
 
 	// Load the player
 	player = std::make_unique<Thomas>(mSDL);
+	if (!player->load()) success = false;
 
+	//***DEBUG***
+	// This needs to be replaced with loading game level information from a game metafile not hardcoded like this
+	// Load the first level
+	if (!loadLevel("data/level1.dat")) success = false;
+	if (FuGlobals::DEBUG_MODE) std::cout << mLevel->toString();
+
+	std::cout << "Success: " << success << std::endl;
 	// Return successful loading of game data.
-	return (sprites && player);
+	return (sprites && success);
 }
 
 // Load in the current level
 bool GameLoop::loadLevel(std::string lvlDataFile) {
-	// load level code here
+	bool success{ true };
 
-	// TEMP TO TEST MUSCIC
-	mSDL->loadMusic("data/KungFu_Original.ogg");
-	mSDL->toggleMusic();
+	// Load the requested level and set player start position
+	mLevel = std::make_unique<Level>(lvlDataFile, mSDL);
+	if (!mLevel->load()) {
+		success = false;
+		std::cerr << "Failed in GameLoop::loadLevel. Level::load returned false." << std::endl;
+	} else {
+		// set player starting position as given by level
+		if (player) {
+			player->setStartPosition(mLevel->getPlayStart());
+		} else {
+			success = false;
+		}
+	}
+
+	return success;
 }
 
 // Runs the main game loop.
 void GameLoop::runGameLoop() {
 	// Show the window
 	mSDL->showWindow(true);
-	
+
 	// Set some variables for use in our loop
 	bool quit{ false };					// whethar to quit the loop or not
 	double previous = SDL_GetTicks();	// holds current time in milliseconds since SDL init
@@ -61,13 +83,17 @@ void GameLoop::runGameLoop() {
 			// handle input events
 			quit = handleEvents();
 
+			// process movements of sprites. For the player this is a physics movement (movement to player not initiated by player!)
+			player->move();
+			for (int i{ 0 }; i < sprites->size(); ++i) sprites->at(i).move();
+			
 			// update our time lag calculations
 			lag -= FuGlobals::FPS_TARGET;
 
 			//***DEBUG***
-			if (FuGlobals::DEBUG_MODE) mSDL->outputFPS();
+			if (FuGlobals::SHOW_FPS) mSDL->outputFPS();
 
-			// if FPS target is set to 0 break out as we are going for as many as we can
+			// if FPS target is set to 0 break out as we are going for as many frames as we can
 			if (FuGlobals::FPS_TARGET == 0) break;
 		}
 
@@ -91,7 +117,7 @@ bool GameLoop::handleEvents() {
             quit = true;
         } else if (e.type == SDL_KEYDOWN) {
 			// Handle keyboard presses
-            player->move(e.key.keysym.sym);
+            player->playerInput(e.key.keysym.sym);
         }
     }
 
