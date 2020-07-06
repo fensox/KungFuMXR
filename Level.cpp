@@ -182,3 +182,46 @@ void Level::render() {
         NULL,
         SDL_FLIP_NONE);
 }
+
+// Moves the viewport a distance in x/y pixels passed in using an SDL_Point. Returns the actual distance the viewport moved
+// which can be less based on running into boundries, etc.
+SDL_Point Level::moveViewport(const SDL_Point& dist) {
+    // store the limit coordinates the background can move
+    int limitX{ mBGTexture->getSize().x - mViewport.w };
+    int limitY{ mBGTexture->getSize().y - mViewport.h };;
+
+    // holds the move attempt temporarily for testing
+    int tryX{ mViewport.x + dist.x };
+    int tryY{ mViewport.y + dist.y };
+
+    // test horizontal boundries of level
+    if ((tryX < 0) || (tryX > limitX)) {
+        if (tryX < 0) {
+            // if less than 0 then we'll move all that is left in x coordinate to move
+            tryX = mViewport.x;
+        }
+        else {
+            // if we went beyond the width limit of the level then we'll move all that we could without going over the limit
+            tryX = limitX - mViewport.x;
+        }
+    }
+
+    // test vertical boundries of level
+    if ((tryY < 0) || (tryY > limitY)) {
+        if (tryY < 0) {
+            // if less than 0 then we'll move all that is left in y coordinate to move
+            tryY = mViewport.y;
+        }
+        else {
+            // if we went beyond the height limit of the level then we'll move all that we could without going over the limit
+            tryY = limitY - mViewport.y;
+        }
+    }
+
+    // perform the actual move on the viewport
+    mViewport.x = tryX;
+    mViewport.y = tryY;
+
+    // return what we actually moved not what was requested
+    return SDL_Point{ tryX, tryY };
+}

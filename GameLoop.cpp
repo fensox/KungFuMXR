@@ -1,4 +1,3 @@
-#include <memory>
 #include <iostream>
 #include "GameLoop.h"
 #include "SDLMan.h"
@@ -38,15 +37,16 @@ bool GameLoop::loadGameData() {
 bool GameLoop::loadLevel(std::string lvlDataFile) {
 	bool success{ true };
 
-	// Load the requested level and set player start position
-	mLevel = std::make_unique<Level>(lvlDataFile, mSDL);
+	// Load the requested level and give the player object it's start position and a smart pointer to our new level
+	mLevel = std::make_shared<Level>(lvlDataFile, mSDL);
 	if (!mLevel->load()) {
 		success = false;
 		std::cerr << "Failed in GameLoop::loadLevel. Level::load returned false." << std::endl;
 	} else {
-		// set player starting position as given by level
+		// set player starting position as given by level and give the player a smart pointer to the Level
 		if (mPlayer) {
 			mPlayer->setStartPosition(mLevel->getPlayStart());
+			mPlayer->setLevel(mLevel);
 		} else {
 			success = false;
 		}
@@ -66,6 +66,9 @@ void GameLoop::runGameLoop() {
 	double lag = 0;						// will hold lag between game time elapsed and real time elapsed
 	
 	// Start the main loop
+	// Game loop uses "Fixed update time step, variable rendering" method written about
+	// in the book Game Programming Patterns by Robert Nystrom. Adjust performance
+	// of this loop by setting the integer variable in the Globals.h file.
 	while (!quit) {
 		// some time calculations to manage game loop speed
 		double current = SDL_GetTicks();

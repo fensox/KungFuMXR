@@ -8,6 +8,7 @@
 #include <memory>
 #include "Texture.h"
 #include "SDLMan.h"
+#include "Level.h"
 
 class Sprite {
 
@@ -30,6 +31,9 @@ public:
 
 	// Access function to get a reference to this sprite's position in 2D space as an SDL_Point object.
 	SDL_Point& getPosition();
+
+	// Sets the smart pointer member variable that points to the Level currently being played.
+	void setLevel(std::shared_ptr<Level> level);
 
 	// Access function to get the depth of this sprite as an int.
 	int getDepth();
@@ -92,6 +96,10 @@ protected:
 		int left{ 1 };
 		int right{ 0 };
 	};
+
+	// Smart pointer to the level we are on. Various Level functions allow sprites to move level viewport and
+	// check level collision rectangles, boundries, etc..
+	std::shared_ptr<Level> mLevel{ nullptr };
 
 private:
 	// Smart pointer to the Texture holding our sprite's sprite sheet.

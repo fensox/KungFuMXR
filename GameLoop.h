@@ -28,7 +28,7 @@ private:
 	std::shared_ptr<SDLMan> mSDL{ nullptr };
 
 	// The current game level the player is on.
-	std::unique_ptr<Level> mLevel{ nullptr };
+	std::shared_ptr<Level> mLevel{ nullptr };
 
 	// The Sprite for the player
 	std::unique_ptr<Thomas> mPlayer{ nullptr };

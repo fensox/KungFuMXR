@@ -6,7 +6,7 @@
 #include <string>
 #include "SDLMan.h"
 
-/* Holds information about one level in the game. */
+/* Holds information about one level in the game. All levels have a 1280 x 720 pixel viewport that scales to fit display. */
 class Level {
 public:
 	// Constructor takes path to metadata file for the level relative to game executable and an SDLMan pointer to hold for rendering.
@@ -24,6 +24,11 @@ public:
 
 	// Return player start position
 	SDL_Point getPlayStart();
+
+	// Moves the viewport a distance in x/y pixels passed in using a refernce to a const SDL_Point.
+	// Returns the actual distance the viewport moved which can be less than requested 
+	// based on running into level boundries, etc.
+	SDL_Point moveViewport(const SDL_Point& dist);
 
 	// Render the level
 	void render();

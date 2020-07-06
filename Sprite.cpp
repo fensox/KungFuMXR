@@ -111,6 +111,11 @@ bool Sprite::loadSpriteSheet() {
     return (!(mTexture==nullptr));
 }
 
+// Sets the smart pointer member variable that points to the Level currently being played.
+void Sprite::setLevel(std::shared_ptr<Level> level) {
+    mLevel = level;
+}
+
 // Returns a string representation of the sprite information
 std::string Sprite::toString() {
     SDL_Rect cr = getCollisionRect();

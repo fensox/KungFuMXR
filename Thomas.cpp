@@ -27,11 +27,13 @@ void Thomas::playerInput(SDL_Keycode key) {
         break;
 
     case SDLK_LEFT:
-        moveLeft();
+        //moveLeft();
+        mLevel->moveViewport(SDL_Point{ -16 });
         break;
 
     case SDLK_RIGHT:
-        moveRight();
+        //moveRight();
+        mLevel->moveViewport(SDL_Point{ 16 });
         break;
 
     default:
