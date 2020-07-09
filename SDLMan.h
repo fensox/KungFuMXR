@@ -5,6 +5,7 @@
 #include <string>
 #include "Texture.h"
 #include <memory>
+#include "Globals.h"
 
 /* SDLMan - SDL Manager Utility Class
  *
@@ -51,6 +52,9 @@ public:
 	// Clears the drawing buffer so we have a clean area to draw on.
 	void clearBackBuffer();
 
+	// Returns the height and width of a texture as an SDL_Point.
+	SDL_Point getSize(std::shared_ptr<Texture> text);
+
 	// Load in a music file. Does not play immediately. Use playMusic(bool) to start and stop loaded music.
 	bool loadMusic(std::string musicFile);
 
@@ -80,8 +84,7 @@ private:
 	std::string mWindowCaption{};
 
 	// Store's the window width and height with defaults.
-	int mWindowW{ 1280 }, mWindowH{ 720 };
-	//int mWindowW{ 256 }, mWindowH{ 240 }; // NES Resolution
+	int mWindowW{ FuGlobals::WINDOW_WIDTH }, mWindowH{ FuGlobals::WINDOW_HEIGHT };
 
 	// Full screen window or not
 	bool mWindowFull{ false };

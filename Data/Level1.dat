@@ -1,4 +1,4 @@
-# Kung Fu MXR - Standard Level Metadata File
+# Kung Fu MXR - Standard Level Metadata File V.1.0
 #
 # File format description:
 #
@@ -21,6 +21,7 @@
 #
 #	START_VIEWPORT=x, y, w, h 	- The starting viewport of the level given as x, y integer coordinates to the top left of
 #					  the rectangle and width and height integers.
+#					  HAS TO BE 1280x720 WIDTH/HEIGHT VERSION 1 OF ENGINE.
 #
 #	PLAYER_START=x, y		- The starting integer coordinates for the player on this level given as X, Y coordinates
 #					  to top left corner of player image.
@@ -35,7 +36,7 @@
 #
 # i.e.
 #	NAME=Tower of Terror
-#	BACKGROUND=data/level1.png
+#	BACKGROUND=data/Level1.png
 #	TRANS_COLOR=100,100,100,1
 #	MUSIC=data/kung_fu_music.ogg
 #	START_VIEWPORT=0,0,1280,720
@@ -51,13 +52,13 @@
 
 #Name and paths
 NAME=Level 1
-BACKGROUND=data/level1.png
+BACKGROUND=data/Level1.png
 TRANS_COLOR=0,0,0,0
 MUSIC=data/kung_fu_music.ogg
-PLAYER_START=1200, 556
-START_VIEWPORT=0,0,1280,720
+PLAYER_START=1100, 471
+START_VIEWPORT=6400,0,1280,720
 
 #Floor
-COLRECT=0, 1200, 5000, 80
+COLRECT=0, 470, 7680, 250
 
 # End data file

@@ -168,6 +168,40 @@ std::string Level::toString() {
     return str.str();
 }
 
+// Returns whethar level has scrolled as far right as possible and is at boundry.
+bool Level::isBoundRight() {
+    if (mViewport.x >= getSize().x - mViewport.w) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+// Returns whethar level has scrolled as far left as possible and is at boundry.
+bool Level::isBoundLeft() {
+    if (mViewport.x <= 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+// Returns the height and width of the level background in an SDL_Point.
+SDL_Point Level::getSize() {
+    return mSDLMan->getSize(mBGTexture);
+}
+
+// Returns the distance in pixels the given point is from the center of the viewport. 
+// All coordinates viewport relative not level BG texture relative.
+SDL_Point Level::getDistFromViewCenter(SDL_Point given) {
+    SDL_Point dist{};
+
+    dist.x = -(given.x - (mViewport.w / 2));
+    dist.y = -(given.y - (mViewport.h / 2));
+    
+    return dist;
+}
+
 // Render the level to the screen
 void Level::render() {
     // create a destination rect based on window size
@@ -186,6 +220,8 @@ void Level::render() {
 // Moves the viewport a distance in x/y pixels passed in using an SDL_Point. Returns the actual distance the viewport moved
 // which can be less based on running into boundries, etc.
 SDL_Point Level::moveViewport(const SDL_Point& dist) {
+    SDL_Point actual{};
+
     // store the limit coordinates the background can move
     int limitX{ mBGTexture->getSize().x - mViewport.w };
     int limitY{ mBGTexture->getSize().y - mViewport.h };;
@@ -195,33 +231,35 @@ SDL_Point Level::moveViewport(const SDL_Point& dist) {
     int tryY{ mViewport.y + dist.y };
 
     // test horizontal boundries of level
-    if ((tryX < 0) || (tryX > limitX)) {
-        if (tryX < 0) {
-            // if less than 0 then we'll move all that is left in x coordinate to move
-            tryX = mViewport.x;
-        }
-        else {
-            // if we went beyond the width limit of the level then we'll move all that we could without going over the limit
-            tryX = limitX - mViewport.x;
-        }
+    if (tryX < 0) {
+        // if new position is less than 0 then we'll move all that we can x coordinate and store what we couldn't for return
+        actual.x = -mViewport.x;
+        tryX = mViewport.x;
+    } else if (tryX > limitX) {
+        // if we went beyond the width limit of the level then we'll move all that we can and store what we couldn't for return
+        actual.x = limitX - mViewport.x;
+        tryX = limitX;
+    } else {
+        actual.x = dist.x;
     }
 
     // test vertical boundries of level
-    if ((tryY < 0) || (tryY > limitY)) {
-        if (tryY < 0) {
-            // if less than 0 then we'll move all that is left in y coordinate to move
-            tryY = mViewport.y;
-        }
-        else {
-            // if we went beyond the height limit of the level then we'll move all that we could without going over the limit
-            tryY = limitY - mViewport.y;
-        }
+    if (tryY < 0) {
+        // if new position is less than 0 then we'll move all that we can y coordinate and store what we couldn't for return
+        actual.y = -mViewport.y;
+        tryY = mViewport.y;
+    } else if (tryY > limitY) {
+        // if we went beyond the width limit of the level then we'll move all that we can and store what we couldn't for return
+        actual.y = limitY - mViewport.y;
+        tryY = limitY;
+    } else {
+        actual.y = dist.y;
     }
-
+    
     // perform the actual move on the viewport
     mViewport.x = tryX;
     mViewport.y = tryY;
 
     // return what we actually moved not what was requested
-    return SDL_Point{ tryX, tryY };
+    return actual;
 }

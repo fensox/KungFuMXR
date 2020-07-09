@@ -62,8 +62,8 @@ void GameLoop::runGameLoop() {
 
 	// Set some variables for use in our loop
 	bool quit{ false };					// whethar to quit the loop or not
-	double previous = SDL_GetTicks();	// holds current time in milliseconds since SDL init
-	double lag = 0;						// will hold lag between game time elapsed and real time elapsed
+	double previous = SDL_GetTicks();	// holds current time in milliseconds since SDL init - game loop speed/FPS management
+	double lag = 0;						// will hold lag between game time elapsed and real time elapsed - game loop speed/FPS management
 	
 	// Start the main loop
 	// Game loop uses "Fixed update time step, variable rendering" method written about
@@ -78,6 +78,9 @@ void GameLoop::runGameLoop() {
 
 		// clear back buffer for our new frame
 		mSDL->clearBackBuffer();
+
+		//***DEBUG***
+		mSDL->toggleMusic();
 
 		// progress game logic without rendering to backbuffer until FPS target has been reached
 		while (lag >= FuGlobals::FPS_TARGET) {

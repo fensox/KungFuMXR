@@ -35,9 +35,26 @@ SDL_Rect Sprite::getCollisionRect() {
     return colRect;
 }
 
-// Access function to get a reference to this sprite's position in 2D space as an SDL_Point object.
-SDL_Point& Sprite::getPosition() {
-	return mPosition;
+// Access function to get this sprite's position in 2D space as an SDL_Rect object. Width and Height are also returned with x/y coordinates being at center of that w/h.
+SDL_Rect Sprite::getCenterPoint() {
+    // get our SDL_Rect for the current animation frame
+    std::vector<SDL_Rect>& tmpVect = mAnimMap[mActionMode];
+    SDL_Rect& frame = tmpVect[mCurrentFrame];
+
+    // adjust dest coordinates to center the sprite
+    SDL_Rect tmp{ mPosition.x + frame.w / 2,
+                  mPosition.y + frame.h / 2,
+                  frame.w, frame.h };
+
+	return tmp;
+}
+
+// Access function to set the center point of this sprite's position in 2D space as an SDL_Point object.
+void Sprite::setCenterPoint(SDL_Point newCtr) {
+    SDL_Rect oldCtr = getCenterPoint();
+
+    mPosition.x = newCtr.x - oldCtr.w / 2;
+    mPosition.y = newCtr.y - oldCtr.h / 2;
 }
 
 // Load sprite data from files - Needs to be called before any other functions can be called.
@@ -120,18 +137,11 @@ void Sprite::setLevel(std::shared_ptr<Level> level) {
 std::string Sprite::toString() {
     SDL_Rect cr = getCollisionRect();
     std::ostringstream output;
-    output << "Sprite name: " << mName << ", Position: " << mPosition.x << ", " << mPosition.y << ", Depth: " << mDepth << ", ";
+    output << "Sprite name: " << mName << ", Top Left Position: " << mPosition.x << ", " << mPosition.y << ", Depth: " << mDepth << ", ";
     output << "# of action modes: " << mAnimMap.size() << ", "<< "Current ation mode: " << mActionMode << ", Collision rect: ";
     output << cr.x << ", " << cr.y << ", " << cr.w << ", " << cr.h << std::endl;
 
     return output.str();
-}
-
-// Helper function to ge the width and height of the current animation frame Texture. Returned in an SDL_Point type (x=width, y=height).
-SDL_Point Sprite::getSize(Texture text) {
-    SDL_Point size{};
-    SDL_QueryTexture(text.getTexture(), NULL, NULL, &size.x, &size.y);
-    return size;
 }
 
 int Sprite::getDepth() {
@@ -167,9 +177,14 @@ void Sprite::render() {
     std::vector<SDL_Rect>& tmpVect = mAnimMap[mActionMode];
     SDL_Rect& clip = tmpVect[mCurrentFrame];
     
-    // create a destination rect based on position, and our frame size multiplied by mScale factor member
+    // create a destination rect based on position, and our frame size multiplied by mScale factor member.
     SDL_Rect dest { mPosition.x, mPosition.y, clip.w * mScale, clip.h * mScale };
-    
+
+    // adjust position so coordinates mean center of texture
+    dest.x = dest.x - dest.w / 2;
+    dest.y = dest.y - dest.h / 2;
+
+
     //Render to screen
     SDL_RenderCopyEx(   &mSDLMan->getRenderer(),
                         mTexture->getTexture(),

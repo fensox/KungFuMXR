@@ -1,13 +1,7 @@
 #include "SDLMan.h"
-#include "Texture.h"
-#include <SDL.h>
 #include <SDL_image.h>
-#include <SDL_mixer.h>
 #include <iostream>
-#include <string>
-#include <memory>
 #include <vector>
-#include "Globals.h"
 
 // Constructor. Takes title string to use as window caption if needed.
 SDLMan::SDLMan(std::string windowCaption) {
@@ -140,6 +134,13 @@ void SDLMan::setFullscreen(bool fs) {
 	else {
 		SDL_SetWindowFullscreen(mWindow, 0);
 	}
+}
+
+// Returns the height and width of a Texture object's wrapped SDL_Texture. Return type holding width/height is an SDL_Point.
+SDL_Point SDLMan::getSize(std::shared_ptr<Texture> text) {
+	SDL_Point size{};
+	SDL_QueryTexture(text->getTexture(), NULL, NULL, &size.x, &size.y);
+	return size;
 }
 
 // Load in a Texture object using the passed in filename and SDL_Image functions. Returns a smart pointer to a Texture object.

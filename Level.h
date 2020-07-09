@@ -6,7 +6,10 @@
 #include <string>
 #include "SDLMan.h"
 
-/* Holds information about one level in the game. All levels have a 1280 x 720 pixel viewport that scales to fit display. */
+/*	
+	Holds information about one level in the game. All levels have a 1280 x 720 pixel viewport that scales to fit display.
+	Levels are 720 pixels tall graphic files and we view them through a 1280x720 viewport.
+*/
 class Level {
 public:
 	// Constructor takes path to metadata file for the level relative to game executable and an SDLMan pointer to hold for rendering.
@@ -25,10 +28,23 @@ public:
 	// Return player start position
 	SDL_Point getPlayStart();
 
+	// Returns the distance in pixels the given point is from the center of the viewport. 
+	// All coordinates viewport relative not level BG texture relative.
+	SDL_Point getDistFromViewCenter(SDL_Point given);
+
 	// Moves the viewport a distance in x/y pixels passed in using a refernce to a const SDL_Point.
 	// Returns the actual distance the viewport moved which can be less than requested 
 	// based on running into level boundries, etc.
 	SDL_Point moveViewport(const SDL_Point& dist);
+
+	// Returns whethar level has scrolled as far right as possible and is at boundry.
+	bool isBoundRight();
+
+	// Returns whethar level has scrolled as far left as possible and is at boundry.
+	bool isBoundLeft();
+
+	// Returns the width/height of the level background in an SDL_Point.
+	SDL_Point getSize();
 
 	// Render the level
 	void render();
@@ -46,11 +62,11 @@ private:
 	// Holds the path and filename to the level's music file
 	std::string mMusicFile{};
 
-	// Holds the path and filename to the level's background graphic (720 pixels tall graphics for a 1280x720 viewport)
+	// Holds the path and filename to the level's background graphic
 	std::string mBGFile{};
 
-	// Holds the SDL_Texture of the level background
-	std::unique_ptr<Texture> mBGTexture{ nullptr };
+	// Holds the SDL_Texture of the level background in a smart pointer
+	std::shared_ptr<Texture> mBGTexture{ nullptr };
 
 	// Holds the transparency color for the background texture
 	SDL_Color mTrans{};

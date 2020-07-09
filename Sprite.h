@@ -29,8 +29,11 @@ public:
 	position, height, and width. For more accurate collision this function should be overidden by derived classes. */
 	SDL_Rect getCollisionRect();
 
-	// Access function to get a reference to this sprite's position in 2D space as an SDL_Point object.
-	SDL_Point& getPosition();
+	// Access function to get a const reference to the center point of this sprite's position in 2D space as an SDL_Rect object.
+	SDL_Rect getCenterPoint();
+
+	// Access function to set the center point of this sprite's position in 2D space as an SDL_Point object.
+	void setCenterPoint(SDL_Point newCtr);
 
 	// Sets the smart pointer member variable that points to the Level currently being played.
 	void setLevel(std::shared_ptr<Level> level);
@@ -76,9 +79,6 @@ protected:
 	// A ClipsMap is a std::unordered_map container with the string name of an action (the key) mapped to a vector of SDL_Rect holding all sprite sheet clip information for that action.
 	typedef std::unordered_map<std::string, std::vector<SDL_Rect>> ClipsMap;
 
-	// Position of sprite.
-	SDL_Point mPosition{0, 0};
-
 	// int holding the current frame of animation for our action mode we are in.
 	std::size_t mCurrentFrame{};
 
@@ -102,6 +102,9 @@ protected:
 	std::shared_ptr<Level> mLevel{ nullptr };
 
 private:
+	// Position of sprite.
+	SDL_Point mPosition{ 0, 0 };
+
 	// Smart pointer to the Texture holding our sprite's sprite sheet.
 	std::shared_ptr<Texture> mTexture{ nullptr };
 	
@@ -116,7 +119,4 @@ private:
 
 	// Load in the sprite sheet specified in the const string mSpriteSheet and set transparency. Return boolean success.
 	bool loadSpriteSheet();
-
-	// Helper function to ge the width and height of an SDL_Texture. Returned in a SDL_Point type (x=width, y=height).
-	SDL_Point getSize(Texture text);
 };
