@@ -39,7 +39,7 @@ bool SDLMan::init() {
 	//if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) std::cerr << "Warning in SDLMan::init: Linear Texture filtering not enabled!" << std::endl;
 	
 	// Set up some window creation flags. Start window hidden (can be shown with a call to showWindow), borderless, and whethar full screen or not.
-	int flags = SDL_WINDOW_HIDDEN;
+	int flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE;
 	if (mWindowFull) flags = flags | SDL_WINDOW_FULLSCREEN;
 	
 	// Create a window
@@ -73,6 +73,11 @@ bool SDLMan::init() {
 	fpsLast = SDL_GetTicks();
 
 	return true;
+}
+
+// Tells SDLMan to poll SDL for the window size and update our window size variables
+void SDLMan::updateWindowSize() {
+	SDL_GetWindowSize(mWindow, &mWindowW, &mWindowH);
 }
 
 // Draws the screen
@@ -175,9 +180,9 @@ std::unique_ptr<Texture> SDLMan::loadImage(std::string fileName, SDL_Color color
 	return std::make_unique<Texture>(newTexture);
 }
 
-// Provide a reference to the renderer for others to use to draw themselves.
-SDL_Renderer& SDLMan::getRenderer() {
-	return *mRenderer;
+// Provide a pointer to the renderer for others to use to draw themselves.
+SDL_Renderer* SDLMan::getRenderer() {
+	return mRenderer;
 }
 
 // Load in a music file. Does not play immediately. Use playMusic(bool) to start and stop loaded music.

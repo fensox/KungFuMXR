@@ -171,11 +171,14 @@ void Sprite::render() {
     int scaledH{ clip.h * mScale };
 
     // create a destination rect cenetering texture on our position
-    //mDest = {mXPos - (scaledW / 2), mYPos - (scaledH / 2), scaledW, scaledH};
-    mDest = { mXPos, mYPos, clip.w, clip.h };
+    mDest = {mXPos - (scaledW / 2), mYPos - (scaledH / 2), scaledW, scaledH};
+    
+    // adjust the Sprite coordinates by the distance the viewport is from origin
+    mDest.x -= mLevel->getPosition().x;
+    mDest.y -= mLevel->getPosition().y;
 
     //Render to screen
-    SDL_RenderCopyEx(   &mSDLMan->getRenderer(),
+    SDL_RenderCopyEx(   mSDLMan->getRenderer(),
                         mTexture->getTexture(),
                         &clip,
                         &mDest,

@@ -31,7 +31,7 @@ private:
 	std::shared_ptr<Level> mLevel{ nullptr };
 
 	// The Sprite for the player
-	std::unique_ptr<Thomas> mPlayer{ nullptr };
+	std::shared_ptr<Thomas> mPlayer{ nullptr };
 
 	// Container to hold all non-player sprites in the game (smart pointer to a vector)
 	std::unique_ptr<std::vector<Sprite>> sprites{ nullptr };

@@ -46,6 +46,9 @@ public:
 	// Set's the window fullscreen boolean value
 	void setFullscreen(bool fs);
 
+	// Tells SDLMan to poll SDL for the window size and update our window size variables
+	void updateWindowSize();
+
 	// Draws the screen
 	void refresh();
 
@@ -64,8 +67,8 @@ public:
 	// Load in a Texture object using the passed in filename, transparancy color, and transparancy on/off switch. Returns a smart pointer to a Texture object.
 	std::unique_ptr<Texture> loadImage(std::string fileName, SDL_Color color, bool useTrans);
 
-	// Provide a reference to our renderer for others to use to draw themselves.
-	SDL_Renderer& getRenderer();
+	// Provide a pointer to our renderer for others to use to draw themselves.
+	SDL_Renderer* getRenderer();
 
 	// Outputs the FPS count to console using an averaging method.
 	void outputFPS();

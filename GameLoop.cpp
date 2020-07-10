@@ -43,11 +43,12 @@ bool GameLoop::loadLevel(std::string lvlDataFile) {
 		success = false;
 		std::cerr << "Failed in GameLoop::loadLevel. Level::load returned false." << std::endl;
 	} else {
-		// set player starting position as given by level and give the player a smart pointer to the Level
+		// set player starting position as given by level and give the player and level smart pointers to each other
 		if (mPlayer) {
 			mPlayer->setX(mLevel->getPlayStart().x);
 			mPlayer->setY(mLevel->getPlayStart().y);
 			mPlayer->setLevel(mLevel);
+			mLevel->setFollowSprite(mPlayer);
 		} else {
 			success = false;
 		}
@@ -106,12 +107,6 @@ void GameLoop::runGameLoop() {
 		mLevel->render();
 		mPlayer->render();
 
-		//***DEBUG***
-		//Render red filled quad
-		SDL_Rect fillRect{ mPlayer->getX(), mPlayer->getY(), 20, 40 };
-		//SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
-		SDL_RenderFillRect(&mSDL->getRenderer(), &fillRect);
-
 		// update the screen
 		mSDL->refresh();
 	}
@@ -130,7 +125,9 @@ bool GameLoop::handleEvents() {
         } else if (e.type == SDL_KEYDOWN) {
 			// Handle keyboard presses
             mPlayer->playerInput(e.key.keysym.sym);
-        }
+		} else if ((e.type == SDL_WINDOWEVENT) && (e.window.event == SDL_WINDOWEVENT_RESIZED)) {
+			mSDL->updateWindowSize();
+		}
     }
 
     return quit;

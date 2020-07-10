@@ -1,14 +1,17 @@
 #pragma once
 
+#include "Level.h"
+#include "Texture.h"
+#include "SDLMan.h"
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include <SDL.h>
 #include <tuple>
 #include <memory>
-#include "Texture.h"
-#include "SDLMan.h"
-#include "Level.h"
+
+// Forward declaration for Level class...ran into a circular reference between Sprite<->Level
+class Level;
 
 class Sprite {
 

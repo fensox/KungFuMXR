@@ -1,14 +1,18 @@
 #pragma once
 
+#include "Sprite.h"
 #include <memory>
 #include <vector>
 #include <SDL.h>
 #include <string>
 #include "SDLMan.h"
 
+// Forward declaration for Sprite class...ran into a circular reference between Sprite<->Level
+class Sprite;
+
 /*	
-	Holds information about one level in the game. All levels have a 1280 x 720 pixel viewport that scales to fit display.
-	Levels are 720 pixels tall graphic files and we view them through a 1280x720 viewport.
+	Holds information about one level in the game. All levels viewed through a viewport whose
+	size if specifided in FuGlobals::VIEWPORT_WIDTH & VIEWPORT_HEIGHT. This viewport is scaled to fit display resolution.
 */
 class Level {
 public:
@@ -31,14 +35,14 @@ public:
 	// Returns the width/height of the level background in an SDL_Point.
 	SDL_Point getSize();
 
-	// Returns the top/left coordinate of the viewport on the level.
-	SDL_Point getPosition();
+	// Returns the viewport on the levels top-left coordinates and the viewport width/height.
+	SDL_Rect getPosition();
 
 	// Render the level
 	void render();
 
-	// Centers the viewport over the given coordinates adjusting for level boundries.
-	void centerViewport(int x, int y);
+	// Set's the Sprite pointer that this level's viewport will stay centered on.
+	void setFollowSprite(std::shared_ptr<Sprite> follow);
 
 	// Outputs the object information represented as a string
 	std::string toString();
@@ -65,11 +69,14 @@ private:
 	// Player starting coordinates as an SDL_Point in reference to the center of player
 	SDL_Point mPlayStart{};
 
-	// Holds the current viewport rectangle over the level. Get's centered on player position.
+	// Holds the current viewport rectangle over the level. Get's centered on mFollowSprite member's position.
 	SDL_Rect mViewport{0, 0, FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT};
 
 	// Smart pointer to an SDLMan object used to draw the level
 	std::shared_ptr<SDLMan> mSDLMan{ nullptr };
+
+	// Smart pointer to a Sprite object this viewport will center on. Usually holds player sprite but could be any sprite i.e. a scripted scene, etc..
+	std::shared_ptr<Sprite> mFollowSprite{ nullptr };
 
 	// Holds all collision rectangles in a vector wrapped in a smart pointer.
 	ColRects mColRects{nullptr};
@@ -88,4 +95,7 @@ private:
 
 	// Load in the level's music file. Returns Success.
 	bool loadMusicFile();
+
+	// Centers the viewport over the given coordinates adjusting for level boundries.
+	void centerViewport();
 };

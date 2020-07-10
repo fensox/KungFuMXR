@@ -38,8 +38,5 @@ private:
 	// Adjust the player position or the viewport position. This is called at end of a chain of function calls, begun at playerInput(), that have already confirmed
 	// enough time has passed to move, selected the appropriate animation frame, and now we are ready to adjust position
 	void changePosition(int moveX, int moveY);
-
-	// Calls the level's centerViewport() function passing in new player coordinates to center around. Called after a player movement.
-	void centerViewport();
 };
 

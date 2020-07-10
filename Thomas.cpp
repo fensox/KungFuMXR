@@ -20,9 +20,12 @@ void Thomas::playerInput(SDL_Keycode key) {
     switch (key)
     {
     case SDLK_UP:
-        SDL_Point pnt{ mLevel->getPosition() };
-        std::cout << "Viewport: " << pnt.x << ", " << pnt.y << std::endl;
-        std::cout << toString() << std::endl;
+    {
+        SDL_Rect pnt{ mLevel->getPosition() };
+
+        std::cout << "Viewport: " << pnt.x << ", " << pnt.y << ", " << pnt.w << ", " << pnt.h << std::endl;
+        std::cout << toString() << "\n";
+    }
         break;
 
     case SDLK_DOWN:
@@ -52,13 +55,8 @@ void Thomas::moveRight() {
     } else {
         //attempts to move the player the given amount if enough time has passed
         if (checkWalkTime()) {
-            if (mCurrentFrame == 0) {
-                advanceFrame();
-                changePosition(mWalkDistance, 0);
-                centerViewport();
-            } else {
-                advanceFrame();
-            }
+            advanceFrame();
+            if (mCurrentFrame == 0) changePosition(mWalkDistance, 0);
         }
     }
 }
@@ -75,7 +73,6 @@ void Thomas::moveLeft() {
             if (mCurrentFrame == 0) {
                 advanceFrame();
                 changePosition(-mWalkDistance, 0);
-                centerViewport();
             } else {
                 advanceFrame();
             }
@@ -112,9 +109,4 @@ void Thomas::changePosition(int moveX, int moveY) {
 void Thomas::move() {
     // handle gravity
     
-}
-
-// Calls the level's centerViewport() function passing in new player coordinates to center around. Called after a player movement.
-void Thomas::centerViewport() {
-    mLevel->centerViewport(getX(), getY());
 }

@@ -33,7 +33,7 @@
 # i.e.
 #	NAME=Tower of Terror
 #	BACKGROUND=data/Level1.png
-#	TRANS_COLOR=100,100,100,1
+#	TRANS_COLOR=92,148,252,1
 #	MUSIC=data/kung_fu_music.ogg
 #	START_VIEWPORT=0,0,1280,720
 #	PLAYER_START=1280, 720
@@ -49,7 +49,7 @@
 #Name and paths
 NAME=Level 1
 BACKGROUND=data/Level1.png
-TRANS_COLOR=0,0,0,0
+TRANS_COLOR=92,148,252,0
 MUSIC=data/kung_fu_music.mp3
 PLAYER_START=1100, 400
 

@@ -25,9 +25,6 @@ bool Level::load() {
 
     // Load in the level's background texture
     if (!loadBGTexture()) success = false;
-    
-    // Set starting viewport position over player start position we read from metafile
-    centerViewport(mPlayStart.x, mPlayStart.y);
 
     return success;
 }
@@ -142,9 +139,9 @@ SDL_Point Level::getPlayStart() {
     return mPlayStart;
 }
 
-// Returns the top/left coordinate of the viewport on the level.
-SDL_Point Level::getPosition() {
-    return SDL_Point{ mViewport.x, mViewport.y };
+// Returns the viewport on the levels top-left coordinates and the viewport width/height.
+SDL_Rect Level::getPosition() {
+    return mViewport;
 }
 
 // Outputs the level information represented as a string
@@ -161,13 +158,21 @@ SDL_Point Level::getSize() {
     return mSDLMan->getSize(mBGTexture);
 }
 
-// Render the level to the screen
-void Level::render() {
-    // create a destination rect based on window size
-    SDL_Rect dest{ 0, 0, mSDLMan->getWindowW() , mSDLMan->getWindowH() };
+// Set's the Sprite pointer that this level's viewport will stay centered on.
+void Level::setFollowSprite(std::shared_ptr<Sprite> follow) {
+    mFollowSprite = follow;
+}
 
-    //Render to screen
-    SDL_RenderCopyEx(&mSDLMan->getRenderer(),
+// Render the level to the screen
+void Level::render() {    
+    // center viewport on the Sprite we've been told to follow
+    centerViewport();
+
+    // Destination rectangle for viewport to draw into which scales our scene to fit window
+    SDL_Rect dest{ 0, 0, mSDLMan->getWindowW(), mSDLMan->getWindowH() };
+    
+    //Render the area of level our viewport is pointing at
+    SDL_RenderCopyEx(mSDLMan->getRenderer(),
         mBGTexture->getTexture(),
         &mViewport,
         &dest,
@@ -177,14 +182,14 @@ void Level::render() {
 }
 
 // Centers the viewport on given x, y coordinates adjusting for level boundries.
-void Level::centerViewport(int x, int y) {
+void Level::centerViewport() {
     // move the viewport to given coordinates
-    mViewport.x = x - (FuGlobals::VIEWPORT_WIDTH / 2);
-    mViewport.y = y - (FuGlobals::VIEWPORT_HEIGHT / 2);
+    mViewport.x = mFollowSprite->getX() - (FuGlobals::VIEWPORT_WIDTH / 2);
+    mViewport.y = mFollowSprite->getY() - (FuGlobals::VIEWPORT_HEIGHT / 2);
     
     // check against level boundries and move back some if need be
     int limitX{ mBGTexture->getSize().x - mViewport.w };
-    int limitY{ mBGTexture->getSize().y - mViewport.h };;
+    int limitY{ mBGTexture->getSize().y - mViewport.h };
     // x
     if (mViewport.x > limitX) mViewport.x = limitX;
     else if (mViewport.x < 0) mViewport.x = 0;
