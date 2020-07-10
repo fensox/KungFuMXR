@@ -29,12 +29,6 @@ public:
 	position, height, and width. For more accurate collision this function should be overidden by derived classes. */
 	SDL_Rect getCollisionRect();
 
-	// Access function to get a const reference to the center point of this sprite's position in 2D space as an SDL_Rect object.
-	SDL_Rect getCenterPoint();
-
-	// Access function to set the center point of this sprite's position in 2D space as an SDL_Point object.
-	void setCenterPoint(SDL_Point newCtr);
-
 	// Sets the smart pointer member variable that points to the Level currently being played.
 	void setLevel(std::shared_ptr<Level> level);
 
@@ -47,8 +41,17 @@ public:
 	// Returns the name of this sprite from the global mName constant.
 	std::string getName();
 
-	// Set's the position of the sprite.
-	void setStartPosition(SDL_Point start);
+	// Sets the sprite's x coordinate position relative to level.
+	void setX(int x);
+
+	// Sets the sprite's y coordinate position relative to level.
+	void setY(int y);
+
+	// Returns the sprite's x coordinate position relative to level.
+	int getX();
+
+	// Returns the sprite's y coordinate position relative to level.
+	int getY();
 
 	// Handle movement of the sprite. Purely virtual function as all sprites move differently.
 	virtual void move() = 0;
@@ -101,18 +104,23 @@ protected:
 	// check level collision rectangles, boundries, etc..
 	std::shared_ptr<Level> mLevel{ nullptr };
 
-private:
-	// Position of sprite.
-	SDL_Point mPosition{ 0, 0 };
-
-	// Smart pointer to the Texture holding our sprite's sprite sheet.
-	std::shared_ptr<Texture> mTexture{ nullptr };
-	
 	// Smart pointer to the SDLMan object passed in during construction.
 	std::shared_ptr<SDLMan> mSDLMan{ nullptr };
 
+private:
+	// Center position of sprite within the level. This is not viewport relative but level relative. This is not derived from
+	// the size of the current animation frame. The render function renders the animation frame texture around this point.
+	int mXPos{ 0 };
+	int mYPos{ 0 };
+
+	// Smart pointer to the Texture holding our sprite's sprite sheet.
+	std::shared_ptr<Texture> mTexture{ nullptr };
+
 	// Holds the depth of this Sprite. Used for rendering of things in front/behind each other.
 	int mDepth{};
+
+	// Holds the destination rectangle we will be rendered into
+	SDL_Rect mDest{};
 
 	// Load the initial data file in with action mode names and animation frame counts. Store in passed in map and return boolean success.
 	bool loadDataFile();

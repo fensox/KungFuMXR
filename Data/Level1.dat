@@ -19,12 +19,8 @@
 #	MUSIC=path and file		- Background music to play on a loop during this level. File path rules same as for background.
 #					- Only include one of these per metafile.
 #
-#	START_VIEWPORT=x, y, w, h 	- The starting viewport of the level given as x, y integer coordinates to the top left of
-#					  the rectangle and width and height integers.
-#					  HAS TO BE 1280x720 WIDTH/HEIGHT VERSION 1 OF ENGINE.
-#
 #	PLAYER_START=x, y		- The starting integer coordinates for the player on this level given as X, Y coordinates
-#					  to top left corner of player image.
+#					  to center of player.
 #
 #	COLRECT=x, y, w, h		- Collision rectangles in the level. Include as many of these lines as needed per level.
 #					  Rectangles are specified as integers: Top Left X position, Top Left Y position, Width, Height
@@ -54,9 +50,8 @@
 NAME=Level 1
 BACKGROUND=data/Level1.png
 TRANS_COLOR=0,0,0,0
-MUSIC=data/kung_fu_music.ogg
-PLAYER_START=1100, 471
-START_VIEWPORT=6400,0,1280,720
+MUSIC=data/kung_fu_music.mp3
+PLAYER_START=1100, 400
 
 #Floor
 COLRECT=0, 470, 7680, 250

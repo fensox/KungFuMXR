@@ -60,7 +60,7 @@ bool SDLMan::init() {
 	SDL_SetRenderDrawColor(mRenderer, 100, 0, 100, SDL_ALPHA_OPAQUE);
 
 	// Initialize SDL_mixer for sound support
-	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+	if (Mix_OpenAudio(MIX_DEFAULT_FORMAT, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
 	{
 		std::cout << "Failed in SDLMan::init, SDL_mixer could not initialize. SDL_mixer Error: \n" << Mix_GetError() << std::endl;;
 		return false;

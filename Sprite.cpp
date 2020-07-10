@@ -35,28 +35,6 @@ SDL_Rect Sprite::getCollisionRect() {
     return colRect;
 }
 
-// Access function to get this sprite's position in 2D space as an SDL_Rect object. Width and Height are also returned with x/y coordinates being at center of that w/h.
-SDL_Rect Sprite::getCenterPoint() {
-    // get our SDL_Rect for the current animation frame
-    std::vector<SDL_Rect>& tmpVect = mAnimMap[mActionMode];
-    SDL_Rect& frame = tmpVect[mCurrentFrame];
-
-    // adjust dest coordinates to center the sprite
-    SDL_Rect tmp{ mPosition.x + frame.w / 2,
-                  mPosition.y + frame.h / 2,
-                  frame.w, frame.h };
-
-	return tmp;
-}
-
-// Access function to set the center point of this sprite's position in 2D space as an SDL_Point object.
-void Sprite::setCenterPoint(SDL_Point newCtr) {
-    SDL_Rect oldCtr = getCenterPoint();
-
-    mPosition.x = newCtr.x - oldCtr.w / 2;
-    mPosition.y = newCtr.y - oldCtr.h / 2;
-}
-
 // Load sprite data from files - Needs to be called before any other functions can be called.
 bool Sprite::load() {
     // First load in sprite metadata file. Read it into a ClipsMap map (see header for typedef).
@@ -137,9 +115,13 @@ void Sprite::setLevel(std::shared_ptr<Level> level) {
 std::string Sprite::toString() {
     SDL_Rect cr = getCollisionRect();
     std::ostringstream output;
-    output << "Sprite name: " << mName << ", Top Left Position: " << mPosition.x << ", " << mPosition.y << ", Depth: " << mDepth << ", ";
-    output << "# of action modes: " << mAnimMap.size() << ", "<< "Current ation mode: " << mActionMode << ", Collision rect: ";
-    output << cr.x << ", " << cr.y << ", " << cr.w << ", " << cr.h << std::endl;
+    output << "Sprite name: " << mName << ", Position: " << mXPos << ", " << mYPos << ", Depth: " << mDepth << ", ";
+    output << "# of action modes: " << mAnimMap.size() << ", " << "Current ation mode: " << mActionMode << "\n";
+    output << "All clip rects for this mActionMode:\n";
+    std::vector<SDL_Rect> tmpVect { mAnimMap[mActionMode] };
+    for (int i{ 0 }; i < tmpVect.size(); ++i) {
+        output << tmpVect.at(i).x << ", " << tmpVect.at(i).y << ", " << tmpVect.at(i).w << ", " << tmpVect.at(i).h << "\n";
+    }
 
     return output.str();
 }
@@ -152,14 +134,21 @@ void Sprite::setDepth(int depth) {
     mDepth = depth;
 }
 
+// Sets the sprite's x coordinate position relative to level.
+void Sprite::setX(int x) { mXPos = x; }
+
+// Sets the sprite's y coordinate position relative to level.
+void Sprite::setY(int y) { mYPos = y; }
+
+// Returns the sprite's x coordinate position relative to level.
+int Sprite::getX() { return mXPos; }
+
+// Returns the sprite's y coordinate position relative to level.
+int Sprite::getY() { return mYPos; }
+
 // Returns the name of this sprite from the global mName constant.
 std::string Sprite::getName() {
     return mName;
-}
-
-// Set's the position of the sprite in reference to top left corner.
-void Sprite::setStartPosition(SDL_Point start) {
-    mPosition = start;
 }
 
 // Advances the current action mode animation frame ahead or loops to beginning if at end of animation frames.
@@ -175,23 +164,22 @@ void Sprite::advanceFrame() {
 void Sprite::render() {
     // get our SDL_Rect for the current animation frame
     std::vector<SDL_Rect>& tmpVect = mAnimMap[mActionMode];
-    SDL_Rect& clip = tmpVect[mCurrentFrame];
+    SDL_Rect& clip{ tmpVect[mCurrentFrame] };
     
-    // create a destination rect based on position, and our frame size multiplied by mScale factor member.
-    SDL_Rect dest { mPosition.x, mPosition.y, clip.w * mScale, clip.h * mScale };
+    // scale our animation frame based on mScale member
+    int scaledW{ clip.w * mScale };
+    int scaledH{ clip.h * mScale };
 
-    // adjust position so coordinates mean center of texture
-    dest.x = dest.x - dest.w / 2;
-    dest.y = dest.y - dest.h / 2;
-
+    // create a destination rect cenetering texture on our position
+    //mDest = {mXPos - (scaledW / 2), mYPos - (scaledH / 2), scaledW, scaledH};
+    mDest = { mXPos, mYPos, clip.w, clip.h };
 
     //Render to screen
     SDL_RenderCopyEx(   &mSDLMan->getRenderer(),
                         mTexture->getTexture(),
                         &clip,
-                        &dest,
+                        &mDest,
                         0,
                         NULL,
                         SDL_FLIP_NONE);
-    
 }

@@ -8,6 +8,9 @@ namespace FuGlobals {
 	// Turn on all debug output
 	constexpr bool DEBUG_MODE{ true };
 
+	// Turn on music
+	constexpr bool MUSIC{ false };
+
 	// Turn on FPS readout
 	constexpr bool SHOW_FPS{ false };
 
@@ -28,5 +31,5 @@ namespace FuGlobals {
 	constexpr int GRAVITY{ 5 };
 
 	// Distance in pixels a player can get to the edge of the viewport when level boundry has been reached.
-	constexpr int LEVEL_BOUNDS = 15;
+	constexpr int LEVEL_BOUNDS = 1;
 }

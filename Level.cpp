@@ -26,6 +26,9 @@ bool Level::load() {
     // Load in the level's background texture
     if (!loadBGTexture()) success = false;
     
+    // Set starting viewport position over player start position we read from metafile
+    centerViewport(mPlayStart.x, mPlayStart.y);
+
     return success;
 }
 
@@ -78,9 +81,6 @@ bool Level::loadDataFile() {
                 break;
             case FensoxUtils::hash("PLAYER_START"):
                 mPlayStart = FensoxUtils::getPointFromCDV(value);
-                break;
-            case FensoxUtils::hash("START_VIEWPORT"):
-                if (!storeViewport(value)) success = false;
                 break;
             case FensoxUtils::hash("TRANS_COLOR"):
                 if (!storeTrans(value)) success = false;
@@ -137,26 +137,14 @@ bool Level::storeColRect(std::string value) {
     return true;
 }
 
-// Helper function to take comma delimited value from metadata file, convert to an SDL_Rect, and store in our mViewport member. Returns success or failure.
-bool Level::storeViewport(std::string value) {
-    // Using a helper function, turn comma delimited values into an SDL_Rect
-    std::tuple<bool, SDL_Rect> tplRect = FensoxUtils::getRectFromCDV(value);
-
-    // check if we were successful in converting to an SDL_Rect
-    if (std::get<0>(tplRect)) {
-        mViewport = std::get<1>(tplRect);
-    } else {
-        // helper funct tells us we failed parsing CDVs so output an error msg and return failure
-        std::cerr << "Failed in Level::storeViewport. FensoxUtils::getRectfromCDV returned false." << std::endl;
-        return false;
-    }
-
-    return true;
-}
-
 // Return player start position
 SDL_Point Level::getPlayStart() {
     return mPlayStart;
+}
+
+// Returns the top/left coordinate of the viewport on the level.
+SDL_Point Level::getPosition() {
+    return SDL_Point{ mViewport.x, mViewport.y };
 }
 
 // Outputs the level information represented as a string
@@ -168,38 +156,9 @@ std::string Level::toString() {
     return str.str();
 }
 
-// Returns whethar level has scrolled as far right as possible and is at boundry.
-bool Level::isBoundRight() {
-    if (mViewport.x >= getSize().x - mViewport.w) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-// Returns whethar level has scrolled as far left as possible and is at boundry.
-bool Level::isBoundLeft() {
-    if (mViewport.x <= 0) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
 // Returns the height and width of the level background in an SDL_Point.
 SDL_Point Level::getSize() {
     return mSDLMan->getSize(mBGTexture);
-}
-
-// Returns the distance in pixels the given point is from the center of the viewport. 
-// All coordinates viewport relative not level BG texture relative.
-SDL_Point Level::getDistFromViewCenter(SDL_Point given) {
-    SDL_Point dist{};
-
-    dist.x = -(given.x - (mViewport.w / 2));
-    dist.y = -(given.y - (mViewport.h / 2));
-    
-    return dist;
 }
 
 // Render the level to the screen
@@ -217,49 +176,19 @@ void Level::render() {
         SDL_FLIP_NONE);
 }
 
-// Moves the viewport a distance in x/y pixels passed in using an SDL_Point. Returns the actual distance the viewport moved
-// which can be less based on running into boundries, etc.
-SDL_Point Level::moveViewport(const SDL_Point& dist) {
-    SDL_Point actual{};
-
-    // store the limit coordinates the background can move
+// Centers the viewport on given x, y coordinates adjusting for level boundries.
+void Level::centerViewport(int x, int y) {
+    // move the viewport to given coordinates
+    mViewport.x = x - (FuGlobals::VIEWPORT_WIDTH / 2);
+    mViewport.y = y - (FuGlobals::VIEWPORT_HEIGHT / 2);
+    
+    // check against level boundries and move back some if need be
     int limitX{ mBGTexture->getSize().x - mViewport.w };
     int limitY{ mBGTexture->getSize().y - mViewport.h };;
-
-    // holds the move attempt temporarily for testing
-    int tryX{ mViewport.x + dist.x };
-    int tryY{ mViewport.y + dist.y };
-
-    // test horizontal boundries of level
-    if (tryX < 0) {
-        // if new position is less than 0 then we'll move all that we can x coordinate and store what we couldn't for return
-        actual.x = -mViewport.x;
-        tryX = mViewport.x;
-    } else if (tryX > limitX) {
-        // if we went beyond the width limit of the level then we'll move all that we can and store what we couldn't for return
-        actual.x = limitX - mViewport.x;
-        tryX = limitX;
-    } else {
-        actual.x = dist.x;
-    }
-
-    // test vertical boundries of level
-    if (tryY < 0) {
-        // if new position is less than 0 then we'll move all that we can y coordinate and store what we couldn't for return
-        actual.y = -mViewport.y;
-        tryY = mViewport.y;
-    } else if (tryY > limitY) {
-        // if we went beyond the width limit of the level then we'll move all that we can and store what we couldn't for return
-        actual.y = limitY - mViewport.y;
-        tryY = limitY;
-    } else {
-        actual.y = dist.y;
-    }
-    
-    // perform the actual move on the viewport
-    mViewport.x = tryX;
-    mViewport.y = tryY;
-
-    // return what we actually moved not what was requested
-    return actual;
+    // x
+    if (mViewport.x > limitX) mViewport.x = limitX;
+    else if (mViewport.x < 0) mViewport.x = 0;
+    // y
+    if (mViewport.y > limitY) mViewport.y = limitY;
+    else if (mViewport.y < 0) mViewport.y = 0;
 }

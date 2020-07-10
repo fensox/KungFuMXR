@@ -45,7 +45,8 @@ bool GameLoop::loadLevel(std::string lvlDataFile) {
 	} else {
 		// set player starting position as given by level and give the player a smart pointer to the Level
 		if (mPlayer) {
-			mPlayer->setStartPosition(mLevel->getPlayStart());
+			mPlayer->setX(mLevel->getPlayStart().x);
+			mPlayer->setY(mLevel->getPlayStart().y);
 			mPlayer->setLevel(mLevel);
 		} else {
 			success = false;
@@ -80,7 +81,7 @@ void GameLoop::runGameLoop() {
 		mSDL->clearBackBuffer();
 
 		//***DEBUG***
-		mSDL->toggleMusic();
+		if (FuGlobals::MUSIC) mSDL->toggleMusic();
 
 		// progress game logic without rendering to backbuffer until FPS target has been reached
 		while (lag >= FuGlobals::FPS_TARGET) {
@@ -104,6 +105,12 @@ void GameLoop::runGameLoop() {
 		// render to back buffer
 		mLevel->render();
 		mPlayer->render();
+
+		//***DEBUG***
+		//Render red filled quad
+		SDL_Rect fillRect{ mPlayer->getX(), mPlayer->getY(), 20, 40 };
+		//SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
+		SDL_RenderFillRect(&mSDL->getRenderer(), &fillRect);
 
 		// update the screen
 		mSDL->refresh();

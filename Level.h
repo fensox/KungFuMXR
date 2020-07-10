@@ -28,26 +28,17 @@ public:
 	// Return player start position
 	SDL_Point getPlayStart();
 
-	// Returns the distance in pixels the given point is from the center of the viewport. 
-	// All coordinates viewport relative not level BG texture relative.
-	SDL_Point getDistFromViewCenter(SDL_Point given);
-
-	// Moves the viewport a distance in x/y pixels passed in using a refernce to a const SDL_Point.
-	// Returns the actual distance the viewport moved which can be less than requested 
-	// based on running into level boundries, etc.
-	SDL_Point moveViewport(const SDL_Point& dist);
-
-	// Returns whethar level has scrolled as far right as possible and is at boundry.
-	bool isBoundRight();
-
-	// Returns whethar level has scrolled as far left as possible and is at boundry.
-	bool isBoundLeft();
-
 	// Returns the width/height of the level background in an SDL_Point.
 	SDL_Point getSize();
 
+	// Returns the top/left coordinate of the viewport on the level.
+	SDL_Point getPosition();
+
 	// Render the level
 	void render();
+
+	// Centers the viewport over the given coordinates adjusting for level boundries.
+	void centerViewport(int x, int y);
 
 	// Outputs the object information represented as a string
 	std::string toString();
@@ -71,11 +62,11 @@ private:
 	// Holds the transparency color for the background texture
 	SDL_Color mTrans{};
 
-	// Player starting coordinates as an SDL_Point in reference to the top left corner of player image
+	// Player starting coordinates as an SDL_Point in reference to the center of player
 	SDL_Point mPlayStart{};
 
-	// The starting viewport for the level
-	SDL_Rect mViewport{};
+	// Holds the current viewport rectangle over the level. Get's centered on player position.
+	SDL_Rect mViewport{0, 0, FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT};
 
 	// Smart pointer to an SDLMan object used to draw the level
 	std::shared_ptr<SDLMan> mSDLMan{ nullptr };
@@ -85,9 +76,6 @@ private:
 
 	// Helper function to take a comma delimited value, convert to an SDL_Rect, and store in our ColRects member. Returns success or failure.
 	bool storeColRect(std::string value);
-
-	// Helper function to take comma delimited value from metadata file, convert to an SDL_Rect, and store in our mViewport member. Returns success or failure.
-	bool storeViewport(std::string value);
 
 	// Helper function to take a comma delimited value from metadata file, convert to an SDL_Color, and store in our mTrans member. Returns success or failure.
 	bool storeTrans(std::string value);
