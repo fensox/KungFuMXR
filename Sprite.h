@@ -130,4 +130,8 @@ private:
 
 	// Load in the sprite sheet specified in the const string mSpriteSheet and set transparency. Return boolean success.
 	bool loadSpriteSheet();
+
+	//***DEBUG***
+	double tmpSW{}, tmpSH{};
+	int tmpX{}, tmpY{};
 };

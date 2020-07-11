@@ -35,7 +35,7 @@ public:
 	// Returns the width/height of the level background in an SDL_Point.
 	SDL_Point getSize();
 
-	// Returns the viewport on the levels top-left coordinates and the viewport width/height.
+	// Returns the viewport's top-left coordinates and width/height.
 	SDL_Rect getPosition();
 
 	// Render the level

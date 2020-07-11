@@ -119,13 +119,11 @@ bool GameLoop::handleEvents() {
 
     // Cycle through all events on the event queue
     while (SDL_PollEvent(&e)) {
-		// Set quit boolean when user requests it
-        if (e.type == SDL_QUIT) {
-            quit = true;
-        } else if (e.type == SDL_KEYDOWN) {
-			// Handle keyboard presses
+        if (e.type == SDL_QUIT) {																	// Handle request to quit
+			quit = true;
+        } else if (e.type == SDL_KEYDOWN) {															// Handle keyboard presses
             mPlayer->playerInput(e.key.keysym.sym);
-		} else if ((e.type == SDL_WINDOWEVENT) && (e.window.event == SDL_WINDOWEVENT_RESIZED)) {
+		} else if ((e.type == SDL_WINDOWEVENT) && (e.window.event == SDL_WINDOWEVENT_RESIZED)) {	// Handle window resize events
 			mSDL->updateWindowSize();
 		}
     }

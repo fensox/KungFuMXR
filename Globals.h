@@ -15,13 +15,16 @@ namespace FuGlobals {
 	constexpr bool SHOW_FPS{ false };
 
 	// FPS target for game loop as milliseconds per frame (0 for unlimited).
-	constexpr Uint32 FPS_TARGET{ 0 };
+	constexpr Uint32 FPS_TARGET{ 30 };
 
 	// Starting window size when not full screen
 	constexpr int WINDOW_WIDTH{ 1280 };
 	constexpr int WINDOW_HEIGHT{ 720 };
 	
-	// Viewport resolution. Game is scaled to fit various window sizes/resolutions but viewport is always this size internally.
+	// Default aspect ratio pre-calc'd for performance
+	constexpr double ASPECT_RATIO{ static_cast<double>(WINDOW_WIDTH) / static_cast<double>(WINDOW_HEIGHT) };
+
+	// Viewport resolution. Game is scaled to fit various window sizes/resolutions but viewport is always this size internally. Needs to stay same aspect ratio ad WINDOW_ to look right.
 	constexpr int VIEWPORT_WIDTH{ 1280 };
 	constexpr int VIEWPORT_HEIGHT{ 720 };
 	//constexpr int VIEWPORT_WIDTH{ 256 }; // NES Resolution

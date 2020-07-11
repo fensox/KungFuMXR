@@ -46,9 +46,6 @@ public:
 	// Set's the window fullscreen boolean value
 	void setFullscreen(bool fs);
 
-	// Tells SDLMan to poll SDL for the window size and update our window size variables
-	void updateWindowSize();
-
 	// Draws the screen
 	void refresh();
 
@@ -57,6 +54,12 @@ public:
 
 	// Returns the height and width of a texture as an SDL_Point.
 	SDL_Point getSize(std::shared_ptr<Texture> text);
+
+	// Called upon completion of a window resize event. Adjusts window to proper aspect ratio for the game.
+	void updateWindowSize();
+
+	// Returns the scale we are rendering based on various window sizes.
+	double getScale();
 
 	// Load in a music file. Does not play immediately. Use playMusic(bool) to start and stop loaded music.
 	bool loadMusic(std::string musicFile);
@@ -103,4 +106,7 @@ private:
 
 	// the value you want
 	float fps;
+
+	// Holds the scale we are rendering to based on various window sizes.
+	double scale{1};
 };

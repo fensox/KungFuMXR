@@ -34,7 +34,7 @@ bool SDLMan::init() {
 		return false;
 	}
 
-	//***DEBUG*** Turned off as transparency artifacts were halo'd around each sprite (what is linear texture filtering anyhow...)
+	//***DEBUG*** Turned off texture filtering as transparency artifacts were halo'd around each sprite (what is linear texture filtering anyhow...no time to google)
 	// Try to set texture filtering to linear. Warn if unable.
 	//if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) std::cerr << "Warning in SDLMan::init: Linear Texture filtering not enabled!" << std::endl;
 	
@@ -75,9 +75,28 @@ bool SDLMan::init() {
 	return true;
 }
 
-// Tells SDLMan to poll SDL for the window size and update our window size variables
+// Called upon completion of a window resize event. Adjusts window to proper aspect ratio for the game.
 void SDLMan::updateWindowSize() {
+	// get new size
 	SDL_GetWindowSize(mWindow, &mWindowW, &mWindowH);
+
+	// See what user resized aspect is and adjust to our global aspect ratio
+	double newAspect = static_cast<double>(mWindowW) / static_cast<double>(mWindowH);
+	if (newAspect > FuGlobals::ASPECT_RATIO) {
+		mWindowH = (1.f / FuGlobals::ASPECT_RATIO) * mWindowW;
+	} else if (newAspect < FuGlobals::ASPECT_RATIO) {
+		mWindowW = FuGlobals::ASPECT_RATIO * mWindowH;
+	}
+
+	// Update the window size and store the new scale we are rendering too compared to global default
+	SDL_SetWindowSize(mWindow, mWindowW, mWindowH);
+	scale = static_cast<double>(mWindowW) / static_cast<double>(FuGlobals::WINDOW_WIDTH);
+
+}
+
+// Returns the scale we are rendering based on various window sizes.
+double SDLMan::getScale() {
+	return scale;
 }
 
 // Draws the screen

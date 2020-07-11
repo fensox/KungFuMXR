@@ -165,17 +165,28 @@ void Sprite::render() {
     // get our SDL_Rect for the current animation frame
     std::vector<SDL_Rect>& tmpVect = mAnimMap[mActionMode];
     SDL_Rect& clip{ tmpVect[mCurrentFrame] };
-    
-    // scale our animation frame based on mScale member
-    int scaledW{ clip.w * mScale };
-    int scaledH{ clip.h * mScale };
+
+    // scale our animation frame based on mScale member for this sprite and on the SDLMan scale to compensate for window size
+    double scaledW{ clip.w * mScale * mSDLMan->getScale() };
+    double scaledH{ clip.h * mScale * mSDLMan->getScale() };
 
     // create a destination rect cenetering texture on our position
-    mDest = {mXPos - (scaledW / 2), mYPos - (scaledH / 2), scaledW, scaledH};
-    
-    // adjust the Sprite coordinates by the distance the viewport is from origin
+    double x{ mXPos - (scaledW / 2) };
+    double y{ mYPos - (scaledH / 2) };
+    mDest = { static_cast<int>(x), static_cast<int>(y), static_cast<int>(scaledW), static_cast<int>(scaledH) };
+
+    // adjust the Sprite coordinates by the distance the viewport is from origin (fixed a 3 day bug hunt where character exponentially ran faster than bg scroll)
     mDest.x -= mLevel->getPosition().x;
     mDest.y -= mLevel->getPosition().y;
+
+    //***DEBUG***
+    if (FuGlobals::DEBUG_MODE && (scaledW != tmpSW || scaledH != tmpSH || tmpX != mXPos || tmpY != mYPos)) {
+        std::cout << "VP x, y: " << mLevel->getPosition().x << ", " << mLevel->getPosition().y << "\n";
+        std::cout << "x, y: " << mXPos << ", " << mYPos << "\n";
+        std::cout << "dest x, y: " << mDest.x << ", " << mDest.y << "\n";
+        std::cout << "scaledH: " << scaledH << ", getScale(): " << mSDLMan->getScale() << std::endl;
+        tmpSW = scaledW; tmpSH = scaledH; tmpX = mXPos; tmpY = mYPos;
+    }
 
     //Render to screen
     SDL_RenderCopyEx(   mSDLMan->getRenderer(),
