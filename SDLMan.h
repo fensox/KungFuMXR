@@ -10,17 +10,29 @@
 /* SDLMan - SDL Manager Utility Class
  *
  * Helper class to manage all sorts of SDL goings on.
- * Wraps a SDL_Window and SDL_Renderer. Supplies functions
+ * Wraps an SDL_Window and SDL_Renderer. Supplies functions
  * to draw things, a destructor to close down SDL objects, etc.
  *
+ * Rendering is triple buffered but invisible to the drawer.
+ * All rendering happens on a blank texture member. The drawing
+ * texture is cleared with a call to clearBackBuffer() and drawn
+ * with a call to render() which copies the texture to SDL's
+ * internal buffer, scaling as necessart to fit window, then
+ * flipped to the window. This system simplifies coordinate scaling
+ * with various window sizes as the drawers need not care about
+ * window size.
+ *
  * Constructor initializes SDL but no window is opened or renderer
- * obtained until a call to openWindow() is made.
+ * obtained until a call to openWindow() is made. Constructor takes
+ * a caption argument for the window and a width/height for the
+ * back buffer texture. This buffer size will stay constant despite
+ * the window size and be scaled to fit window when render() is called.
  */
 class SDLMan {
 
 public:
-	// Constructor. Takes title string to use as window caption if needed.
-	SDLMan(std::string windowCaption);
+	// Constructor. Takes window caption string and width and height of backbuffer to create.
+	SDLMan(std::string windowCaption, int width, int height);
 
 	// Destructor
 	~SDLMan();
@@ -46,20 +58,14 @@ public:
 	// Set's the window fullscreen boolean value
 	void setFullscreen(bool fs);
 
-	// Draws the screen
+	// Draws the buffer to the screen and clears the buffer
 	void refresh();
-
-	// Clears the drawing buffer so we have a clean area to draw on.
-	void clearBackBuffer();
 
 	// Returns the height and width of a texture as an SDL_Point.
 	SDL_Point getSize(std::shared_ptr<Texture> text);
 
 	// Called upon completion of a window resize event. Adjusts window to proper aspect ratio for the game.
 	void updateWindowSize();
-
-	// Returns the scale we are rendering based on various window sizes.
-	double getScale();
 
 	// Load in a music file. Does not play immediately. Use playMusic(bool) to start and stop loaded music.
 	bool loadMusic(std::string musicFile);
@@ -77,8 +83,10 @@ public:
 	void outputFPS();
 
 private:
+	const bool TRIPLE_BUFFERING{ true };
+
 	// Holds the music that will be played in the background
-	Mix_Music* gMusic{ nullptr };
+	Mix_Music* mMusic{ nullptr };
 
 	// Pointer holding the SDL_Window we'll be rendering to
 	SDL_Window* mWindow{ nullptr };
@@ -86,11 +94,20 @@ private:
 	// Pointer holding the SDL_Renderer for our window.
 	SDL_Renderer* mRenderer{ nullptr };
 
+	// Smart pointer to a Texture objext holding the SDL_Texture used as our backbuffer drawing surface.
+	std::unique_ptr<Texture> mBuffer{ nullptr };
+
+	// Destination rectangle on window to render our buffer too. Adjusted each time window is resized. Defaults to size of default buffer.
+	SDL_Rect dest{ 0, 0, 1280, 720 };
+
 	// Store's the caption for the window.
 	std::string mWindowCaption{};
 
 	// Store's the window width and height with defaults.
-	int mWindowW{ FuGlobals::WINDOW_WIDTH }, mWindowH{ FuGlobals::WINDOW_HEIGHT };
+	static int mWindowW, mWindowH;
+
+	// Store's the buffer width and height with defaults.
+	int mBufferW{ 1280 }, mBufferH{ 720 };
 
 	// Full screen window or not
 	bool mWindowFull{ false };
@@ -107,6 +124,9 @@ private:
 	// the value you want
 	float fps;
 
-	// Holds the scale we are rendering to based on various window sizes.
-	double scale{1};
+	// Maintain aspect ratio upon window resize. Called from a SDL_AddEventWatch call injected in showWindow()
+	static int resizingEventWatcher(void* data, SDL_Event* event);
+
+	// Creates a buffer texture for our drawing surface.
+	bool createBuffer();
 };

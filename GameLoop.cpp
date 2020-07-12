@@ -6,7 +6,7 @@
 // Initializes the graphics and sound systems.
 bool GameLoop::initGameSystems() {
 	// Initialize our SDL wrapper class and a shared smart pointer to manage SDL things
-	mSDL = std::make_shared<SDLMan>("Kung Fu Mr. X's Revenge");
+	mSDL = std::make_shared<SDLMan>("Kung Fu Mr. X's Revenge", FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT);
 
 	// Set some window parameters and initialize SDL if we can.
 	mSDL->setFullscreen(false);
@@ -77,9 +77,6 @@ void GameLoop::runGameLoop() {
 		double elapsed = current - previous;
 		previous = current;
 		lag += elapsed;
-
-		// clear back buffer for our new frame
-		mSDL->clearBackBuffer();
 
 		//***DEBUG***
 		if (FuGlobals::MUSIC) mSDL->toggleMusic();

@@ -168,9 +168,9 @@ void Level::render() {
     // center viewport on the Sprite we've been told to follow
     centerViewport();
 
-    // Destination rectangle for viewport to draw into which scales our scene to fit window
-    SDL_Rect dest{ 0, 0, mSDLMan->getWindowW(), mSDLMan->getWindowH() };
-    
+    // Destination rectangle for viewport to draw into
+    SDL_Rect dest{ 0, 0, FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT };
+
     //Render the area of level our viewport is pointing at
     SDL_RenderCopyEx(mSDLMan->getRenderer(),
         mBGTexture->getTexture(),

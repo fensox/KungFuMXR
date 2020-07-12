@@ -15,7 +15,7 @@ namespace FuGlobals {
 	constexpr bool SHOW_FPS{ false };
 
 	// FPS target for game loop as milliseconds per frame (0 for unlimited).
-	constexpr Uint32 FPS_TARGET{ 30 };
+	constexpr Uint32 FPS_TARGET{ 0 };
 
 	// Starting window size when not full screen
 	constexpr int WINDOW_WIDTH{ 1280 };
