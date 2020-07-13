@@ -3,13 +3,14 @@
 #include <iostream>
 #include <vector>
 
-// Constructor. Takes window caption string and width and height of backbuffer to create or uses defaults if dimensions not specified.
-SDLMan::SDLMan(std::string windowCaption, int width = 1280 , int height = 720 ) {
+// Constructor. Takes window caption string, bool to start with a fullscreen window, and width and height of starting window
+// if we are not full screen. Width and height may be not used and will default to FuGlobals::VIEWPORT_WIDTH &
+// FuGlobals::VIEWPORT_WIDTH.
+SDLMan::SDLMan(std::string windowCaption, bool fullScreen, int width, int height) {
 	mWindowCaption = windowCaption;
 	mWindowW = width;
 	mWindowH = height;
-	mBufferW = width;
-	mBufferH = height;
+	mWindowFull = fullScreen;
 }
 
 // Destructor. Close down SDL.
@@ -37,10 +38,6 @@ bool SDLMan::init() {
 		std::cerr << "Failed in SDLMan::init: SDL could not initialize. SDL Error: \n" << SDL_GetError();
 		return false;
 	}
-
-	//***DEBUG*** Turned off texture filtering as transparency artifacts were halo'd around each sprite (what is linear texture filtering anyhow...no time to google)
-	// Try to set texture filtering to linear. Warn if unable.
-	//if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) std::cerr << "Warning in SDLMan::init: Linear Texture filtering not enabled!" << std::endl;
 	
 	// Set up some window creation flags. Start window hidden (can be shown with a call to showWindow), borderless, and whethar full screen or not.
 	int flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE;
@@ -60,16 +57,14 @@ bool SDLMan::init() {
 		return false;
 	}
 	
+	// Set resolution for renderer so SDL will keep our viewport aspect ratio when window size changes
+	if (SDL_RenderSetLogicalSize(mRenderer, FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT) != 0) {
+		std::cerr << "Failed in SDLMan:init: Renderer could not be set to our viewport width/height. SDL Error: \n" << SDL_GetError();
+		return false;
+	}
+
 	// Initialize renderer color for clearing the screen (using black)
 	SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-
-	// Create drawing buffer if triple buffering const enabled
-	if (TRIPLE_BUFFERING) {
-		if (!createBuffer()) {
-			std::cerr << "Failed in SDLMan:init: Buffer could not be created. SDL Error: \n" << SDL_GetError();
-			return false;
-		}
-	}
 
 	// Initialize SDL_mixer for sound support
 	if (Mix_OpenAudio(MIX_DEFAULT_FORMAT, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
@@ -87,61 +82,11 @@ bool SDLMan::init() {
 	return true;
 }
 
-// Creates a buffer texture for our drawing surface.
-bool SDLMan::createBuffer() {
-	// create the texture to use as our buffer
-	mBuffer = std::make_unique<Texture>(SDL_CreateTexture(mRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, mBufferW, mBufferH));
-	if (mBuffer == nullptr) return false;
-
-	// point the render target at the buffer so all drawers are drawingt to the buffer and not SDLs built in backbuffer
-	if (TRIPLE_BUFFERING) SDL_SetRenderTarget(mRenderer, mBuffer->getTexture());
-
-	return true;
-}
-
-// Called upon completion of a window resize event. Adjusts window to proper aspect ratio for the game.
-void SDLMan::updateWindowSize() {
-	// get new size
-	SDL_GetWindowSize(mWindow, &mWindowW, &mWindowH);
-	std::cout << "Original W/H: " << mWindowW << ", " << mWindowH << "\n";
-
-
-	// Calculate new destination rectangle height our buffer will be drawn into. Width will be window width.
-	double newAspect = static_cast<double>(mWindowW) / static_cast<double>(mWindowH);
-
-	// Calculate window size to maintain aspect ratio
-	if (newAspect > FuGlobals::ASPECT_RATIO) {
-		mWindowH = static_cast<int>((1.f / FuGlobals::ASPECT_RATIO) * mWindowW);
-	} else if (newAspect < FuGlobals::ASPECT_RATIO) {
-		mWindowW = static_cast<int>((1.f / FuGlobals::ASPECT_RATIO) * mWindowH);
-	}
-
-	// Update window with new size and destination rectangle our buffer get's scaled too
-	SDL_SetWindowSize(mWindow, mWindowW, mWindowH);
-	dest = { 0, 0, mWindowW, mWindowH };
-
-	//***DEBUG***
-	std::cout << "New Wind W/H: " << mWindowW << ", " << mWindowH << "\n";
-	std::cout << "Dest: " << dest.x << ", " << dest.y << ", " << dest.w << ", " << dest.h << std::endl;
-}
-
 // Renders to the screen the contents of the buffer
 void SDLMan::refresh() {
-	// If triple buffering copy our own texture buffer to SDLs internal buffer
-	if (TRIPLE_BUFFERING) {
-		SDL_SetRenderTarget(mRenderer, NULL);
-		SDL_RenderCopyEx(mRenderer,	mBuffer->getTexture(), NULL, &dest, 0, NULL, SDL_FLIP_NONE);
-	}
-
 	// Flip SDL's internal buffer to the window and clear buffer
 	SDL_RenderPresent(mRenderer);
 	SDL_RenderClear(mRenderer);
-
-	// Repoint renderer back to our buffer and clear it if we are using triple buffering
-	if (TRIPLE_BUFFERING) {
-		SDL_SetRenderTarget(mRenderer, mBuffer->getTexture());
-		SDL_RenderClear(mRenderer);
-	}
 }
 
 // Show or hide the window. Returns false if SDL hasn't been initialized yet.
@@ -152,30 +97,15 @@ bool SDLMan::showWindow(bool win) {
 		return false;
 	}
 
-	// toggle the window visability and set the destination draw rectangle for our buffer to be drawn onto the window with a call to updateWindowSize()
+	// toggle the window visability
 	if (win) {
 		SDL_ShowWindow(mWindow);
-		updateWindowSize();
 		SDL_RaiseWindow(mWindow);
-		SDL_AddEventWatch(resizingEventWatcher, mWindow);
 	} else {
-		SDL_DelEventWatch(resizingEventWatcher, mWindow);
 		SDL_HideWindow(mWindow);
 	}	
 
 	return true;
-}
-
-// Maintain aspect ratio upon window resize. Called from a SDL_AddEventWatch call injected in showWindow()
-int SDLMan::resizingEventWatcher(void* data, SDL_Event* event) {
-	if (event->type == SDL_WINDOWEVENT && event->window.event == SDL_WINDOWEVENT_RESIZED) {
-		SDL_Window* win = SDL_GetWindowFromID(event->window.windowID);
-		if (win == (SDL_Window*)data) {
-			
-		}
-	}
-
-	return 0;
 }
 
 // Return's the window height.
@@ -199,7 +129,7 @@ void SDLMan::setWindowW(int windowW) {
 }
 
 // Set's the window fullscreen boolean value
-void SDLMan::setFullscreen(bool fs) {
+void SDLMan::setFullscreen(bool fs) {	
 	mWindowFull = fs;
 
 	if (mWindowFull) {

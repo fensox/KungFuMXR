@@ -169,13 +169,14 @@ void Level::render() {
     centerViewport();
 
     // Destination rectangle for viewport to draw into
-    SDL_Rect dest{ 0, 0, FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT };
+    //SDL_Rect dest{ 0, 0, FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT };
 
     //Render the area of level our viewport is pointing at
     SDL_RenderCopyEx(mSDLMan->getRenderer(),
         mBGTexture->getTexture(),
         &mViewport,
-        &dest,
+        NULL,
+        //&dest,
         0,
         NULL,
         SDL_FLIP_NONE);

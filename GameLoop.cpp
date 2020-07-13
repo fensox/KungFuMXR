@@ -6,10 +6,9 @@
 // Initializes the graphics and sound systems.
 bool GameLoop::initGameSystems() {
 	// Initialize our SDL wrapper class and a shared smart pointer to manage SDL things
-	mSDL = std::make_shared<SDLMan>("Kung Fu Mr. X's Revenge", FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT);
+	mSDL = std::make_shared<SDLMan>("Kung Fu Mr. X's Revenge");
 
-	// Set some window parameters and initialize SDL if we can.
-	mSDL->setFullscreen(false);
+	// Try to have SDLMan to initialize all systems
 	return mSDL->init();;
 }
 
@@ -120,8 +119,6 @@ bool GameLoop::handleEvents() {
 			quit = true;
         } else if (e.type == SDL_KEYDOWN) {															// Handle keyboard presses
             mPlayer->playerInput(e.key.keysym.sym);
-		} else if ((e.type == SDL_WINDOWEVENT) && (e.window.event == SDL_WINDOWEVENT_RESIZED)) {	// Handle window resize events
-			mSDL->updateWindowSize();
 		}
     }
 
