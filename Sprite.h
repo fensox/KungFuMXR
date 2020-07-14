@@ -29,8 +29,9 @@ public:
 	void render();
 
 	/* Returns current texture's collision rectangle by value. Class Sprite creates a collision	box using the sprites
-	position, height, and width. For more accurate collision this function should be overidden by derived classes. */
-	SDL_Rect getCollisionRect();
+	position, height, and width. For more accurate collision than jus the sprites texture bounding box this function
+	should be overidden by derived classes. */
+	virtual const SDL_Rect& getCollisionRect();
 
 	// Sets the smart pointer member variable that points to the Level currently being played.
 	void setLevel(std::shared_ptr<Level> level);
@@ -94,21 +95,27 @@ protected:
 	// Advances the current action mode animation frame ahead or loops to beginning if at end of animation frames.
 	void advanceFrame();
 
-	// Holds velocity/momentum for the four 2d directions. These modify speed/position in jumps, falls, etc.
-	// Gravity, friction, hits taken, etc can also modify these in return.
-	struct velocity {
-		int up{ 0 };
-		int down{ 0 };
-		int left{ 1 };
-		int right{ 0 };
-	};
-
 	// Smart pointer to the level we are on. Various Level functions allow sprites to move level viewport and
 	// check level collision rectangles, boundries, etc..
 	std::shared_ptr<Level> mLevel{ nullptr };
 
 	// Smart pointer to the SDLMan object passed in during construction.
 	std::shared_ptr<SDLMan> mSDLMan{ nullptr };
+
+	// Holds velocity/momentum for the four 2d directions. These modify speed/position in jumps, falls, etc.
+	// Gravity, friction, hits taken, etc can also modify these in return.
+	struct Velocity {
+		int up{ 0 };
+		int down{ 0 };
+		int left{ 0 };
+		int right{ 0 };
+	};
+
+	// Instance of Velocity struct for this sprite
+	Velocity mVeloc{};
+
+	// Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
+	bool downBump();
 
 private:
 	// Center position of sprite within the level. This is not viewport relative but level relative. This is not derived from
@@ -125,13 +132,12 @@ private:
 	// Holds the destination rectangle we will be rendered into
 	SDL_Rect mDest{};
 
+	// The sprite's instance of the Velocity struct
+	Velocity veloc{};
+
 	// Load the initial data file in with action mode names and animation frame counts. Store in passed in map and return boolean success.
 	bool loadDataFile();
 
 	// Load in the sprite sheet specified in the const string mSpriteSheet and set transparency. Return boolean success.
 	bool loadSpriteSheet();
-
-	//***DEBUG***
-	double tmpSW{}, tmpSH{};
-	int tmpX{}, tmpY{};
 };

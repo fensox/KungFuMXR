@@ -19,13 +19,8 @@ Thomas::Thomas(std::shared_ptr<SDLMan> sdlMan) : Sprite(sdlMan) {
 void Thomas::playerInput(SDL_Keycode key) {
     switch (key)
     {
-    case SDLK_UP:
-    {
-        SDL_Rect pnt{ mLevel->getPosition() };
-
-        std::cout << "Viewport: " << pnt.x << ", " << pnt.y << ", " << pnt.w << ", " << pnt.h << std::endl;
-        std::cout << toString() << "\n";
-    }
+    case SDLK_SPACE:
+        jump();
         break;
 
     case SDLK_DOWN:
@@ -80,6 +75,14 @@ void Thomas::moveLeft() {
     }
 }
 
+// Handles the player requesting a jump.
+void Thomas::jump() {
+    // only launch into a jump if we have something to launch off of
+    if (downBump) {
+        mVeloc.up += mJumpPower;
+    }
+}
+
 // Check if enough time has passed to walk and if so return true otherwise false.
 bool Thomas::checkWalkTime() {
     // we are walking - check if enough time has passed before taking a step
@@ -108,5 +111,13 @@ void Thomas::changePosition(int moveX, int moveY) {
 // Player control is handled by playerInput() but this checks for other influnces on the player. Namely velocities, gravity, attacks that needs to be factored in to position.
 void Thomas::move() {
     // handle gravity
-    
+    if (downBump) {
+        mVeloc.down = 0;
+    } else {
+        mVeloc.down *= FuGlobals::GRAVITY;
+    }
+
+    // adjust position based on velocities
+    setX( getX() + mVeloc.right + mVeloc.left );
+    setY( getY() + mVeloc.up + mVeloc.down );
 }

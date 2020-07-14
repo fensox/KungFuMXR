@@ -26,11 +26,17 @@ private:
 	// Last time we took a step in SDL ticks. Used to regulate walking speed.
 	Uint32 mLastWalkTime{};
 
+	// Jump power is the amount added to upward velocity when jump action initiated
+	int mJumpPower{ 20 };
+
 	// Handles the player requesting to move to the right.
 	void moveRight();
 
 	// Handles the player requesting to move to the right.
 	void moveLeft();
+
+	// Handles the player requesting a jump.
+	void jump();
 
 	// Check if enough time has passed to walk then work with viewport position and move player if so
 	bool checkWalkTime();

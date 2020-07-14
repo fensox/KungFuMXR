@@ -12,7 +12,7 @@ namespace FuGlobals {
 	constexpr bool MUSIC{ false };
 
 	// Turn on FPS readout
-	constexpr bool SHOW_FPS{ true };
+	constexpr bool SHOW_FPS{ false };
 
 	// FPS target for game loop as milliseconds per frame (0 for unlimited).
 	constexpr Uint32 FPS_TARGET{ 0 };
@@ -26,8 +26,8 @@ namespace FuGlobals {
 	// Default aspect ratio pre-calc'd for performance
 	constexpr double ASPECT_RATIO{ static_cast<double>(VIEWPORT_WIDTH) / static_cast<double>(VIEWPORT_HEIGHT) };
 
-	// Gravity
-	constexpr int GRAVITY{ 5 };
+	// Gravity multiplier
+	constexpr float GRAVITY{ .5 };
 
 	// Distance in pixels a player can get to the edge of the viewport when level boundry has been reached.
 	constexpr int LEVEL_BOUNDS = 1;

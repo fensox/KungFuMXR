@@ -80,13 +80,13 @@ void GameLoop::runGameLoop() {
 		//***DEBUG***
 		if (FuGlobals::MUSIC) mSDL->toggleMusic();
 
-		// progress game logic without rendering to backbuffer until FPS target has been reached
+		// progress game logic without rendering to backbuffer until FPS target has been reached (for slow systems or network connections)
 		while (lag >= FuGlobals::FPS_TARGET) {
 			// handle input events
 			quit = handleEvents();
 
-			// process movements of sprites. For the player this is a physics movement (movement to player not initiated by player!)
-			mPlayer->move();
+			// process movements of sprites. For the player this is a physics movement (i.e. movement to player not initiated by player!)
+			mPlayer->move(); // ***DEBUG***this could prob be stuffed inside the sprites vector..version 2 maybe
 			for (int i{ 0 }; i < sprites->size(); ++i) sprites->at(i).move();
 			
 			// update our time lag calculations

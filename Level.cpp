@@ -198,3 +198,14 @@ void Level::centerViewport() {
     if (mViewport.y > limitY) mViewport.y = limitY;
     else if (mViewport.y < 0) mViewport.y = 0;
 }
+
+// Checks if the given point is contained in a collision rect for the level.
+bool Level::isACollision(const SDL_Point* pnt) {
+    // loop through all our level collision rectangles checking for a collision
+    for (int i{ 0 }; i < mColRects->size(); ++i) {
+        const SDL_Rect* r = &mColRects->at(i);
+        if (SDL_PointInRect(pnt, r)) return true;
+    }
+
+    return false;
+}

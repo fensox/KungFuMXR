@@ -23,16 +23,8 @@ Sprite::Sprite(std::shared_ptr<SDLMan> sdlMan) {
 
 /* Returns current texture's collision rectangle by value. Class Sprite creates a collision	box using the sprites
 position, height, and width. For more accurate collision this function should be overidden by derived classes. */
-SDL_Rect Sprite::getCollisionRect() {
-    SDL_Rect colRect{};
-    /*
-    SDL_Point tmpPoint = getSize(getTextureToRender());
-    colRect.x = mPosition.x;
-    colRect.y = mPosition.y;
-    colRect.w = tmpPoint.x;
-    colRect.h = tmpPoint.y;
-    */
-    return colRect;
+const SDL_Rect& Sprite::getCollisionRect() {
+    return  mAnimMap[mActionMode].at(mCurrentFrame);
 }
 
 // Load sprite data from files - Needs to be called before any other functions can be called.
@@ -187,4 +179,12 @@ void Sprite::render() {
                         0,
                         NULL,
                         SDL_FLIP_NONE);
+}
+
+// Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
+bool Sprite::downBump() {
+    // get our current action frame clip rectangle, and test if a pixel one beneath it collides with the level
+    const SDL_Rect& rect{ mAnimMap[mActionMode].at(mCurrentFrame) };
+    const SDL_Point pnt{ rect.x, rect.y + rect.h + 1 };
+    return mLevel->isACollision(&pnt);
 }

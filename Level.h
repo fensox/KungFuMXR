@@ -26,6 +26,9 @@ public:
 	// Returns all hard collision objects in level.
 	ColRects getColRects();
 
+	// Checks if the given point is contained in a collision rect for the level.
+	bool isACollision(const SDL_Point* pnt);
+
 	// Load in the data filefor the level. Must be called before other functions for proper operation. Returns success or failure.
 	bool load();
 
