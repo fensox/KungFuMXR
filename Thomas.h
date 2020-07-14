@@ -12,9 +12,6 @@ public:
 	// Handles input from the player and performs sprite actions accordingly
 	void playerInput(SDL_Keycode key);
 
-	// Player control is handled by playerInput() but this checks for other influnces on the player. Namely velocities, gravity, attacks that needs to be factored in to position.
-	void move();
-
 private:
 	// Walk speed of player
 	//Uint32 mWalkWaitTime{ 50 };
@@ -27,7 +24,7 @@ private:
 	Uint32 mLastWalkTime{};
 
 	// Jump power is the amount added to upward velocity when jump action initiated
-	int mJumpPower{ 20 };
+	int mJumpPower{ 5 };
 
 	// Handles the player requesting to move to the right.
 	void moveRight();

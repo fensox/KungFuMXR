@@ -134,6 +134,11 @@ bool Level::storeColRect(std::string value) {
     return true;
 }
 
+// Returns all hard collision objects in level as our typedef'd ColRects type.
+Level::ColRects Level::getColRects() {
+    return mColRects;
+}
+
 // Return player start position
 SDL_Point Level::getPlayStart() {
     return mPlayStart;

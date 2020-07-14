@@ -19,6 +19,11 @@ Thomas::Thomas(std::shared_ptr<SDLMan> sdlMan) : Sprite(sdlMan) {
 void Thomas::playerInput(SDL_Keycode key) {
     switch (key)
     {
+    case SDLK_UP:
+        //***DEBUG***
+        if (FuGlobals::DEBUG_MODE) std::cout << "Velocity (Up, Down, Left, Right): " << mVeloc.up << ", " << mVeloc.down << ", " << mVeloc.left << ", " << mVeloc.right << std::endl;
+        break;
+
     case SDLK_SPACE:
         jump();
         break;
@@ -78,9 +83,12 @@ void Thomas::moveLeft() {
 // Handles the player requesting a jump.
 void Thomas::jump() {
     // only launch into a jump if we have something to launch off of
-    if (downBump) {
+    if (downBump()) {
         mVeloc.up += mJumpPower;
     }
+
+    //***DEBUG***
+    if (FuGlobals::DEBUG_MODE) std::cout << "Velocity (Up, Down, Left, Right): " << mVeloc.up << ", " << mVeloc.down << ", " << mVeloc.left << ", " << mVeloc.right << std::endl;
 }
 
 // Check if enough time has passed to walk and if so return true otherwise false.
@@ -99,25 +107,11 @@ bool Thomas::checkWalkTime() {
 // enough time has passed to move, selected the appropriate animation frame, and now we are ready to adjust position of player.
 void Thomas::changePosition(int moveX, int moveY) {
     // Checks for level boundries being exceeded and adjusts if necessary
-    int tmpX{ getX() + moveX };
+    int tmpX{ mXPos + moveX };
     int rightBound{ mLevel->getSize().x - FuGlobals::LEVEL_BOUNDS };
     if (tmpX < FuGlobals::LEVEL_BOUNDS) tmpX = FuGlobals::LEVEL_BOUNDS;
     else if (tmpX > rightBound) tmpX = rightBound;
 
     // Commit the move to the player position
-    setX(tmpX);
-}
-
-// Player control is handled by playerInput() but this checks for other influnces on the player. Namely velocities, gravity, attacks that needs to be factored in to position.
-void Thomas::move() {
-    // handle gravity
-    if (downBump) {
-        mVeloc.down = 0;
-    } else {
-        mVeloc.down *= FuGlobals::GRAVITY;
-    }
-
-    // adjust position based on velocities
-    setX( getX() + mVeloc.right + mVeloc.left );
-    setY( getY() + mVeloc.up + mVeloc.down );
+    mXPos = tmpX;
 }

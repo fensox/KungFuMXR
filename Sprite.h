@@ -57,8 +57,8 @@ public:
 	// Returns the sprite's y coordinate position relative to level.
 	int getY();
 
-	// Handle movement of the sprite. Purely virtual function as all sprites move differently.
-	virtual void move() = 0;
+	// Moves sprite based on velocities adjusting for gravity and collisions. May be overridden for custom movement routines.
+	virtual void move();
 
 	// Returns information about the Sprite object represented as a std::string for debugging purposes.
 	virtual std::string toString();
@@ -92,6 +92,11 @@ protected:
 	// Unordered map to hold key/value pairs of action names (the key) and their animation frame coordinates on the sprite sheet (the value).
 	ClipsMap mAnimMap{};
 
+	// Center position of sprite within the level. This is not viewport relative but level relative. This is not derived from
+	// the size of the current animation frame. The render function renders the animation frame texture around this point.
+	int mXPos{ 0 };
+	int mYPos{ 0 };
+
 	// Advances the current action mode animation frame ahead or loops to beginning if at end of animation frames.
 	void advanceFrame();
 
@@ -105,10 +110,10 @@ protected:
 	// Holds velocity/momentum for the four 2d directions. These modify speed/position in jumps, falls, etc.
 	// Gravity, friction, hits taken, etc can also modify these in return.
 	struct Velocity {
-		int up{ 0 };
-		int down{ 0 };
-		int left{ 0 };
-		int right{ 0 };
+		float up{ 0 };
+		float down{ 0 };
+		float left{ 0 };
+		float right{ 0 };
 	};
 
 	// Instance of Velocity struct for this sprite
@@ -118,11 +123,6 @@ protected:
 	bool downBump();
 
 private:
-	// Center position of sprite within the level. This is not viewport relative but level relative. This is not derived from
-	// the size of the current animation frame. The render function renders the animation frame texture around this point.
-	int mXPos{ 0 };
-	int mYPos{ 0 };
-
 	// Smart pointer to the Texture holding our sprite's sprite sheet.
 	std::shared_ptr<Texture> mTexture{ nullptr };
 
@@ -134,6 +134,9 @@ private:
 
 	// The sprite's instance of the Velocity struct
 	Velocity veloc{};
+
+	// Last time we increased down velocity becasue of gravity. Used to regulate gravity adjustments to by time and not by frame as frame rates vary.
+	Uint32 mLastGravTime{};
 
 	// Load the initial data file in with action mode names and animation frame counts. Store in passed in map and return boolean success.
 	bool loadDataFile();

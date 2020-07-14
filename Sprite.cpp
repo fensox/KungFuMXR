@@ -185,6 +185,58 @@ void Sprite::render() {
 bool Sprite::downBump() {
     // get our current action frame clip rectangle, and test if a pixel one beneath it collides with the level
     const SDL_Rect& rect{ mAnimMap[mActionMode].at(mCurrentFrame) };
-    const SDL_Point pnt{ rect.x, rect.y + rect.h + 1 };
+    const SDL_Point pnt{ rect.x, mYPos + (rect.h/2) + 1 };
+
     return mLevel->isACollision(&pnt);
+}
+
+// Moves sprite based on velocities adjusting for gravity and collisions.
+void Sprite::move() {
+    // apply gravity - if not downBump'ing increase down velocity by our gravity global every time interval specified by our gravity time interval
+    if (downBump()) {
+        mVeloc.down = 0;
+    } else {
+        if (SDL_GetTicks() - mLastGravTime >= FuGlobals::GRAVITY_TIME) {
+            mVeloc.up -= FuGlobals::GRAVITY;
+            if (mVeloc.up < 0) mVeloc.up = 0;
+            mVeloc.down += FuGlobals::GRAVITY;
+            mLastGravTime = SDL_GetTicks();
+            std::cout << "grav" << std::endl;
+        }
+    }
+
+    // temporarily adjust position based on velocities then we test if we can move that much without a collision
+    int tryX = static_cast<int>(mXPos + mVeloc.right - mVeloc.left);
+    int tryY = static_cast<int>(mYPos - mVeloc.up + mVeloc.down);
+    SDL_Point pnt{};
+
+    // x test and possible reduction in distance
+    if (tryX > 0) {
+        for (int i{ tryX }; i > 0; --i) {
+            pnt = { i, tryY };
+            if (!mLevel->isACollision(&pnt)) break;
+        }
+    } else if (tryX < 0) {
+        for (int i{ tryX }; i < 0; ++i) {
+            pnt = { i, tryY };
+            if (!mLevel->isACollision(&pnt)) break;
+        }
+    }
+
+    // y test and possible reduction in distance
+    if (tryY > 0) {
+        for (int i{ tryY }; i > 0; --i) {
+            pnt = { tryX, i };
+            if (!mLevel->isACollision(&pnt)) break;
+        }
+    } else if (tryY < 0) {
+        for (int i{ tryY }; i < 0; ++i) {
+            pnt = { tryX, i };
+            if (!mLevel->isACollision(&pnt)) break;
+        }
+    }
+
+    // set the position now that all tests have completed
+    mXPos = tryX;
+    mYPos = tryY;
 }

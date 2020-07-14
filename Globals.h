@@ -26,8 +26,11 @@ namespace FuGlobals {
 	// Default aspect ratio pre-calc'd for performance
 	constexpr double ASPECT_RATIO{ static_cast<double>(VIEWPORT_WIDTH) / static_cast<double>(VIEWPORT_HEIGHT) };
 
-	// Gravity multiplier
-	constexpr float GRAVITY{ .5 };
+	// Gravity multiplier - increased downward speed by this amount of pixels every GRAVITY_TIME
+	constexpr float GRAVITY{ 1.5 };
+
+	// This is a value in milliseconds to let pass each time before applying our GRAVITY velocity modyfier when object is falling
+	constexpr int GRAVITY_TIME{ 250 };
 
 	// Distance in pixels a player can get to the edge of the viewport when level boundry has been reached.
 	constexpr int LEVEL_BOUNDS = 1;
