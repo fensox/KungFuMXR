@@ -46,16 +46,16 @@ public:
 	std::string getName();
 
 	// Sets the sprite's x coordinate position relative to level.
-	void setX(int x);
+	void setX(decimal x);
 
 	// Sets the sprite's y coordinate position relative to level.
-	void setY(int y);
+	void setY(decimal y);
 
 	// Returns the sprite's x coordinate position relative to level.
-	int getX();
+	decimal getX();
 
 	// Returns the sprite's y coordinate position relative to level.
-	int getY();
+	decimal getY();
 
 	// Moves sprite based on velocities adjusting for gravity and collisions. May be overridden for custom movement routines.
 	virtual void move();
@@ -94,8 +94,8 @@ protected:
 
 	// Center position of sprite within the level. This is not viewport relative but level relative. This is not derived from
 	// the size of the current animation frame. The render function renders the animation frame texture around this point.
-	int mXPos{ 0 };
-	int mYPos{ 0 };
+	decimal mXPos{ 0 };
+	decimal mYPos{ 0 };
 
 	// Advances the current action mode animation frame ahead or loops to beginning if at end of animation frames.
 	void advanceFrame();
@@ -110,14 +110,17 @@ protected:
 	// Holds velocity/momentum for the four 2d directions. These modify speed/position in jumps, falls, etc.
 	// Gravity, friction, hits taken, etc can also modify these in return.
 	struct Velocity {
-		float up{ 0 };
-		float down{ 0 };
-		float left{ 0 };
-		float right{ 0 };
+		decimal up{ 0 };
+		decimal down{ 0 };
+		decimal left{ 0 };
+		decimal right{ 0 };
 	};
 
 	// Instance of Velocity struct for this sprite
 	Velocity mVeloc{};
+
+	// Last time we increased down velocity becasue of gravity. Used to regulate gravity adjustments by time and not by frame as frame rates vary.
+	Uint32 mLastGravTime{};
 
 	// Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 	bool downBump();
@@ -134,9 +137,6 @@ private:
 
 	// The sprite's instance of the Velocity struct
 	Velocity veloc{};
-
-	// Last time we increased down velocity becasue of gravity. Used to regulate gravity adjustments to by time and not by frame as frame rates vary.
-	Uint32 mLastGravTime{};
 
 	// Load the initial data file in with action mode names and animation frame counts. Store in passed in map and return boolean success.
 	bool loadDataFile();

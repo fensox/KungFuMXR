@@ -127,16 +127,16 @@ void Sprite::setDepth(int depth) {
 }
 
 // Sets the sprite's x coordinate position relative to level.
-void Sprite::setX(int x) { mXPos = x; }
+void Sprite::setX(decimal x) { mXPos = x; }
 
 // Sets the sprite's y coordinate position relative to level.
-void Sprite::setY(int y) { mYPos = y; }
+void Sprite::setY(decimal y) { mYPos = y; }
 
 // Returns the sprite's x coordinate position relative to level.
-int Sprite::getX() { return mXPos; }
+decimal Sprite::getX() { return mXPos; }
 
 // Returns the sprite's y coordinate position relative to level.
-int Sprite::getY() { return mYPos; }
+decimal Sprite::getY() { return mYPos; }
 
 // Returns the name of this sprite from the global mName constant.
 std::string Sprite::getName() {
@@ -185,23 +185,27 @@ void Sprite::render() {
 bool Sprite::downBump() {
     // get our current action frame clip rectangle, and test if a pixel one beneath it collides with the level
     const SDL_Rect& rect{ mAnimMap[mActionMode].at(mCurrentFrame) };
-    const SDL_Point pnt{ rect.x, mYPos + (rect.h/2) + 1 };
+    SDL_Point pnt{ rect.x, static_cast<int>(mYPos + (rect.h / 2) + 1) };
 
-    return mLevel->isACollision(&pnt);
+    return mLevel->isACollision( pnt );
 }
 
 // Moves sprite based on velocities adjusting for gravity and collisions.
 void Sprite::move() {
     // apply gravity - if not downBump'ing increase down velocity by our gravity global every time interval specified by our gravity time interval
     if (downBump()) {
-        mVeloc.down = 0;
+        // we are standing on something, if its the end of a fall, stop and downward velocity AND upward velocity to make sure up/down both canceled out.
+        // Stops a bouncing sprite effect if they have not evenly canceled each other out upon landing.
+        if (mVeloc.down != 0) {
+            mVeloc.up = 0;
+            mVeloc.down = 0;
+        }
     } else {
         if (SDL_GetTicks() - mLastGravTime >= FuGlobals::GRAVITY_TIME) {
             mVeloc.up -= FuGlobals::GRAVITY;
             if (mVeloc.up < 0) mVeloc.up = 0;
             mVeloc.down += FuGlobals::GRAVITY;
             mLastGravTime = SDL_GetTicks();
-            std::cout << "grav" << std::endl;
         }
     }
 
@@ -209,30 +213,30 @@ void Sprite::move() {
     int tryX = static_cast<int>(mXPos + mVeloc.right - mVeloc.left);
     int tryY = static_cast<int>(mYPos - mVeloc.up + mVeloc.down);
     SDL_Point pnt{};
-
+    
     // x test and possible reduction in distance
     if (tryX > 0) {
         for (int i{ tryX }; i > 0; --i) {
             pnt = { i, tryY };
-            if (!mLevel->isACollision(&pnt)) break;
+            if (!mLevel->isACollision( pnt )) break;
         }
     } else if (tryX < 0) {
         for (int i{ tryX }; i < 0; ++i) {
             pnt = { i, tryY };
-            if (!mLevel->isACollision(&pnt)) break;
+            if (!mLevel->isACollision( pnt )) break;
         }
     }
-
+    
     // y test and possible reduction in distance
     if (tryY > 0) {
         for (int i{ tryY }; i > 0; --i) {
             pnt = { tryX, i };
-            if (!mLevel->isACollision(&pnt)) break;
+            if (!mLevel->isACollision( pnt )) break;
         }
     } else if (tryY < 0) {
         for (int i{ tryY }; i < 0; ++i) {
             pnt = { tryX, i };
-            if (!mLevel->isACollision(&pnt)) break;
+            if (!mLevel->isACollision( pnt )) break;
         }
     }
 

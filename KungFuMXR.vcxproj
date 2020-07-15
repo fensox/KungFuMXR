@@ -154,6 +154,7 @@
     <ClCompile Include="GameLoop.cpp" />
     <ClCompile Include="KungFuMXR.cpp" />
     <ClCompile Include="Level.cpp" />
+    <ClCompile Include="PointF.cpp" />
     <ClCompile Include="SDLMan.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="GameLoop.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="Level.h" />
+    <ClInclude Include="PointF.h" />
     <ClInclude Include="SDLMan.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="FensoxUtils.h" />

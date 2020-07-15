@@ -190,8 +190,8 @@ void Level::render() {
 // Centers the viewport on given x, y coordinates adjusting for level boundries.
 void Level::centerViewport() {
     // move the viewport to given coordinates
-    mViewport.x = mFollowSprite->getX() - (FuGlobals::VIEWPORT_WIDTH / 2);
-    mViewport.y = mFollowSprite->getY() - (FuGlobals::VIEWPORT_HEIGHT / 2);
+    mViewport.x = static_cast<int>(mFollowSprite->getX() - (FuGlobals::VIEWPORT_WIDTH / 2));
+    mViewport.y = static_cast<int>(mFollowSprite->getY() - (FuGlobals::VIEWPORT_HEIGHT / 2));
     
     // check against level boundries and move back some if need be
     int limitX{ mBGTexture->getSize().x - mViewport.w };
@@ -205,11 +205,25 @@ void Level::centerViewport() {
 }
 
 // Checks if the given point is contained in a collision rect for the level.
-bool Level::isACollision(const SDL_Point* pnt) {
+bool Level::isACollision(const SDL_Point& pnt) {
     // loop through all our level collision rectangles checking for a collision
     for (int i{ 0 }; i < mColRects->size(); ++i) {
         const SDL_Rect* r = &mColRects->at(i);
-        if (SDL_PointInRect(pnt, r)) return true;
+        if (SDL_PointInRect(&pnt, r)) return true;
+    }
+
+    return false;
+}
+
+// Checks if the given point is contained in a collision rect for the level. Parameter of PointF is cast to integer type SDL_Point.
+bool Level::isACollision(PointF& pnt) {
+    // convert PointF to SDL_Point
+    SDL_Point p{ pnt.getSDL_Point() };
+
+    // loop through all our level collision rectangles checking for a collision
+    for (int i{ 0 }; i < mColRects->size(); ++i) {
+        const SDL_Rect* r = &mColRects->at(i);
+        if (SDL_PointInRect(&p, r)) return true;
     }
 
     return false;

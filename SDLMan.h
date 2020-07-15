@@ -110,5 +110,5 @@ private:
 	Uint32 fpsCount;
 
 	// the value you want
-	float fps;
+	decimal fps;
 };

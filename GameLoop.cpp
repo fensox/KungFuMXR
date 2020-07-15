@@ -16,7 +16,7 @@ bool GameLoop::initGameSystems() {
 bool GameLoop::loadGameData() {
 	bool success{ true };
 	
-	// initialize our Sprite holding vector. Holds all non-player sprites.
+	// initialize our Sprite holding vector. Holds all sprites but the player.
 	sprites = std::make_unique<std::vector<Sprite>>();
 
 	// Load the player

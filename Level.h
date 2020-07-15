@@ -1,11 +1,12 @@
 #pragma once
 
 #include "Sprite.h"
+#include "PointF.h"
+#include "SDLMan.h"
 #include <memory>
 #include <vector>
 #include <SDL.h>
 #include <string>
-#include "SDLMan.h"
 
 // Forward declaration for Sprite class...ran into a circular reference between Sprite<->Level
 class Sprite;
@@ -27,15 +28,18 @@ public:
 	ColRects getColRects();
 
 	// Checks if the given point is contained in a collision rect for the level.
-	bool isACollision(const SDL_Point* pnt);
+	bool isACollision(const SDL_Point& pnt);
+
+	// Checks if the given point is contained in a collision rect for the level. Parameter of PointF is cast to integer type SDL_Point.
+	bool isACollision(PointF& pnt);
 
 	// Load in the data filefor the level. Must be called before other functions for proper operation. Returns success or failure.
 	bool load();
 
-	// Return player start position
+	// Return player start position as an SDL_Point object
 	SDL_Point getPlayStart();
 
-	// Returns the width/height of the level background in an SDL_Point.
+	// Returns the width/height of the level background as an SDL_Point
 	SDL_Point getSize();
 
 	// Returns the viewport's top-left coordinates and width/height.
