@@ -9,8 +9,8 @@ public:
 	// Use base Sprite constructor
 	Thomas(std::shared_ptr<SDLMan> sdlMan);
 
-	// Handles input from the player and performs sprite actions accordingly
-	void playerInput(SDL_Keycode key);
+	// Handles input from the player. SDL_Keycode is the key and the bool is true on key pressed and false on key released.
+	void playerInput(SDL_Keycode key, bool press);
 
 	// Moves player based on velocities adjusting for gravity, friction, and collisions. Overrides the Sprite class default move function
 	// for a few custom player effects like respecting level boundries that other sprites do not need to do.
@@ -19,13 +19,13 @@ public:
 private:
 	// Walk speed of player
 	//Uint32 mWalkWaitTime{ 50 };
-	const Uint32 WALK_WAIT_TIME { 10 };
+	const Uint32 WALK_WAIT_TIME { 15 };
 
 	// Walk velocity increase per mWalkWaitTime
-	const decimal WALK_VELOCITY_PER { 7.5 };
+	const decimal WALK_VELOCITY_PER { 2.5 };
 
 	// Maximum velocity player can walk
-	const decimal WALK_MAX { 30 };
+	const decimal WALK_MAX { 5 };
 
 	// Jump power is the amount added to upward velocity when jump action initiated
 	const decimal JUMP_VELOCITY { 5 };
@@ -39,14 +39,17 @@ private:
 	// Handles the player requesting to move to the right.
 	void moveLeft();
 
+	//***DEBUG***
+	// Control switches
+	bool RIGHT{ false }, LEFT{ false }, JUMP{ false };
+
 	// Handles the player requesting a jump.
 	void jump();
 
 	// Check if enough time has passed to walk then work with viewport position and move player if so
 	bool checkWalkTime();
 
-	// Adjust the player position or the viewport position. This is called at end of a chain of function calls, begun at playerInput(), that have already confirmed
-	// enough time has passed to move, selected the appropriate animation frame, and now we are ready to adjust position
-	void changePosition(decimal moveX, decimal moveY);
+	// Adjust the player position back inside the level if an out of bounds location has been detected.
+	void adjustForLevelBounds();
 };
 

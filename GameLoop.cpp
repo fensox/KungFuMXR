@@ -85,7 +85,7 @@ void GameLoop::runGameLoop() {
 			// handle input events
 			quit = handleEvents();
 
-			// process movements of sprites. For the player this is a physics movement (i.e. movement to player not initiated by player!)
+			// process movements of sprites
 			mPlayer->move(); // ***DEBUG***this could prob be stuffed inside the sprites vector..version 2 maybe
 			for (int i{ 0 }; i < sprites->size(); ++i) sprites->at(i).move();
 			
@@ -102,6 +102,7 @@ void GameLoop::runGameLoop() {
 		// render to back buffer
 		mLevel->render();
 		mPlayer->render();
+		for (int i{ 0 }; i < sprites->size(); ++i) sprites->at(i).render();
 
 		// update the screen
 		mSDL->refresh();
@@ -118,7 +119,9 @@ bool GameLoop::handleEvents() {
         if (e.type == SDL_QUIT) {																	// Handle request to quit
 			quit = true;
         } else if (e.type == SDL_KEYDOWN) {															// Handle keyboard presses
-            mPlayer->playerInput(e.key.keysym.sym);
+            mPlayer->playerInput(e.key.keysym.sym, true);
+		} else if (e.type == SDL_KEYUP) {
+			mPlayer->playerInput(e.key.keysym.sym, false);
 		}
     }
 

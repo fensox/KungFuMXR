@@ -105,4 +105,7 @@ private:
 
 	// Centers the viewport over the given coordinates adjusting for level boundries.
 	void centerViewport();
+
+	// Outlines all the collision rectangles in the level so visible on screen. Debugging and level design utility function.
+	void drawColRects();
 };

@@ -147,7 +147,7 @@ SDL_Point SDLMan::getSize(std::shared_ptr<Texture> text) {
 	return size;
 }
 
-// Load in a Texture object using the passed in filename and SDL_Image functions. Returns a smart pointer to a Texture object.
+// Load in a Texture object using the passed in filename, transparancy color, and transparancy on/off switch. Returns a smart pointer to a Texture object.
 std::unique_ptr<Texture> SDLMan::loadImage(std::string fileName, SDL_Color color, bool useTrans) {
 	//Pointer to the SDL texture object we will wrap with Texture class and return
 	SDL_Texture* newTexture {nullptr};
@@ -174,6 +174,7 @@ std::unique_ptr<Texture> SDLMan::loadImage(std::string fileName, SDL_Color color
 
 	//Get rid of old loaded surface
 	SDL_FreeSurface(loadedSurface);
+	loadedSurface = nullptr;
 	
 	// Wrap the SDL_Texture in our Texture class and return as a smart pointer
 	return std::make_unique<Texture>(newTexture);

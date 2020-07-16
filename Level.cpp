@@ -26,6 +26,9 @@ bool Level::load() {
     // Load in the level's background texture
     if (!loadBGTexture()) success = false;
 
+    //***DEBUG***
+    if (FuGlobals::DEBUG_MODE) std::cout << toString();
+
     return success;
 }
 
@@ -153,8 +156,12 @@ SDL_Rect Level::getPosition() {
 std::string Level::toString() {
     std::ostringstream str{};
     str << "Level Name: " << mName << ", Meta: " << mMetaFile << ", BG: " << mBGFile;
-    str << "Music: " << mMusicFile << ", Player Start: " << mPlayStart.x << ", " << mPlayStart.y;
-    str << ", # Collision Rectangles: " << mColRects->size() << std::endl;
+    str << ", Music: " << mMusicFile << ", Player Start: " << mPlayStart.x << ", " << mPlayStart.y;
+    str << ", # Collision Rectangles: " << mColRects->size() << "\nCollision Rectangles List:";
+    for (int i{ 0 }; i < mColRects->size(); ++i) {
+        str << "\n" << mColRects->at(i).x << ", " << mColRects->at(i).y << ", " << mColRects->at(i).w << ", " << mColRects->at(i).h;
+    }
+    str << std::endl;
     return str.str();
 }
 
@@ -173,18 +180,17 @@ void Level::render() {
     // center viewport on the Sprite we've been told to follow
     centerViewport();
 
-    // Destination rectangle for viewport to draw into
-    //SDL_Rect dest{ 0, 0, FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT };
-
     //Render the area of level our viewport is pointing at
     SDL_RenderCopyEx(mSDLMan->getRenderer(),
         mBGTexture->getTexture(),
         &mViewport,
         NULL,
-        //&dest,
         0,
         NULL,
         SDL_FLIP_NONE);
+
+    // if debug on draw all collision rectangles so visible on screen
+    if (FuGlobals::DEBUG_MODE) drawColRects();
 }
 
 // Centers the viewport on given x, y coordinates adjusting for level boundries.
@@ -202,6 +208,19 @@ void Level::centerViewport() {
     // y
     if (mViewport.y > limitY) mViewport.y = limitY;
     else if (mViewport.y < 0) mViewport.y = 0;
+}
+
+// Outlines all the collision rectangles in the level so visible on screen. Debugging and level design utility function.
+void Level::drawColRects() {
+    // Set drawing color and loop through all collision rectangles drawing them
+    SDL_SetRenderDrawColor(mSDLMan->getRenderer(), 0, 255, 0, SDL_ALPHA_OPAQUE);
+    for (int i{ 0 }; i < mColRects->size(); ++i) {
+        const SDL_Rect* r = &mColRects->at(i);   
+        SDL_RenderDrawRect(mSDLMan->getRenderer(), r);
+    }
+
+    // Return our draw color to black
+    SDL_SetRenderDrawColor(mSDLMan->getRenderer(), 0, 0, 0, SDL_ALPHA_OPAQUE);
 }
 
 // Checks if the given point is contained in a collision rect for the level.

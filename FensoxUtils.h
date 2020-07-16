@@ -8,7 +8,7 @@
 #include <sstream>
 
 /*
-    A static utility class with many helpful functions.
+    A static utility namespace with many helpful functions.
     i.e. random number generation, string trimming functionality, etc.
     Begun by Fensox June 2020.
 */

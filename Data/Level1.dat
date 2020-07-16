@@ -54,7 +54,13 @@ MUSIC=data/kung_fu_music.mp3
 PLAYER_START=1100, 0
 
 #Floor
-#COLRECT=0, 470, 7680, 250
-COLRECT=0, 470, 7680, 1000
+COLRECT=0, 470, 7680, 250
+
+#Table
+COLRECT=10,383,309,19
+
+#Ceiling
+COLRECT=0,0,7680,20
+
 
 # End data file

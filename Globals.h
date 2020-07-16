@@ -36,7 +36,7 @@ namespace FuGlobals {
 	constexpr int GRAVITY_TIME{ 250 };
 
 	// This is the friction surfaces have that slows a players speed
-	constexpr decimal FRICTION{ 1.5 };
+	constexpr decimal FRICTION{ .2 };
 
 	// Distance in pixels a player can get to the edge of the viewport when level boundry has been reached.
 	constexpr int LEVEL_BOUNDS = 1;

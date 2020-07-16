@@ -57,7 +57,10 @@ public:
 	// Returns the sprite's y coordinate position relative to level.
 	decimal getY();
 
-	// Moves sprite based on velocities adjusting for gravity and collisions. May be overridden for custom movement routines.
+	// Returns the current animation frame's rectangle.
+	SDL_Rect getRect();
+
+	// Moves Sprite based on velocities adjusting for gravity, friction, and collisions. May be overridden or extended for custom movement routines.
 	virtual void move();
 
 	// Returns information about the Sprite object represented as a std::string for debugging purposes.
@@ -94,8 +97,7 @@ protected:
 
 	// Center position of sprite within the level. This is not viewport relative but level relative. This is not derived from
 	// the size of the current animation frame. The render function renders the animation frame texture around this point.
-	decimal mXPos{ 0 };
-	decimal mYPos{ 0 };
+	decimal mXPos{ 0 }; decimal mYPos{ 0 };
 
 	// Advances the current action mode animation frame ahead or loops to beginning if at end of animation frames.
 	void advanceFrame();
@@ -124,6 +126,12 @@ protected:
 
 	// Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 	bool downBump();
+
+	// Applies gravity to the sprite depending on boolean parameter. Also checks if just finished a fall and cleans up some variables if so.
+	void applyGravity(bool standing);
+
+	// Applies friction to the sprite depending on boolean parameter.
+	void applyFriction(bool friction);
 
 private:
 	// Smart pointer to the Texture holding our sprite's sprite sheet.

@@ -152,6 +152,11 @@ void Sprite::advanceFrame() {
     if (++mCurrentFrame >= count) mCurrentFrame = 0;
 }
 
+// Returns the current animation frame's rectangle.
+SDL_Rect Sprite::getRect() {
+    return mAnimMap[mActionMode].at(mCurrentFrame);
+}
+
 // Renders the sprite based on position, action mode, animation frame using a SDL_Renderer from SDLMan.
 void Sprite::render() {
     // get our SDL_Rect for the current animation frame
@@ -184,23 +189,23 @@ void Sprite::render() {
 // Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 bool Sprite::downBump() {
     // get our current action frame clip rectangle, and test if a pixel one beneath it collides with the level
-    const SDL_Rect& rect{ mAnimMap[mActionMode].at(mCurrentFrame) };
+    SDL_Rect rect{ getRect() };
     SDL_Point pnt{ rect.x, static_cast<int>(mYPos + (rect.h / 2) + 1) };
 
     return mLevel->isACollision( pnt );
 }
 
-// Moves sprite based on velocities adjusting for gravity and collisions.
-void Sprite::move() {
-    // apply gravity - if not downBump'ing increase down velocity by our gravity global every time interval specified by our gravity time interval
-    if (downBump()) {
+// Applies gravity to the sprite depending on boolean parameter. Also checks if just finished a fall and cleans up some variables if so.
+void Sprite::applyGravity(bool standing) {
+    if (standing) {
         // we are standing on something, if its the end of a fall, stop and downward velocity AND upward velocity to make sure up/down both canceled out.
-        // Stops a bouncing sprite effect if they have not evenly canceled each other out upon landing.
+        // Stops a bouncing player effect if they have not evenly canceled each other out upon landing.
         if (mVeloc.down != 0) {
             mVeloc.up = 0;
             mVeloc.down = 0;
         }
     } else {
+        // we are falling. If enough time has passed apply some gravity to our downward velocity.
         if (SDL_GetTicks() - mLastGravTime >= FuGlobals::GRAVITY_TIME) {
             mVeloc.up -= FuGlobals::GRAVITY;
             if (mVeloc.up < 0) mVeloc.up = 0;
@@ -208,35 +213,60 @@ void Sprite::move() {
             mLastGravTime = SDL_GetTicks();
         }
     }
+}
+
+// Applies friction to the sprite depending on boolean parameter.
+void Sprite::applyFriction(bool friction) {
+    if (friction) {
+        mVeloc.left -= FuGlobals::FRICTION;
+        if (mVeloc.left < 0) mVeloc.left = 0;
+        mVeloc.right -= FuGlobals::FRICTION;
+        if (mVeloc.right < 0) mVeloc.right = 0;
+    }
+}
+
+// Moves Sprite based on velocities adjusting for gravity, friction, and collisions. May be overridden or extended for custom movement routines.
+void Sprite::move() {
+    // check for a downward collision to see if we are on stable ground. This will decide gravity and friction application
+    bool standing{ downBump() };
+
+    // apply gravity - if not downBump'ing increase down velocity by our gravity global every gravity time interval specified by our gravity globals
+    applyGravity(standing);
+
+    // apply friction
+    applyFriction(standing);
 
     // temporarily adjust position based on velocities then we test if we can move that much without a collision
-    int tryX = static_cast<int>(mXPos + mVeloc.right - mVeloc.left);
-    int tryY = static_cast<int>(mYPos - mVeloc.up + mVeloc.down);
-    SDL_Point pnt{};
-    
+    decimal tryX = mXPos + mVeloc.right - mVeloc.left;
+    decimal tryY = mYPos - mVeloc.up + mVeloc.down;
+
     // x test and possible reduction in distance
+    SDL_Rect rect{ getRect() };
+    int tmpPos = static_cast<int>(tryX);
+    PointF pnt{ 0.f, 0.f };
     if (tryX > 0) {
-        for (int i{ tryX }; i > 0; --i) {
-            pnt = { i, tryY };
-            if (!mLevel->isACollision( pnt )) break;
+        for (int i{ tmpPos }; i > 0; --i) {
+            pnt = { i + (rect.w / 2), tryY };
+            if (!mLevel->isACollision(pnt)) break;
         }
     } else if (tryX < 0) {
-        for (int i{ tryX }; i < 0; ++i) {
-            pnt = { i, tryY };
-            if (!mLevel->isACollision( pnt )) break;
+        for (int i{ tmpPos }; i < 0; ++i) {
+            pnt = { i - (rect.w / 2), tryY };
+            if (!mLevel->isACollision(pnt)) break;
         }
     }
-    
+
     // y test and possible reduction in distance
+    tmpPos = static_cast<int>(tryY);
     if (tryY > 0) {
-        for (int i{ tryY }; i > 0; --i) {
-            pnt = { tryX, i };
-            if (!mLevel->isACollision( pnt )) break;
+        for (int i{ tmpPos }; i > 0; --i) {
+            pnt = { tryX, i + (rect.h / 2) };
+            if (!mLevel->isACollision(pnt)) break;
         }
     } else if (tryY < 0) {
-        for (int i{ tryY }; i < 0; ++i) {
-            pnt = { tryX, i };
-            if (!mLevel->isACollision( pnt )) break;
+        for (int i{ tmpPos }; i < 0; ++i) {
+            pnt = { tryX, i - (rect.h / 2) };
+            if (!mLevel->isACollision(pnt)) break;
         }
     }
 

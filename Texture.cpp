@@ -1,5 +1,4 @@
 #include "Texture.h"
-#include <SDL.h>
 
 // Constructor takes a pointer to an SDL_Texture and stores some information about it for quick access later.
 Texture::Texture(SDL_Texture* ptrText) {
