@@ -27,6 +27,12 @@ const SDL_Rect& Sprite::getCollisionRect() {
     return  mAnimMap[mActionMode].at(mCurrentFrame);
 }
 
+/* Returns the current collision rectangle's center bottom point. */
+SDL_Point Sprite::getCollisionRectBottom() {
+    const SDL_Rect r = getCollisionRect();
+    return SDL_Point { r.x, r.y + (r.h/2) };
+}
+
 // Load sprite data from files - Needs to be called before any other functions can be called.
 bool Sprite::load() {
     // First load in sprite metadata file. Read it into a ClipsMap map (see header for typedef).
@@ -157,6 +163,22 @@ SDL_Rect Sprite::getRect() {
     return mAnimMap[mActionMode].at(mCurrentFrame);
 }
 
+// Draw a mark on four collision point boundries for debugging purposes.
+void Sprite::drawCollisionPoints() {
+    // set crosshair draw color to orange
+    mSDLMan->setDrawColor(255, 255, 0);
+
+    //bottom
+    SDL_Point p{ getCollisionRectBottom() };
+    p.x += mXPos - mLevel->getPosition().x;
+    p.y += mYPos - mLevel->getPosition().y;
+    mSDLMan->drawCircle(p.x, p.y, 100);
+
+    
+    // return draw color to black
+    mSDLMan->setDrawColor(0, 0, 0);
+}
+
 // Renders the sprite based on position, action mode, animation frame using a SDL_Renderer from SDLMan.
 void Sprite::render() {
     // get our SDL_Rect for the current animation frame
@@ -184,6 +206,9 @@ void Sprite::render() {
                         0,
                         NULL,
                         SDL_FLIP_NONE);
+
+    //***DEBUG*** Draw collision points as crosshairs if debug global is on.
+    if (FuGlobals::DEBUG_MODE) drawCollisionPoints();
 }
 
 // Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
@@ -215,14 +240,12 @@ void Sprite::applyGravity(bool standing) {
     }
 }
 
-// Applies friction to the sprite depending on boolean parameter.
-void Sprite::applyFriction(bool friction) {
-    if (friction) {
-        mVeloc.left -= FuGlobals::FRICTION;
-        if (mVeloc.left < 0) mVeloc.left = 0;
-        mVeloc.right -= FuGlobals::FRICTION;
-        if (mVeloc.right < 0) mVeloc.right = 0;
-    }
+// Applies friction to the sprite
+void Sprite::applyFriction() {
+    mVeloc.left -= FuGlobals::FRICTION;
+    if (mVeloc.left < 0) mVeloc.left = 0;
+    mVeloc.right -= FuGlobals::FRICTION;
+    if (mVeloc.right < 0) mVeloc.right = 0;
 }
 
 // Moves Sprite based on velocities adjusting for gravity, friction, and collisions. May be overridden or extended for custom movement routines.
@@ -234,7 +257,7 @@ void Sprite::move() {
     applyGravity(standing);
 
     // apply friction
-    applyFriction(standing);
+    if (standing) applyFriction();
 
     // temporarily adjust position based on velocities then we test if we can move that much without a collision
     decimal tryX = mXPos + mVeloc.right - mVeloc.left;

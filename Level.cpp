@@ -189,7 +189,7 @@ void Level::render() {
         NULL,
         SDL_FLIP_NONE);
 
-    // if debug on draw all collision rectangles so visible on screen
+    //***DEBUG*** if debug on draw all collision rectangles so visible on screen
     if (FuGlobals::DEBUG_MODE) drawColRects();
 }
 
@@ -213,37 +213,32 @@ void Level::centerViewport() {
 // Outlines all the collision rectangles in the level so visible on screen. Debugging and level design utility function.
 void Level::drawColRects() {
     // Set drawing color and loop through all collision rectangles drawing them
-    SDL_SetRenderDrawColor(mSDLMan->getRenderer(), 0, 255, 0, SDL_ALPHA_OPAQUE);
+    mSDLMan->setDrawColor(0, 255, 0);
     for (int i{ 0 }; i < mColRects->size(); ++i) {
-        const SDL_Rect* r = &mColRects->at(i);   
-        SDL_RenderDrawRect(mSDLMan->getRenderer(), r);
+        SDL_Rect r = mColRects->at(i);   
+        r.x -= mViewport.x; // compensate for viewport's distance from level origin
+        r.y -= mViewport.y;
+        SDL_RenderDrawRect(mSDLMan->getRenderer(), &r);
     }
 
     // Return our draw color to black
-    SDL_SetRenderDrawColor(mSDLMan->getRenderer(), 0, 0, 0, SDL_ALPHA_OPAQUE);
+    mSDLMan->setDrawColor(0, 0, 0, 255);
 }
 
 // Checks if the given point is contained in a collision rect for the level.
-bool Level::isACollision(const SDL_Point& pnt) {
+bool Level::isACollision(SDL_Point pnt) {
     // loop through all our level collision rectangles checking for a collision
     for (int i{ 0 }; i < mColRects->size(); ++i) {
-        const SDL_Rect* r = &mColRects->at(i);
-        if (SDL_PointInRect(&pnt, r)) return true;
+        SDL_Rect r = mColRects->at(i);
+        r.x -= mViewport.x; // compensate for viewport's distance from level origin
+        r.y -= mViewport.y;
+        if (SDL_PointInRect(&pnt, &r)) return true;
     }
 
     return false;
 }
 
 // Checks if the given point is contained in a collision rect for the level. Parameter of PointF is cast to integer type SDL_Point.
-bool Level::isACollision(PointF& pnt) {
-    // convert PointF to SDL_Point
-    SDL_Point p{ pnt.getSDL_Point() };
-
-    // loop through all our level collision rectangles checking for a collision
-    for (int i{ 0 }; i < mColRects->size(); ++i) {
-        const SDL_Rect* r = &mColRects->at(i);
-        if (SDL_PointInRect(&p, r)) return true;
-    }
-
-    return false;
+bool Level::isACollision(PointF pnt) {
+    return isACollision( pnt.getSDL_Point() );
 }

@@ -20,5 +20,5 @@ public:
 	decimal y{};
 
 	// Returns an SDL_Point by static casting floating point coordinates to integers
-	SDL_Point const getSDL_Point();
+	SDL_Point getSDL_Point();
 };

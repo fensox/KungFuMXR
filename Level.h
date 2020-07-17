@@ -28,10 +28,10 @@ public:
 	ColRects getColRects();
 
 	// Checks if the given point is contained in a collision rect for the level.
-	bool isACollision(const SDL_Point& pnt);
+	bool isACollision(SDL_Point pnt);
 
 	// Checks if the given point is contained in a collision rect for the level. Parameter of PointF is cast to integer type SDL_Point.
-	bool isACollision(PointF& pnt);
+	bool isACollision(PointF pnt);
 
 	// Load in the data filefor the level. Must be called before other functions for proper operation. Returns success or failure.
 	bool load();

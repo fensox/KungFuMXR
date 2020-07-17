@@ -59,6 +59,18 @@ public:
 	// Draws the buffer to the screen and clears the buffer
 	void refresh();
 
+	// Set's the current draw color of the renderer with RGB values between 0 and 255. Optional alpha transparency value defaults to 255 opaque.
+	void setDrawColor(Uint8 red, Uint8 green, Uint8 blue, Uint8 alpha = 255 );
+
+	// Draw's a line on screen with given starting and ending points using currently set draw color.
+	void drawLine(int x1, int y1, int x2, int y2);
+
+	// Draw's a line on screen with given starting and ending points using currently set draw color. Casts floating point parameter values to integers for screen drawing.
+	void drawLine(decimal x1, decimal y1, decimal x2, decimal y2);
+
+	// Draw's a circle using the Midpoint Circle Algorithm. Found on Stack Exchange.
+	void drawCircle(int centreX, int centreY, int radius);
+
 	// Returns the height and width of a texture as an SDL_Point.
 	SDL_Point getSize(std::shared_ptr<Texture> text);
 

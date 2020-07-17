@@ -19,6 +19,6 @@ PointF::PointF(decimal pX, int pY) {
 }
 
 // Returns an SDL_Point by static casting floating point coordinates to integers
-SDL_Point const PointF::getSDL_Point() {
+SDL_Point PointF::getSDL_Point() {
 	return SDL_Point{ static_cast<int>(x), static_cast<int>(y) };
 }

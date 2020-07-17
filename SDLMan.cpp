@@ -64,7 +64,7 @@ bool SDLMan::init() {
 	}
 
 	// Initialize renderer color for clearing the screen (using black)
-	SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+	setDrawColor(0, 0, 0);
 
 	// Initialize SDL_mixer for sound support
 	if (Mix_OpenAudio(MIX_DEFAULT_FORMAT, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
@@ -145,6 +145,61 @@ SDL_Point SDLMan::getSize(std::shared_ptr<Texture> text) {
 	SDL_Point size{};
 	SDL_QueryTexture(text->getTexture(), NULL, NULL, &size.x, &size.y);
 	return size;
+}
+
+// Set's the current draw color of the renderer with RGB values between 0 and 255. Optional alpha transparency value defaults to 255 opaque.
+void SDLMan::setDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
+	SDL_SetRenderDrawColor(mRenderer, r, g, b, a);
+}
+
+// Draw's a line on screen with given starting and ending points using currently set draw color.
+void SDLMan::drawLine(int x1, int y1, int x2, int y2) {
+	SDL_RenderDrawLine(mRenderer, x1, y1, x2, y2);
+}
+
+// Draw's a line on screen with given starting and ending points using currently set draw color. Casts floating point parameter values to integers for screen drawing.
+void SDLMan::drawLine(decimal x1, decimal y1, decimal x2, decimal y2) {
+	SDL_RenderDrawLine(	mRenderer,
+						static_cast<int>(x1),
+						static_cast<int>(y1),
+						static_cast<int>(x2),
+						static_cast<int>(y2) );
+}
+
+
+// Draw's a circle using the Midpoint Circle Algorithm. Found on Stack Exchange.
+void SDLMan::drawCircle(int centreX, int centreY, int radius) {
+	const int diameter{ radius * 2 };
+
+	int x{ radius - 1 };
+	int y{ 0 };
+	int tx{ 1 };
+	int ty{ 1 };
+	int error{ tx - diameter };
+
+	while (x >= y) {
+		//  Each of the following renders an octant of the circle
+		SDL_RenderDrawPoint(mRenderer, centreX + x, centreY - y);
+		SDL_RenderDrawPoint(mRenderer, centreX + x, centreY + y);
+		SDL_RenderDrawPoint(mRenderer, centreX - x, centreY - y);
+		SDL_RenderDrawPoint(mRenderer, centreX - x, centreY + y);
+		SDL_RenderDrawPoint(mRenderer, centreX + y, centreY - x);
+		SDL_RenderDrawPoint(mRenderer, centreX + y, centreY + x);
+		SDL_RenderDrawPoint(mRenderer, centreX - y, centreY - x);
+		SDL_RenderDrawPoint(mRenderer, centreX - y, centreY + x);
+
+		if (error <= 0) {
+			++y;
+			error += ty;
+			ty += 2;
+		}
+
+		if (error > 0) {
+			--x;
+			tx += 2;
+			error += (tx - diameter);
+		}
+	}
 }
 
 // Load in a Texture object using the passed in filename, transparancy color, and transparancy on/off switch. Returns a smart pointer to a Texture object.
