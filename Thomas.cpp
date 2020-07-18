@@ -20,7 +20,9 @@ Thomas::Thomas(std::shared_ptr<SDLMan> sdlMan) : Sprite(sdlMan) {
 void Thomas::playerInput(SDL_Keycode key, bool press) {
     switch (key) {
         case SDLK_UP:
-            std::cout << mXPos << ", " << mYPos << std::endl;
+            std::cout << "Pos X/Y:\t\t" << mXPos << "\t" << mYPos << "\n";
+            std::cout << "Clip W/H:\t\t" << getCollisionRect().w << "\t" << getCollisionRect().h << "\n";
+            std::cout << "BCol X/Y:\t\t" << getCollisionRectBottom().x << "\t" << getCollisionRectBottom().y << std::endl;
             break;
 
         case SDLK_SPACE:

@@ -167,8 +167,8 @@ void SDLMan::drawLine(decimal x1, decimal y1, decimal x2, decimal y2) {
 }
 
 
-// Draw's a circle using the Midpoint Circle Algorithm. Found on Stack Exchange.
-void SDLMan::drawCircle(int centreX, int centreY, int radius) {
+// Draw's a circle using the Midpoint Circle Algorithm found on Stack Exchange.
+void SDLMan::drawCircle(int centerX, int centerY, int radius) {
 	const int diameter{ radius * 2 };
 
 	int x{ radius - 1 };
@@ -179,14 +179,14 @@ void SDLMan::drawCircle(int centreX, int centreY, int radius) {
 
 	while (x >= y) {
 		//  Each of the following renders an octant of the circle
-		SDL_RenderDrawPoint(mRenderer, centreX + x, centreY - y);
-		SDL_RenderDrawPoint(mRenderer, centreX + x, centreY + y);
-		SDL_RenderDrawPoint(mRenderer, centreX - x, centreY - y);
-		SDL_RenderDrawPoint(mRenderer, centreX - x, centreY + y);
-		SDL_RenderDrawPoint(mRenderer, centreX + y, centreY - x);
-		SDL_RenderDrawPoint(mRenderer, centreX + y, centreY + x);
-		SDL_RenderDrawPoint(mRenderer, centreX - y, centreY - x);
-		SDL_RenderDrawPoint(mRenderer, centreX - y, centreY + x);
+		SDL_RenderDrawPoint(mRenderer, centerX + x, centerY - y);
+		SDL_RenderDrawPoint(mRenderer, centerX + x, centerY + y);
+		SDL_RenderDrawPoint(mRenderer, centerX - x, centerY - y);
+		SDL_RenderDrawPoint(mRenderer, centerX - x, centerY + y);
+		SDL_RenderDrawPoint(mRenderer, centerX + y, centerY - x);
+		SDL_RenderDrawPoint(mRenderer, centerX + y, centerY + x);
+		SDL_RenderDrawPoint(mRenderer, centerX - y, centerY - x);
+		SDL_RenderDrawPoint(mRenderer, centerX - y, centerY + x);
 
 		if (error <= 0) {
 			++y;
@@ -200,6 +200,11 @@ void SDLMan::drawCircle(int centreX, int centreY, int radius) {
 			error += (tx - diameter);
 		}
 	}
+}
+
+// Draw's a filled circle using the Midpoint Circle Algorithm found on Stack Exchange. Inneficient 'for' loop of smaller circles fills it in.
+void SDLMan::drawCircleFilled(int centerX, int centerY, int radius) {
+	for (int i{ 1 }; i < (radius + 1); ++i) drawCircle(centerX, centerY, i);
 }
 
 // Load in a Texture object using the passed in filename, transparancy color, and transparancy on/off switch. Returns a smart pointer to a Texture object.

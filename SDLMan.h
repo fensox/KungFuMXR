@@ -69,7 +69,10 @@ public:
 	void drawLine(decimal x1, decimal y1, decimal x2, decimal y2);
 
 	// Draw's a circle using the Midpoint Circle Algorithm. Found on Stack Exchange.
-	void drawCircle(int centreX, int centreY, int radius);
+	void drawCircle(int centerX, int centerY, int radius);
+
+	// Draw's a filled circle using the Midpoint Circle Algorithm found on Stack Exchange. Inneficient 'for' loop of smaller circles fills it in.
+	void drawCircleFilled(int centerX, int centerY, int radius);
 
 	// Returns the height and width of a texture as an SDL_Point.
 	SDL_Point getSize(std::shared_ptr<Texture> text);

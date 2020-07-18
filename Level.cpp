@@ -148,7 +148,7 @@ SDL_Point Level::getPlayStart() {
 }
 
 // Returns the viewport on the levels top-left coordinates and the viewport width/height.
-SDL_Rect Level::getPosition() {
+SDL_Point Level::getPosition() {
     return mViewport;
 }
 
@@ -180,10 +180,13 @@ void Level::render() {
     // center viewport on the Sprite we've been told to follow
     centerViewport();
 
+    // put all viewport data into a rectangle for rendering
+    SDL_Rect vp{ mViewport.x, mViewport.y, FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT };
+
     //Render the area of level our viewport is pointing at
     SDL_RenderCopyEx(mSDLMan->getRenderer(),
         mBGTexture->getTexture(),
-        &mViewport,
+        &vp,
         NULL,
         0,
         NULL,
@@ -200,8 +203,8 @@ void Level::centerViewport() {
     mViewport.y = static_cast<int>(mFollowSprite->getY() - (FuGlobals::VIEWPORT_HEIGHT / 2));
     
     // check against level boundries and move back some if need be
-    int limitX{ mBGTexture->getSize().x - mViewport.w };
-    int limitY{ mBGTexture->getSize().y - mViewport.h };
+    int limitX{ mBGTexture->getSize().x - FuGlobals::VIEWPORT_WIDTH };
+    int limitY{ mBGTexture->getSize().y - FuGlobals::VIEWPORT_HEIGHT };
     // x
     if (mViewport.x > limitX) mViewport.x = limitX;
     else if (mViewport.x < 0) mViewport.x = 0;

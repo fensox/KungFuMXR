@@ -22,15 +22,17 @@ Sprite::Sprite(std::shared_ptr<SDLMan> sdlMan) {
 }
 
 /* Returns current texture's collision rectangle by value. Class Sprite creates a collision	box using the sprites
-position, height, and width. For more accurate collision this function should be overidden by derived classes. */
+position, height, and width from the sprite sheet. For more accurate collision this function should be overidden by derived classes. */
 const SDL_Rect& Sprite::getCollisionRect() {
     return  mAnimMap[mActionMode].at(mCurrentFrame);
 }
 
-/* Returns the current collision rectangle's center bottom point. */
+/* Returns the current collision rectangle's center bottom point compensating for position of viewport within level. */
 SDL_Point Sprite::getCollisionRectBottom() {
     const SDL_Rect r = getCollisionRect();
-    return SDL_Point { r.x, r.y + (r.h/2) };
+    int x = static_cast<int>(mXPos - mLevel->getPosition().x);
+    int y = static_cast<int>(mYPos + (r.h * mScale / 2)) - mLevel->getPosition().y;
+    return SDL_Point { x, y };
 }
 
 // Load sprite data from files - Needs to be called before any other functions can be called.
@@ -158,21 +160,27 @@ void Sprite::advanceFrame() {
     if (++mCurrentFrame >= count) mCurrentFrame = 0;
 }
 
-// Returns the current animation frame's rectangle.
+// Returns the current animation frame's rectangle from the sprite sheet.
 SDL_Rect Sprite::getRect() {
     return mAnimMap[mActionMode].at(mCurrentFrame);
 }
 
-// Draw a mark on four collision point boundries for debugging purposes.
+// Draws a mark on the screen for each collision point boundry. For debugging purposes.
 void Sprite::drawCollisionPoints() {
-    // set crosshair draw color to orange
-    mSDLMan->setDrawColor(255, 255, 0);
+    // set draw color and mark size
+    mSDLMan->setDrawColor(255, 0, 0);
+    int radius{ 3 };
+
+    // get our SDL_Rect for the current animation frame
+    std::vector<SDL_Rect>& tmpVect = mAnimMap[mActionMode];
+    SDL_Rect& clip{ tmpVect[mCurrentFrame] };
+
+    //center
+    mSDLMan->drawCircleFilled(static_cast<int>(mXPos - mLevel->getPosition().x), static_cast<int>(mYPos - mLevel->getPosition().y), radius);
 
     //bottom
     SDL_Point p{ getCollisionRectBottom() };
-    p.x += mXPos - mLevel->getPosition().x;
-    p.y += mYPos - mLevel->getPosition().y;
-    mSDLMan->drawCircle(p.x, p.y, 100);
+    mSDLMan->drawCircleFilled(p.x, p.y, radius);
 
     
     // return draw color to black
@@ -186,12 +194,12 @@ void Sprite::render() {
     SDL_Rect& clip{ tmpVect[mCurrentFrame] };
 
     // scale our animation frame based on mScale member for this sprite
-    double scaledW = clip.w * mScale;
-    double scaledH = clip.h * mScale;
+    decimal scaledW = clip.w * mScale;
+    decimal scaledH = clip.h * mScale;
 
     // create a destination rect cenetering texture on our position
-    double x{ mXPos - (scaledW / 2) };
-    double y{ mYPos - (scaledH / 2) };
+    decimal x{ mXPos - (scaledW / 2) };
+    decimal y{ mYPos - (scaledH / 2) };
     mDest = { static_cast<int>(x), static_cast<int>(y), static_cast<int>(scaledW), static_cast<int>(scaledH) };
    
     // adjust the Sprite coordinates by the distance the viewport is from origin (fixed a 3 day bug hunt where character exponentially ran faster than bg scroll)
@@ -213,11 +221,7 @@ void Sprite::render() {
 
 // Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 bool Sprite::downBump() {
-    // get our current action frame clip rectangle, and test if a pixel one beneath it collides with the level
-    SDL_Rect rect{ getRect() };
-    SDL_Point pnt{ rect.x, static_cast<int>(mYPos + (rect.h / 2) + 1) };
-
-    return mLevel->isACollision( pnt );
+    return mLevel->isACollision( getCollisionRectBottom() );
 }
 
 // Applies gravity to the sprite depending on boolean parameter. Also checks if just finished a fall and cleans up some variables if so.

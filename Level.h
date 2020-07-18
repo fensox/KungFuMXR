@@ -43,7 +43,7 @@ public:
 	SDL_Point getSize();
 
 	// Returns the viewport's top-left coordinates and width/height.
-	SDL_Rect getPosition();
+	SDL_Point getPosition();
 
 	// Render the level
 	void render();
@@ -77,7 +77,7 @@ private:
 	SDL_Point mPlayStart{};
 
 	// Holds the current viewport rectangle over the level. Get's centered on mFollowSprite member's position.
-	SDL_Rect mViewport{0, 0, FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT};
+	SDL_Point mViewport{ 0, 0 };
 
 	// Smart pointer to an SDLMan object used to draw the level
 	std::shared_ptr<SDLMan> mSDLMan{ nullptr };
