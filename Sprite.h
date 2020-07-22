@@ -28,13 +28,11 @@ public:
 	// Renders the sprite based on position, action mode, animation frame using a SDL_Renderer from SDLMan.
 	void render();
 
-	/* Returns current action frame's collision rectangle by value. Class Sprite creates a default collision box
-	using the sprite's texture position, height, and width. For more accurate collision boxes than just the
-	bounding box this function may be overidden by derived classes. */
-	virtual const SDL_Rect& getCollisionRect();
-
-	/* Returns the current collision rectangle's center bottom point. */
-	SDL_Point getCollisionRectBottom();
+	/*  Returns current Sprite's action frame collision rectangle by value. The position of the rectangle is set to player
+	coordinates in the level. Width and height are set to the size of the sprite sheet animation we are currently on and
+	scaled based on the Sprite mScale scaling factor. For more accurate	collision boxes than just the bounding box, this
+	function may be overidden by derived classes. */
+	virtual SDL_Rect getCollisionRect();
 
 	// Sets the smart pointer member variable that points to the Level currently being played.
 	void setLevel(std::shared_ptr<Level> level);
@@ -60,8 +58,8 @@ public:
 	// Returns the sprite's y coordinate position relative to level.
 	decimal getY();
 
-	// Returns the current animation frame's rectangle.
-	SDL_Rect getRect();
+	// Returns by value the current animation frame's rectangle. Sprite sheet coordinate relative.
+	const SDL_Rect& getRect();
 
 	// Draw collision points as crosshairs. Useful for debugging purposes.
 	void drawCollisionPoints();
@@ -137,7 +135,7 @@ protected:
 	void applyGravity(bool standing);
 
 	// Applies friction to the sprite's velocity.
-	void applyFriction();
+	void applyFriction(bool standing);
 
 private:
 	// Smart pointer to the Texture holding our sprite's sprite sheet.

@@ -68,6 +68,12 @@ public:
 	// Draw's a line on screen with given starting and ending points using currently set draw color. Casts floating point parameter values to integers for screen drawing.
 	void drawLine(decimal x1, decimal y1, decimal x2, decimal y2);
 
+	// Draw's a rectangle outline with given integer coordinates and size.
+	void drawRect(int x, int y, int w, int h);
+
+	// Draw's a rectangle outline with given SDL_Rect.
+	void drawRect(const SDL_Rect& rect);
+
 	// Draw's a circle using the Midpoint Circle Algorithm. Found on Stack Exchange.
 	void drawCircle(int centerX, int centerY, int radius);
 

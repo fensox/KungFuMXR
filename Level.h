@@ -27,8 +27,11 @@ public:
 	// Returns all hard collision objects in level.
 	ColRects getColRects();
 
-	// Checks if the given point is contained in a collision rect for the level.
-	bool isACollision(SDL_Point pnt);
+	// Checks if the given point is contained in a collision rectangle for the level.
+	bool isACollision(const SDL_Point& pnt);
+
+	// Checks if the given rectangle is intersecting a collision rectangle for the level.
+	bool isACollision(const SDL_Rect& rect);
 
 	// Checks if the given point is contained in a collision rect for the level. Parameter of PointF is cast to integer type SDL_Point.
 	bool isACollision(PointF pnt);

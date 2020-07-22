@@ -17,21 +17,26 @@ public:
 	void move();
 
 private:
-	// Walk speed of player
-	//Uint32 mWalkWaitTime{ 50 };
-	const Uint32 WALK_WAIT_TIME { 15 };
+	// Time between walk speed increases
+	const Uint32 WALK_WAIT_TIME { 100 };
 
 	// Walk velocity increase per mWalkWaitTime
-	const decimal WALK_VELOCITY_PER { 2.5 };
+	const decimal WALK_VELOCITY_PER { 5 };
 
 	// Maximum velocity player can walk
 	const decimal WALK_MAX { 5 };
 
 	// Jump power is the amount added to upward velocity when jump action initiated
-	const decimal JUMP_VELOCITY { 5 };
+	const decimal JUMP_VELOCITY { 6 };
+
+	// Time after a jump that has to pass before another jump
+	const Uint32 JUMP_WAIT_TIME{ 0 };
 
 	// Last time we took a step in SDL ticks. Used to regulate walking speed.
 	Uint32 mLastWalkTime{};
+
+	// Last time we jumped in SDL ticks. Used to regulate time between jumps.
+	Uint32 mLastJumpTime{};
 
 	// Handles the player requesting to move to the right.
 	void moveRight();
@@ -51,5 +56,8 @@ private:
 
 	// Adjust the player position back inside the level if an out of bounds location has been detected.
 	void adjustForLevelBounds();
+
+	//***DEBUG*** Outputs some debugging info
+	void outputDebug();
 };
 

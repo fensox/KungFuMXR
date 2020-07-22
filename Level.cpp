@@ -27,7 +27,7 @@ bool Level::load() {
     if (!loadBGTexture()) success = false;
 
     //***DEBUG***
-    if (FuGlobals::DEBUG_MODE) std::cout << toString();
+    //if (FuGlobals::DEBUG_MODE) std::cout << toString();
 
     return success;
 }
@@ -229,13 +229,22 @@ void Level::drawColRects() {
 }
 
 // Checks if the given point is contained in a collision rect for the level.
-bool Level::isACollision(SDL_Point pnt) {
+bool Level::isACollision(const SDL_Point& pnt) {
     // loop through all our level collision rectangles checking for a collision
     for (int i{ 0 }; i < mColRects->size(); ++i) {
-        SDL_Rect r = mColRects->at(i);
-        r.x -= mViewport.x; // compensate for viewport's distance from level origin
-        r.y -= mViewport.y;
+        const SDL_Rect& r = mColRects->at(i);
         if (SDL_PointInRect(&pnt, &r)) return true;
+    }
+
+    return false;
+}
+
+// Checks if the given rectangle is intersecting a collision rectangle for the level.
+bool Level::isACollision(const SDL_Rect& rect) {
+    // loop through all our level collision rectangles checking for a collision
+    for (int i{ 0 }; i < mColRects->size(); ++i) {
+        const SDL_Rect& r = mColRects->at(i);
+        if (SDL_HasIntersection(&rect, &r)) return true;
     }
 
     return false;

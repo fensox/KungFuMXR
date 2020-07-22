@@ -21,18 +21,23 @@ Sprite::Sprite(std::shared_ptr<SDLMan> sdlMan) {
     mSDLMan = sdlMan;
 }
 
-/* Returns current texture's collision rectangle by value. Class Sprite creates a collision	box using the sprites
-position, height, and width from the sprite sheet. For more accurate collision this function should be overidden by derived classes. */
-const SDL_Rect& Sprite::getCollisionRect() {
-    return  mAnimMap[mActionMode].at(mCurrentFrame);
-}
+/*  Returns current Sprite's action frame collision rectangle by value. The position of the rectangle is set to player
+    coordinates in the level. Width and height are set to the size of the sprite sheet animation we are currently on and
+    scaled based on the Sprite mScale scaling factor. For more accurate	collision boxes than just the bounding box, this
+    function may be overidden by derived classes. */
+SDL_Rect Sprite::getCollisionRect() {
+    // get current sprite sheet clip rectangle
+    SDL_Rect rect{ mAnimMap[mActionMode].at(mCurrentFrame) };
 
-/* Returns the current collision rectangle's center bottom point compensating for position of viewport within level. */
-SDL_Point Sprite::getCollisionRectBottom() {
-    const SDL_Rect r = getCollisionRect();
-    int x = static_cast<int>(mXPos - mLevel->getPosition().x);
-    int y = static_cast<int>(mYPos + (r.h * mScale / 2)) - mLevel->getPosition().y;
-    return SDL_Point { x, y };
+    // adjust w, h based on our mScale scaling factor
+    rect.w *= mScale;
+    rect.h *= mScale;
+
+    // adjust x, y coordinates from sprite sheet relative to level relative
+    rect.x = static_cast<int>(mXPos);
+    rect.y = static_cast<int>(mYPos);
+    
+    return rect;
 }
 
 // Load sprite data from files - Needs to be called before any other functions can be called.
@@ -113,7 +118,7 @@ void Sprite::setLevel(std::shared_ptr<Level> level) {
 
 // Returns a string representation of the sprite information
 std::string Sprite::toString() {
-    SDL_Rect cr = getCollisionRect();
+    const SDL_Rect& cr = getCollisionRect();
     std::ostringstream output;
     output << "Sprite name: " << mName << ", Position: " << mXPos << ", " << mYPos << ", Depth: " << mDepth << ", ";
     output << "# of action modes: " << mAnimMap.size() << ", " << "Current ation mode: " << mActionMode << "\n";
@@ -160,8 +165,8 @@ void Sprite::advanceFrame() {
     if (++mCurrentFrame >= count) mCurrentFrame = 0;
 }
 
-// Returns the current animation frame's rectangle from the sprite sheet.
-SDL_Rect Sprite::getRect() {
+// Returns the current animation frame's rectangle from the sprite sheet. Sprite sheet coordinate relative.
+const SDL_Rect& Sprite::getRect() {
     return mAnimMap[mActionMode].at(mCurrentFrame);
 }
 
@@ -171,18 +176,15 @@ void Sprite::drawCollisionPoints() {
     mSDLMan->setDrawColor(255, 0, 0);
     int radius{ 3 };
 
-    // get our SDL_Rect for the current animation frame
-    std::vector<SDL_Rect>& tmpVect = mAnimMap[mActionMode];
-    SDL_Rect& clip{ tmpVect[mCurrentFrame] };
-
-    //center
+    // draw a circle at our center coordinates
     mSDLMan->drawCircleFilled(static_cast<int>(mXPos - mLevel->getPosition().x), static_cast<int>(mYPos - mLevel->getPosition().y), radius);
 
-    //bottom
-    SDL_Point p{ getCollisionRectBottom() };
-    mSDLMan->drawCircleFilled(p.x, p.y, radius);
+    // draw our collision rectangle
+    SDL_Rect rect{ getCollisionRect() };
+    rect.x -= static_cast<int>(mLevel->getPosition().x + rect.w / 2);
+    rect.y -= static_cast<int>(mLevel->getPosition().y + rect.h / 2);
+    mSDLMan->drawRect(rect);
 
-    
     // return draw color to black
     mSDLMan->setDrawColor(0, 0, 0);
 }
@@ -190,8 +192,7 @@ void Sprite::drawCollisionPoints() {
 // Renders the sprite based on position, action mode, animation frame using a SDL_Renderer from SDLMan.
 void Sprite::render() {
     // get our SDL_Rect for the current animation frame
-    std::vector<SDL_Rect>& tmpVect = mAnimMap[mActionMode];
-    SDL_Rect& clip{ tmpVect[mCurrentFrame] };
+    const SDL_Rect& clip{ getRect() };
 
     // scale our animation frame based on mScale member for this sprite
     decimal scaledW = clip.w * mScale;
@@ -221,10 +222,15 @@ void Sprite::render() {
 
 // Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 bool Sprite::downBump() {
-    return mLevel->isACollision( getCollisionRectBottom() );
+    // get current collision rectagle and shrink it down to just the bottom
+    SDL_Rect rect{ getCollisionRect() };
+    rect.y += static_cast<int>(rect.h / 2);
+    rect.h = 2;
+    
+    return mLevel->isACollision( rect );
 }
 
-// Applies gravity to the sprite depending on boolean parameter. Also checks if just finished a fall and cleans up some variables if so.
+// Applies gravity to the sprite if parameter set to true otherwise checks if sprite just finished a fall and cleans up velocity variables.
 void Sprite::applyGravity(bool standing) {
     if (standing) {
         // we are standing on something, if its the end of a fall, stop and downward velocity AND upward velocity to make sure up/down both canceled out.
@@ -245,10 +251,14 @@ void Sprite::applyGravity(bool standing) {
 }
 
 // Applies friction to the sprite
-void Sprite::applyFriction() {
-    mVeloc.left -= FuGlobals::FRICTION;
+void Sprite::applyFriction(bool standing) {
+    // set what friction value we will use
+    decimal friction{ FuGlobals::GROUND_FRICTION };
+    if (!standing) friction = FuGlobals::AIR_FRICTION;
+
+    mVeloc.left -= friction;
     if (mVeloc.left < 0) mVeloc.left = 0;
-    mVeloc.right -= FuGlobals::FRICTION;
+    mVeloc.right -= friction;
     if (mVeloc.right < 0) mVeloc.right = 0;
 }
 
@@ -257,47 +267,62 @@ void Sprite::move() {
     // check for a downward collision to see if we are on stable ground. This will decide gravity and friction application
     bool standing{ downBump() };
 
-    // apply gravity - if not downBump'ing increase down velocity by our gravity global every gravity time interval specified by our gravity globals
+    // apply gravity
     applyGravity(standing);
 
     // apply friction
-    if (standing) applyFriction();
+    applyFriction(standing);
 
-    // temporarily adjust position based on velocities then we test if we can move that much without a collision
-    decimal tryX = mXPos + mVeloc.right - mVeloc.left;
-    decimal tryY = mYPos - mVeloc.up + mVeloc.down;
+    // add up how much we are trying to move
+    int tryX{ static_cast<int>(std::round(mVeloc.right - mVeloc.left)) };
+    int tryY{ static_cast<int>(std::round(mVeloc.down - mVeloc.up)) };
+
+    //get our collision rectangle and move x/y coordinates from center to top left
+    SDL_Rect rect{ getCollisionRect() };
+    rect.x -= rect.w / 2;
+    rect.y -= rect.h / 2;
 
     // x test and possible reduction in distance
-    SDL_Rect rect{ getRect() };
-    int tmpPos = static_cast<int>(tryX);
-    PointF pnt{ 0.f, 0.f };
-    if (tryX > 0) {
-        for (int i{ tmpPos }; i > 0; --i) {
-            pnt = { i + (rect.w / 2), tryY };
-            if (!mLevel->isACollision(pnt)) break;
+    if (tryX > 0) {                                 // going right
+        for (int i{ 0 }; i < tryX; ++i) {
+            rect.x += 1;
+            if (mLevel->isACollision(rect)) {
+                rect.x -= 1;
+                break;
+            }
         }
-    } else if (tryX < 0) {
-        for (int i{ tmpPos }; i < 0; ++i) {
-            pnt = { i - (rect.w / 2), tryY };
-            if (!mLevel->isACollision(pnt)) break;
+    } else if (tryX < 0) {                          // going left
+        for (int i{ 0 }; i > tryX; --i) {
+            rect.x -= 1;
+            if (mLevel->isACollision(rect)) {
+                rect.x += 1;
+                break;
+            }
         }
     }
 
     // y test and possible reduction in distance
-    tmpPos = static_cast<int>(tryY);
-    if (tryY > 0) {
-        for (int i{ tmpPos }; i > 0; --i) {
-            pnt = { tryX, i + (rect.h / 2) };
-            if (!mLevel->isACollision(pnt)) break;
+    if (tryY > 0) {                                 // going down
+        for (int i{ 0 }; i < tryY; ++i) {
+            rect.y += 1;
+            if (mLevel->isACollision(rect)) {
+                rect.y -= 1;
+                break;
+            }
         }
-    } else if (tryY < 0) {
-        for (int i{ tmpPos }; i < 0; ++i) {
-            pnt = { tryX, i - (rect.h / 2) };
-            if (!mLevel->isACollision(pnt)) break;
-        }
+    } else if (tryY < 0) {                          // going up - don't check for level collisions so we jump through platforms
+        rect.y += tryY;
+        /* Old routine that detects platforms while velocity is taking us up. Commented out to allow jump through platforms plus was a little sticky on things.
+        for (int i{ 0 }; i > tryY; --i) {
+            rect.y -= 1;
+            if (mLevel->isACollision(rect)) {
+                rect.y += 1;
+                break;
+            }
+        }*/
     }
 
     // set the position now that all tests have completed
-    mXPos = tryX;
-    mYPos = tryY;
+    mXPos = rect.x + rect.w / 2;
+    mYPos = rect.y + rect.h / 2;
 }

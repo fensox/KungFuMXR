@@ -166,6 +166,16 @@ void SDLMan::drawLine(decimal x1, decimal y1, decimal x2, decimal y2) {
 						static_cast<int>(y2) );
 }
 
+// Draw's a rectangle outline with given coordinates and size.
+void SDLMan::drawRect(int x, int y, int w, int h) {
+	const SDL_Rect rect{ x, y, w, h };
+	SDL_RenderDrawRect(mRenderer, &rect);
+}
+
+// Draw's a rectangle outline with given SDL_Rect.
+void SDLMan::drawRect(const SDL_Rect& rect) {
+	SDL_RenderDrawRect(mRenderer, &rect);
+}
 
 // Draw's a circle using the Midpoint Circle Algorithm found on Stack Exchange.
 void SDLMan::drawCircle(int centerX, int centerY, int radius) {
