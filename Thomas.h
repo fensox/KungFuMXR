@@ -9,8 +9,11 @@ public:
 	// Use base Sprite constructor
 	Thomas(std::shared_ptr<SDLMan> sdlMan);
 
-	// Handles input from the player. SDL_Keycode is the key and the bool is true on key pressed and false on key released.
-	void playerInput(SDL_Keycode key, bool press);
+	// Handles keyboard input from the player. SDL_Keycode is the key and the bool is true on key pressed and false on key released.
+	void playerInput(const SDL_Keycode& key, bool press);
+
+	// Handles jopystick input from the player.
+	void playerInputJoystick(const SDL_Event& e);
 
 	// Moves player based on velocities adjusting for gravity, friction, and collisions. Overrides the Sprite class default move function
 	// for a few custom player effects like respecting level boundries that other sprites do not need to do.

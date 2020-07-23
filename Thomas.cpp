@@ -24,8 +24,35 @@ void Thomas::outputDebug() {
     std::cout << "Downbump:\t\t" << std::boolalpha << downBump() << std::endl;
 }
 
-// Handles input from the player. SDL_Keycode is the key and the bool is true on key pressed and false on key released.
-void Thomas::playerInput(SDL_Keycode key, bool press) {
+// Handles jopystick input from the player.
+void Thomas::playerInputJoystick(const SDL_Event& e) {
+    using namespace FuGlobals;
+
+    //X axis motion
+    if (e.jaxis.axis == 0) {
+        if (e.jaxis.value < -JOYSTICK_DEAD_ZONE) {          // Left of dead zone
+            LEFT = true;
+            RIGHT = false;
+        } else if (e.jaxis.value > JOYSTICK_DEAD_ZONE) {    // Right of dead zone
+            RIGHT = true;
+            LEFT = false;
+        } else {                                            // Stick not engaged on x axis
+            RIGHT = false;
+            LEFT = false;
+        }
+    } else if (e.jaxis.axis == 1) {                         // Y axis motion
+        if (e.jaxis.value < -JOYSTICK_DEAD_ZONE) {          // Up above dead zone
+            JUMP = true;
+        } else if (e.jaxis.value > JOYSTICK_DEAD_ZONE) {    // Down below dead zone
+            // do something with joystick down press
+        } else {                                            // Stick not engaged on y axis
+            JUMP = false;
+        }
+    }
+}
+
+// Handles keyboard input from the player. SDL_Keycode is the key and the bool is true on key pressed and false on key released.
+void Thomas::playerInput(const SDL_Keycode& key, bool press) {
     switch (key) {
         case SDLK_UP:
             //***DEBUG***
@@ -131,8 +158,6 @@ void Thomas::move() {
     if (JUMP) jump();
     if (LEFT) moveLeft();
     if (RIGHT) moveRight();
-
-    std::cout << "P Veloc L, R / U, D:\t" << mVeloc.left << "\t" << mVeloc.right << "\t/\t" << mVeloc.up << "\t" << mVeloc.down << "\n";
 
     Sprite::move();
 

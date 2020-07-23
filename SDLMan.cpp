@@ -21,6 +21,10 @@ SDLMan::~SDLMan() {
 	mRenderer = nullptr;
 	mWindow = nullptr;
 
+	// Close gamepad
+	SDL_JoystickClose(mJoystick1);
+	mJoystick1 = nullptr;
+
 	// Free music
 	Mix_FreeMusic(mMusic);
 	mMusic = nullptr;
@@ -34,7 +38,7 @@ SDLMan::~SDLMan() {
 // Initilizes SDL, creates the window and renderer but does not show the window until a call to showWindow is made.
 bool SDLMan::init() {
 	// Attempt to initialize SDL returning false on failure and logging an error.
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0) {
 		std::cerr << "Failed in SDLMan::init: SDL could not initialize. SDL Error: \n" << SDL_GetError();
 		return false;
 	}
@@ -69,9 +73,12 @@ bool SDLMan::init() {
 	// Initialize SDL_mixer for sound support
 	if (Mix_OpenAudio(MIX_DEFAULT_FORMAT, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
 	{
-		std::cout << "Failed in SDLMan::init, SDL_mixer could not initialize. SDL_mixer Error: \n" << Mix_GetError() << std::endl;;
+		std::cerr << "Failed in SDLMan::init, SDL_mixer could not initialize. SDL_mixer Error: \n" << Mix_GetError() << std::endl;;
 		return false;
 	}
+
+	// Attempt to open a joystick if one is connected.
+	openGamepad();
 
 	// Initialize variables used for FPS calculation
 	memset(fpsTimes, 0, sizeof(fpsTimes));
@@ -80,6 +87,17 @@ bool SDLMan::init() {
 	fpsLast = SDL_GetTicks();
 
 	return true;
+}
+
+// Open a gamepad for use. Returns false if a gamepad could not be found and opened.
+void SDLMan::openGamepad() {
+	// make sure there is a gamepad connected and open it
+	if (SDL_NumJoysticks() > 0) {
+		mJoystick1 = SDL_JoystickOpen(0);
+		if (mJoystick1 == NULL) {
+			std::cerr << "SDLMan::openGamepad: Warning: Unable to open game controller! SDL Error: " << SDL_GetError() << std::endl;
+		}
+	}
 }
 
 // Renders to the screen the contents of the buffer

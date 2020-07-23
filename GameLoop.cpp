@@ -116,11 +116,13 @@ bool GameLoop::handleEvents() {
 
     // Cycle through all events on the event queue
     while (SDL_PollEvent(&e)) {
-        if (e.type == SDL_QUIT) {																	// Handle request to quit
+		if (e.type == SDL_QUIT) {										// Handle request to quit
 			quit = true;
-        } else if (e.type == SDL_KEYDOWN) {															// Handle keyboard presses
+		} else if (e.type == SDL_JOYAXISMOTION) {						// Handle joystick input
+			if (e.jaxis.which == 0) mPlayer->playerInputJoystick(e);
+        } else if (e.type == SDL_KEYDOWN) {								// Handle keyboard key down
             mPlayer->playerInput(e.key.keysym.sym, true);
-		} else if (e.type == SDL_KEYUP) {
+		} else if (e.type == SDL_KEYUP) {								// Handle keyboard key released
 			mPlayer->playerInput(e.key.keysym.sym, false);
 		}
     }
