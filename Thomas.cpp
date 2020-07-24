@@ -140,8 +140,8 @@ bool Thomas::checkWalkTime() {
 
 // Adjust the player position back inside the level if an out of bounds location has been detected.
 void Thomas::adjustForLevelBounds() {
-    int downBound{ mLevel->getSize().y - FuGlobals::LEVEL_BOUNDS };
-    int rightBound{ mLevel->getSize().x - FuGlobals::LEVEL_BOUNDS };
+    int downBound{ mLevel.lock()->getSize().y - FuGlobals::LEVEL_BOUNDS };
+    int rightBound{ mLevel.lock()->getSize().x - FuGlobals::LEVEL_BOUNDS };
     
     // x
     if (mXPos < FuGlobals::LEVEL_BOUNDS) mXPos = FuGlobals::LEVEL_BOUNDS;

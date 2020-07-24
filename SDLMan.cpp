@@ -15,6 +15,8 @@ SDLMan::SDLMan(std::string windowCaption, bool fullScreen, int width, int height
 
 // Destructor. Close down SDL.
 SDLMan::~SDLMan() {
+	if (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: SDLMan" << std::endl;
+
 	// Destroy buffer texture, renderer, and the window
 	SDL_DestroyRenderer(mRenderer);
 	SDL_DestroyWindow(mWindow);
@@ -22,8 +24,7 @@ SDLMan::~SDLMan() {
 	mWindow = nullptr;
 
 	// Close gamepad
-	SDL_JoystickClose(mJoystick1);
-	mJoystick1 = nullptr;
+	closeGamepad();
 
 	// Free music
 	Mix_FreeMusic(mMusic);
@@ -38,7 +39,7 @@ SDLMan::~SDLMan() {
 // Initilizes SDL, creates the window and renderer but does not show the window until a call to showWindow is made.
 bool SDLMan::init() {
 	// Attempt to initialize SDL returning false on failure and logging an error.
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) < 0) {
 		std::cerr << "Failed in SDLMan::init: SDL could not initialize. SDL Error: \n" << SDL_GetError();
 		return false;
 	}
@@ -89,15 +90,28 @@ bool SDLMan::init() {
 	return true;
 }
 
-// Open a gamepad for use. Returns false if a gamepad could not be found and opened.
+// Open a gamepad for use. Prints a warning to the error output stream if cannot open a controller but does not prevent game from continuing.
 void SDLMan::openGamepad() {
-	// make sure there is a gamepad connected and open it
-	if (SDL_NumJoysticks() > 0) {
-		mJoystick1 = SDL_JoystickOpen(0);
-		if (mJoystick1 == NULL) {
-			std::cerr << "SDLMan::openGamepad: Warning: Unable to open game controller! SDL Error: " << SDL_GetError() << std::endl;
+	// make sure there is a gamepad connected and open the first one
+	if (FuGlobals::DEBUG_MODE) std::cout << "SDLMan::openGamepad - Game controller open attempt." << std::endl;
+	for (int i = 0; i < SDL_NumJoysticks(); ++i) {
+		if (SDL_IsGameController(i)) {
+			mController1 = SDL_GameControllerOpen(i);
+			if (mController1) {
+				if (FuGlobals::DEBUG_MODE) std::cout << "SDLMan::openGamepad - Game controller open success." << std::endl;
+				break;
+			} else {
+				std::cerr << "SDLMan::openGamepad: Warning: Unable to open game controller! SDL Error: " << SDL_GetError() << std::endl;
+			}
 		}
 	}
+}
+
+// Close the gamepad device we may have opened.
+void SDLMan::closeGamepad() {
+	if (FuGlobals::DEBUG_MODE) std::cout << "SDLMan::closeGamepad - Game controller closed." << std::endl;
+	SDL_GameControllerClose(mController1);
+	mController1 = nullptr;
 }
 
 // Renders to the screen the contents of the buffer

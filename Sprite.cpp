@@ -17,8 +17,16 @@
    After the Sprite derived is constructed a call to load() must be made before any other function calls will operate correctly.
 */
 Sprite::Sprite(std::shared_ptr<SDLMan> sdlMan) {
-    // store the SDLMan smart pointer
+    // store the SDLMan smart shared pointer in our weak_ptr. Using weak to prevent cyclic shared_ptr problems as multiple objects hold a reference to SDLMan.
     mSDLMan = sdlMan;
+}
+
+// Destructor
+Sprite::~Sprite() {
+    if (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: Sprite" << std::endl;
+    mTexture.reset();
+    mLevel.reset();
+    mSDLMan.reset();
 }
 
 /*  Returns current Sprite's action frame collision rectangle by value. The position of the rectangle is set to player
@@ -106,7 +114,7 @@ bool Sprite::loadDataFile() {
 
 // Load in the sprite sheet specified in the const string mSpriteSheet and set transparency. Return boolean success.
 bool Sprite::loadSpriteSheet() {    
-    mTexture = mSDLMan->loadImage(mSpriteSheet, mTrans, true);
+    mTexture = mSDLMan.lock()->loadImage(mSpriteSheet, mTrans, true);
     
     return (!(mTexture==nullptr));
 }
@@ -173,20 +181,20 @@ const SDL_Rect& Sprite::getRect() {
 // Draws a mark on the screen for each collision point boundry. For debugging purposes.
 void Sprite::drawCollisionPoints() {
     // set draw color and mark size
-    mSDLMan->setDrawColor(255, 0, 0);
+    mSDLMan.lock()->setDrawColor(255, 0, 0);
     int radius{ 3 };
 
     // draw a circle at our center coordinates
-    mSDLMan->drawCircleFilled(static_cast<int>(mXPos - mLevel->getPosition().x), static_cast<int>(mYPos - mLevel->getPosition().y), radius);
+    mSDLMan.lock()->drawCircleFilled(static_cast<int>(mXPos - mLevel.lock()->getPosition().x), static_cast<int>(mYPos - mLevel.lock()->getPosition().y), radius);
 
     // draw our collision rectangle
     SDL_Rect rect{ getCollisionRect() };
-    rect.x -= static_cast<int>(mLevel->getPosition().x + rect.w / 2);
-    rect.y -= static_cast<int>(mLevel->getPosition().y + rect.h / 2);
-    mSDLMan->drawRect(rect);
+    rect.x -= static_cast<int>(mLevel.lock()->getPosition().x + rect.w / 2);
+    rect.y -= static_cast<int>(mLevel.lock()->getPosition().y + rect.h / 2);
+    mSDLMan.lock()->drawRect(rect);
 
     // return draw color to black
-    mSDLMan->setDrawColor(0, 0, 0);
+    mSDLMan.lock()->setDrawColor(0, 0, 0);
 }
 
 // Renders the sprite based on position, action mode, animation frame using a SDL_Renderer from SDLMan.
@@ -204,11 +212,11 @@ void Sprite::render() {
     mDest = { static_cast<int>(x), static_cast<int>(y), static_cast<int>(scaledW), static_cast<int>(scaledH) };
    
     // adjust the Sprite coordinates by the distance the viewport is from origin (fixed a 3 day bug hunt where character exponentially ran faster than bg scroll)
-    mDest.x -= mLevel->getPosition().x;
-    mDest.y -= mLevel->getPosition().y;
+    mDest.x -= mLevel.lock()->getPosition().x;
+    mDest.y -= mLevel.lock()->getPosition().y;
 
     //Render to screen
-    SDL_RenderCopyEx(   mSDLMan->getRenderer(),
+    SDL_RenderCopyEx(   mSDLMan.lock()->getRenderer(),
                         mTexture->getTexture(),
                         &clip,
                         &mDest,
@@ -227,7 +235,7 @@ bool Sprite::downBump() {
     rect.y += static_cast<int>(rect.h / 2);
     rect.h = 2;
     
-    return mLevel->isACollision( rect );
+    return mLevel.lock()->isACollision( rect );
 }
 
 // Applies gravity to the sprite if parameter set to true otherwise checks if sprite just finished a fall and cleans up velocity variables.
@@ -286,7 +294,7 @@ void Sprite::move() {
     if (tryX > 0) {                                 // going right
         for (int i{ 0 }; i < tryX; ++i) {
             rect.x += 1;
-            if (mLevel->isACollision(rect)) {
+            if (mLevel.lock()->isACollision(rect)) {
                 rect.x -= 1;
                 break;
             }
@@ -294,7 +302,7 @@ void Sprite::move() {
     } else if (tryX < 0) {                          // going left
         for (int i{ 0 }; i > tryX; --i) {
             rect.x -= 1;
-            if (mLevel->isACollision(rect)) {
+            if (mLevel.lock()->isACollision(rect)) {
                 rect.x += 1;
                 break;
             }
@@ -305,7 +313,7 @@ void Sprite::move() {
     if (tryY > 0) {                                 // going down
         for (int i{ 0 }; i < tryY; ++i) {
             rect.y += 1;
-            if (mLevel->isACollision(rect)) {
+            if (mLevel.lock()->isACollision(rect)) {
                 rect.y -= 1;
                 break;
             }

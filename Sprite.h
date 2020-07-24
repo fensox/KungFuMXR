@@ -22,6 +22,8 @@ public:
 	Sprite(std::shared_ptr<SDLMan> sdlMan);
 	Sprite() = delete;
 
+	~Sprite();
+
 	// Load sprite data from files - Needs to be called before any other functions can be called.
 	bool load();
 
@@ -108,10 +110,10 @@ protected:
 
 	// Smart pointer to the level we are on. Various Level functions allow sprites to move level viewport and
 	// check level collision rectangles, boundries, etc..
-	std::shared_ptr<Level> mLevel{ nullptr };
+	std::weak_ptr<Level> mLevel{ std::shared_ptr<Level>() };
 
 	// Smart pointer to the SDLMan object passed in during construction.
-	std::shared_ptr<SDLMan> mSDLMan{ nullptr };
+	std::weak_ptr<SDLMan> mSDLMan{ std::shared_ptr<SDLMan>() };
 
 	// Holds velocity/momentum for the four 2d directions. These modify speed/position in jumps, falls, etc.
 	// Gravity, friction, hits taken, etc can also modify these in return.
@@ -139,7 +141,7 @@ protected:
 
 private:
 	// Smart pointer to the Texture holding our sprite's sprite sheet.
-	std::shared_ptr<Texture> mTexture{ nullptr };
+	std::unique_ptr<Texture> mTexture{ nullptr };
 
 	// Holds the depth of this Sprite. Used for rendering of things in front/behind each other.
 	int mDepth{};

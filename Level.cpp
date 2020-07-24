@@ -13,6 +13,15 @@ Level::Level(std::string filename, std::shared_ptr<SDLMan> sdlMan) {
     mColRects = std::make_shared<std::vector<SDL_Rect>>();
 }
 
+// Destructor
+Level::~Level() {
+    if (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: Level" << std::endl;
+    mColRects.reset();
+    mBGTexture.reset();
+    mFollowSprite.reset();
+    mSDLMan.reset();
+}
+
 // Loads in the level
 bool Level::load() {
     bool success{ true };
@@ -36,14 +45,14 @@ bool Level::load() {
 bool Level::loadBGTexture() {
     bool useTrans{ true };
     if (mTrans.a == 0) useTrans = false;
-    mBGTexture = mSDLMan->loadImage(mBGFile, mTrans, useTrans);
+    mBGTexture = mSDLMan.lock()->loadImage(mBGFile, mTrans, useTrans);
     
     return (!(mBGTexture == nullptr));
 }
 
 // Load the level's music file into SDLMan.
 bool Level::loadMusicFile() {
-    return (mSDLMan->loadMusic(mMusicFile));
+    return (mSDLMan.lock()->loadMusic(mMusicFile));
 }
 
 // Load in the level's metadata file
@@ -167,7 +176,7 @@ std::string Level::toString() {
 
 // Returns the height and width of the level background in an SDL_Point.
 SDL_Point Level::getSize() {
-    return mSDLMan->getSize(mBGTexture);
+    return mSDLMan.lock()->getSize(mBGTexture);
 }
 
 // Set's the Sprite pointer that this level's viewport will stay centered on.
@@ -184,7 +193,7 @@ void Level::render() {
     SDL_Rect vp{ mViewport.x, mViewport.y, FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT };
 
     //Render the area of level our viewport is pointing at
-    SDL_RenderCopyEx(mSDLMan->getRenderer(),
+    SDL_RenderCopyEx(mSDLMan.lock()->getRenderer(),
         mBGTexture->getTexture(),
         &vp,
         NULL,
@@ -199,8 +208,8 @@ void Level::render() {
 // Centers the viewport on given x, y coordinates adjusting for level boundries.
 void Level::centerViewport() {
     // move the viewport to given coordinates
-    mViewport.x = static_cast<int>(mFollowSprite->getX() - (FuGlobals::VIEWPORT_WIDTH / 2));
-    mViewport.y = static_cast<int>(mFollowSprite->getY() - (FuGlobals::VIEWPORT_HEIGHT / 2));
+    mViewport.x = static_cast<int>(mFollowSprite.lock()->getX() - (FuGlobals::VIEWPORT_WIDTH / 2));
+    mViewport.y = static_cast<int>(mFollowSprite.lock()->getY() - (FuGlobals::VIEWPORT_HEIGHT / 2));
     
     // check against level boundries and move back some if need be
     int limitX{ mBGTexture->getSize().x - FuGlobals::VIEWPORT_WIDTH };
@@ -216,16 +225,16 @@ void Level::centerViewport() {
 // Outlines all the collision rectangles in the level so visible on screen. Debugging and level design utility function.
 void Level::drawColRects() {
     // Set drawing color and loop through all collision rectangles drawing them
-    mSDLMan->setDrawColor(0, 255, 0);
+    mSDLMan.lock()->setDrawColor(0, 255, 0);
     for (int i{ 0 }; i < mColRects->size(); ++i) {
         SDL_Rect r = mColRects->at(i);   
         r.x -= mViewport.x; // compensate for viewport's distance from level origin
         r.y -= mViewport.y;
-        SDL_RenderDrawRect(mSDLMan->getRenderer(), &r);
+        SDL_RenderDrawRect(mSDLMan.lock()->getRenderer(), &r);
     }
 
     // Return our draw color to black
-    mSDLMan->setDrawColor(0, 0, 0, 255);
+    mSDLMan.lock()->setDrawColor(0, 0, 0, 255);
 }
 
 // Checks if the given point is contained in a collision rect for the level.

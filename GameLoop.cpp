@@ -3,6 +3,16 @@
 #include "SDLMan.h"
 #include "Globals.h"
 
+// Destructor
+GameLoop::~GameLoop() {
+	if (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: GameLoop" << std::endl;
+
+	mPlayer.reset();
+	mSprites.reset();
+	mLevel.reset();
+	mSDL.reset();
+}
+
 // Initializes the graphics and sound systems.
 bool GameLoop::initGameSystems() {
 	// Initialize our SDL wrapper class and a shared smart pointer to manage SDL things
@@ -17,7 +27,7 @@ bool GameLoop::loadGameData() {
 	bool success{ true };
 	
 	// initialize our Sprite holding vector. Holds all sprites but the player.
-	sprites = std::make_unique<std::vector<Sprite>>();
+	mSprites = std::make_unique<std::vector<Sprite>>();
 
 	// Load the player
 	mPlayer = std::make_unique<Thomas>(mSDL);
@@ -29,7 +39,7 @@ bool GameLoop::loadGameData() {
 	if (!loadLevel("data/level1.dat")) success = false;
 
 	// Return successful loading of game data.
-	return (sprites && success);
+	return (mSprites && success);
 }
 
 // Load in the current level
@@ -87,7 +97,7 @@ void GameLoop::runGameLoop() {
 
 			// process movements of sprites
 			mPlayer->move(); // ***DEBUG***this could prob be stuffed inside the sprites vector..version 2 maybe
-			for (int i{ 0 }; i < sprites->size(); ++i) sprites->at(i).move();
+			for (int i{ 0 }; i < mSprites->size(); ++i) mSprites->at(i).move();
 			
 			// update our time lag calculations
 			lag -= FuGlobals::FPS_TARGET;
@@ -102,7 +112,7 @@ void GameLoop::runGameLoop() {
 		// render to back buffer
 		mLevel->render();
 		mPlayer->render();
-		for (int i{ 0 }; i < sprites->size(); ++i) sprites->at(i).render();
+		for (int i{ 0 }; i < mSprites->size(); ++i) mSprites->at(i).render();
 
 		// update the screen
 		mSDL->refresh();
@@ -116,16 +126,31 @@ bool GameLoop::handleEvents() {
 
     // Cycle through all events on the event queue
     while (SDL_PollEvent(&e)) {
-		if (e.type == SDL_QUIT) {										// Handle request to quit
-			quit = true;
-		} else if (e.type == SDL_JOYAXISMOTION) {						// Handle joystick input
-			if (e.jaxis.which == 0) mPlayer->playerInputJoystick(e);
-        } else if (e.type == SDL_KEYDOWN) {								// Handle keyboard key down
-            mPlayer->playerInput(e.key.keysym.sym, true);
-		} else if (e.type == SDL_KEYUP) {								// Handle keyboard key released
-			mPlayer->playerInput(e.key.keysym.sym, false);
+		switch (e.type) {
+			case SDL_QUIT:													// Handle request to quit
+				quit = true;
+				break;
+			case SDL_CONTROLLERDEVICEADDED:									// Handle a controller being plugged in
+				mSDL->openGamepad();
+				break;
+
+			case SDL_CONTROLLERDEVICEREMOVED:
+				mSDL->closeGamepad();
+				break;
+
+			case SDL_CONTROLLERAXISMOTION:											// Handle joystick input
+				if (e.jaxis.which == 0) mPlayer->playerInputJoystick(e);
+				break;
+
+			case SDL_KEYDOWN:												// Handle keyboard key down
+				mPlayer->playerInput(e.key.keysym.sym, true);
+				break;
+
+			case SDL_KEYUP:													// Handle keyboard key released
+				mPlayer->playerInput(e.key.keysym.sym, false);
+				break;
 		}
     }
-
+	
     return quit;
 }

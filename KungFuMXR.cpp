@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	// If we succeeded in initializing graphics systems now try to load in game data
-	if ( !(success && game->loadGameData()) ) {
+	if (!(success && game->loadGameData())) {
 		success = false;
 		std::cerr << "Failed in main. GameLoop::loadGameData returned false." << std::endl;
 	}

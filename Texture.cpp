@@ -1,4 +1,6 @@
 #include "Texture.h"
+#include "Globals.h"
+#include <iostream>
 
 // Constructor takes a pointer to an SDL_Texture and stores some information about it for quick access later.
 Texture::Texture(SDL_Texture* ptrText) {
@@ -13,6 +15,7 @@ Texture::Texture(SDL_Texture* ptrText) {
 
 // Destructor destroys the texture properly.
 Texture::~Texture() {
+	if (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: Texture" << std::endl;
 	SDL_DestroyTexture(mText);
 	mText = nullptr;
 };

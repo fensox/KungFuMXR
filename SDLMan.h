@@ -89,8 +89,11 @@ public:
 	// Play the music file that is loaded in or resume it if it is paused. If it is already playing, pause it.
 	void toggleMusic();
 
-	// Open a gamepad for use. Returns false if a gamepad could not be found and opened.
+	// Try to open a gamepad for use. Prints a warning to the error output stream if cannot open a controller but does not prevent game from continuing.
 	void openGamepad();
+
+	// Close the gamepad device we may have opened.
+	void closeGamepad();
 
 	// Load in a Texture object using the passed in filename, transparancy color, and transparancy on/off switch. Returns a smart pointer to a Texture object.
 	std::unique_ptr<Texture> loadImage(std::string fileName, SDL_Color color, bool useTrans);
@@ -114,8 +117,8 @@ private:
 	// Smart pointer to a Texture objext holding the SDL_Texture used as our backbuffer drawing surface.
 	std::unique_ptr<Texture> mBuffer{ nullptr };
 
-	// Pointer holding the SDL_Joystick for our game controller 1
-	SDL_Joystick* mJoystick1{ nullptr };
+	// Pointer holding the SDL_GameController for our game controller 1
+	SDL_GameController* mController1{ nullptr };
 
 	// Store's the caption for the window.
 	std::string mWindowCaption{};
@@ -138,4 +141,5 @@ private:
 
 	// the value you want
 	decimal fps;
+
 };

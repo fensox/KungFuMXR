@@ -8,7 +8,7 @@ typedef double decimal;
 // Global program constants. All constants are in the FuGlobals namespace.
 namespace FuGlobals {
 	
-	constexpr bool		DEBUG_MODE			{ false };				// Turn on all debug output
+	constexpr bool		DEBUG_MODE			{ true };				// Turn on all debug output
 	constexpr bool		MUSIC				{ false };				// Turn on music
 	constexpr bool		SHOW_FPS			{ false };				// Turn on FPS readout
 	constexpr Uint32	FPS_TARGET			{ 0 };					// FPS target for game loop as milliseconds per frame (0 for unlimited).
