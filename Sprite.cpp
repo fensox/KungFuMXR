@@ -18,7 +18,7 @@
 */
 Sprite::Sprite(std::shared_ptr<SDLMan> sdlMan) {
     // store the SDLMan smart shared pointer in our weak_ptr. Using weak to prevent cyclic shared_ptr problems as multiple objects hold a reference to SDLMan.
-    mSDLMan = sdlMan;
+    mSDL = sdlMan;
 }
 
 // Destructor
@@ -26,7 +26,7 @@ Sprite::~Sprite() {
     if (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: Sprite" << std::endl;
     mTexture.reset();
     mLevel.reset();
-    mSDLMan.reset();
+    mSDL.reset();
 }
 
 /*  Returns current Sprite's action frame collision rectangle by value. The position of the rectangle is set to player
@@ -114,7 +114,7 @@ bool Sprite::loadDataFile() {
 
 // Load in the sprite sheet specified in the const string mSpriteSheet and set transparency. Return boolean success.
 bool Sprite::loadSpriteSheet() {    
-    mTexture = mSDLMan.lock()->loadImage(mSpriteSheet, mTrans, true);
+    mTexture = mSDL.lock()->loadImage(mSpriteSheet, mTrans, true);
     
     return (!(mTexture==nullptr));
 }
@@ -181,20 +181,20 @@ const SDL_Rect& Sprite::getRect() {
 // Draws a mark on the screen for each collision point boundry. For debugging purposes.
 void Sprite::drawCollisionPoints() {
     // set draw color and mark size
-    mSDLMan.lock()->setDrawColor(255, 0, 0);
+    mSDL.lock()->setDrawColor(255, 0, 0);
     int radius{ 3 };
 
     // draw a circle at our center coordinates
-    mSDLMan.lock()->drawCircleFilled(static_cast<int>(mXPos - mLevel.lock()->getPosition().x), static_cast<int>(mYPos - mLevel.lock()->getPosition().y), radius);
+    mSDL.lock()->drawCircleFilled(static_cast<int>(mXPos - mLevel.lock()->getPosition().x), static_cast<int>(mYPos - mLevel.lock()->getPosition().y), radius);
 
     // draw our collision rectangle
     SDL_Rect rect{ getCollisionRect() };
     rect.x -= static_cast<int>(mLevel.lock()->getPosition().x + rect.w / 2);
     rect.y -= static_cast<int>(mLevel.lock()->getPosition().y + rect.h / 2);
-    mSDLMan.lock()->drawRect(rect);
+    mSDL.lock()->drawRect(rect);
 
     // return draw color to black
-    mSDLMan.lock()->setDrawColor(0, 0, 0);
+    mSDL.lock()->setDrawColor(0, 0, 0);
 }
 
 // Renders the sprite based on position, action mode, animation frame using a SDL_Renderer from SDLMan.
@@ -216,7 +216,7 @@ void Sprite::render() {
     mDest.y -= mLevel.lock()->getPosition().y;
 
     //Render to screen
-    SDL_RenderCopyEx(   mSDLMan.lock()->getRenderer(),
+    SDL_RenderCopyEx(   mSDL.lock()->getRenderer(),
                         mTexture->getTexture(),
                         &clip,
                         &mDest,

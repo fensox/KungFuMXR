@@ -95,6 +95,9 @@ public:
 	// Close the gamepad device we may have opened.
 	void closeGamepad();
 
+	// Returns the id of the current gamepad or a negative number if a gamepad is not opened.
+	int getGamepadID();
+
 	// Load in a Texture object using the passed in filename, transparancy color, and transparancy on/off switch. Returns a smart pointer to a Texture object.
 	std::unique_ptr<Texture> loadImage(std::string fileName, SDL_Color color, bool useTrans);
 
@@ -119,6 +122,9 @@ private:
 
 	// Pointer holding the SDL_GameController for our game controller 1
 	SDL_GameController* mController1{ nullptr };
+
+	// Controller id. Useful when controllers hot swapped during gameplay which causes id to change. A negative number means no controller associated.
+	int mControllerID{-1};
 
 	// Store's the caption for the window.
 	std::string mWindowCaption{};

@@ -78,8 +78,18 @@ bool SDLMan::init() {
 		return false;
 	}
 
-	// Attempt to open a joystick if one is connected.
+	// Load in game controller mappings database.
+	int iMapResult{ SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt") };
+	if (FuGlobals::DEBUG_MODE) std::cout << "SDLMan::openGamepad - Loaded gamecontrollerdb.txt mappings file with result: " << iMapResult << std::endl;
+	if (iMapResult == -1) {
+		std::cerr << "SDLMan::openGamepad - Warning: Unable to load controller mapping database! SDL Error: " << SDL_GetError() << std::endl;
+	}
+
+	// Attempt to open a game controller if one is connected. We disable controller events during gamepad opening to keep an SDL_CONTROLLERDEVICEADDED
+	// event from being added to the event queue which would cause our openGamepad function to be called twice.
+	SDL_GameControllerEventState(SDL_IGNORE);
 	openGamepad();
+	SDL_GameControllerEventState(SDL_ENABLE);
 
 	// Initialize variables used for FPS calculation
 	memset(fpsTimes, 0, sizeof(fpsTimes));
@@ -97,9 +107,12 @@ void SDLMan::openGamepad() {
 	for (int i = 0; i < SDL_NumJoysticks(); ++i) {
 		if (SDL_IsGameController(i)) {
 			mController1 = SDL_GameControllerOpen(i);
+			mControllerID = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(mController1));			
 			if (mController1) {
-				if (FuGlobals::DEBUG_MODE) std::cout << "SDLMan::openGamepad - Game controller open success." << std::endl;
-				break;
+				if (FuGlobals::DEBUG_MODE) {
+					std::cout << "SDLMan::openGamepad - Game controller open success." << std::endl;
+					std::cout << "SDLMan::openGamepad - Using controller map: " << SDL_GameControllerMapping(mController1) << std::endl;
+				}
 			} else {
 				std::cerr << "SDLMan::openGamepad: Warning: Unable to open game controller! SDL Error: " << SDL_GetError() << std::endl;
 			}
@@ -107,11 +120,17 @@ void SDLMan::openGamepad() {
 	}
 }
 
+// Returns the id of the current gamepad or a negative number if a gamepad is not opened.
+int SDLMan::getGamepadID() {
+	return mControllerID;
+}
+
 // Close the gamepad device we may have opened.
 void SDLMan::closeGamepad() {
 	if (FuGlobals::DEBUG_MODE) std::cout << "SDLMan::closeGamepad - Game controller closed." << std::endl;
 	SDL_GameControllerClose(mController1);
 	mController1 = nullptr;
+	mControllerID = -1;
 }
 
 // Renders to the screen the contents of the buffer

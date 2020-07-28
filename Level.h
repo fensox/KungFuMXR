@@ -86,7 +86,7 @@ private:
 	SDL_Point mViewport{ 0, 0 };
 
 	// Smart pointer to an SDLMan object used to draw the level.
-	std::weak_ptr<SDLMan> mSDLMan{ std::weak_ptr<SDLMan>() };
+	std::weak_ptr<SDLMan> mSDL{ std::weak_ptr<SDLMan>() };
 
 	// Smart pointer to a Sprite object this viewport will center on. Usually holds player sprite but could be any sprite i.e. a scripted scene, etc..
 	std::weak_ptr<Sprite> mFollowSprite{ std::shared_ptr<Sprite>() };

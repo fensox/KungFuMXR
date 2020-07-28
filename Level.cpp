@@ -9,7 +9,7 @@
 // Note load() must be called after construction of this object before other functions will work.
 Level::Level(std::string filename, std::shared_ptr<SDLMan> sdlMan) {
 	mMetaFile = filename;
-    mSDLMan = sdlMan;
+    mSDL = sdlMan;
     mColRects = std::make_shared<std::vector<SDL_Rect>>();
 }
 
@@ -19,7 +19,7 @@ Level::~Level() {
     mColRects.reset();
     mBGTexture.reset();
     mFollowSprite.reset();
-    mSDLMan.reset();
+    mSDL.reset();
 }
 
 // Loads in the level
@@ -45,14 +45,14 @@ bool Level::load() {
 bool Level::loadBGTexture() {
     bool useTrans{ true };
     if (mTrans.a == 0) useTrans = false;
-    mBGTexture = mSDLMan.lock()->loadImage(mBGFile, mTrans, useTrans);
+    mBGTexture = mSDL.lock()->loadImage(mBGFile, mTrans, useTrans);
     
     return (!(mBGTexture == nullptr));
 }
 
 // Load the level's music file into SDLMan.
 bool Level::loadMusicFile() {
-    return (mSDLMan.lock()->loadMusic(mMusicFile));
+    return (mSDL.lock()->loadMusic(mMusicFile));
 }
 
 // Load in the level's metadata file
@@ -176,7 +176,7 @@ std::string Level::toString() {
 
 // Returns the height and width of the level background in an SDL_Point.
 SDL_Point Level::getSize() {
-    return mSDLMan.lock()->getSize(mBGTexture);
+    return mSDL.lock()->getSize(mBGTexture);
 }
 
 // Set's the Sprite pointer that this level's viewport will stay centered on.
@@ -193,7 +193,7 @@ void Level::render() {
     SDL_Rect vp{ mViewport.x, mViewport.y, FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT };
 
     //Render the area of level our viewport is pointing at
-    SDL_RenderCopyEx(mSDLMan.lock()->getRenderer(),
+    SDL_RenderCopyEx(mSDL.lock()->getRenderer(),
         mBGTexture->getTexture(),
         &vp,
         NULL,
@@ -225,16 +225,16 @@ void Level::centerViewport() {
 // Outlines all the collision rectangles in the level so visible on screen. Debugging and level design utility function.
 void Level::drawColRects() {
     // Set drawing color and loop through all collision rectangles drawing them
-    mSDLMan.lock()->setDrawColor(0, 255, 0);
+    mSDL.lock()->setDrawColor(0, 255, 0);
     for (int i{ 0 }; i < mColRects->size(); ++i) {
         SDL_Rect r = mColRects->at(i);   
         r.x -= mViewport.x; // compensate for viewport's distance from level origin
         r.y -= mViewport.y;
-        SDL_RenderDrawRect(mSDLMan.lock()->getRenderer(), &r);
+        SDL_RenderDrawRect(mSDL.lock()->getRenderer(), &r);
     }
 
     // Return our draw color to black
-    mSDLMan.lock()->setDrawColor(0, 0, 0, 255);
+    mSDL.lock()->setDrawColor(0, 0, 0, 255);
 }
 
 // Checks if the given point is contained in a collision rect for the level.

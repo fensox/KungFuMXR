@@ -127,26 +127,34 @@ bool GameLoop::handleEvents() {
     // Cycle through all events on the event queue
     while (SDL_PollEvent(&e)) {
 		switch (e.type) {
-			case SDL_QUIT:													// Handle request to quit
+			case SDL_QUIT:																				// Handle request to quit
 				quit = true;
 				break;
-			case SDL_CONTROLLERDEVICEADDED:									// Handle a controller being plugged in
+			case SDL_CONTROLLERDEVICEADDED:																// Handle a controller being connected
 				mSDL->openGamepad();
 				break;
 
-			case SDL_CONTROLLERDEVICEREMOVED:
+			case SDL_CONTROLLERDEVICEREMOVED:															// Handle a controller being removed
 				mSDL->closeGamepad();
 				break;
 
-			case SDL_CONTROLLERAXISMOTION:											// Handle joystick input
-				if (e.jaxis.which == 0) mPlayer->playerInputJoystick(e);
+			case SDL_CONTROLLERAXISMOTION:																// Handle gamepad analog sticks
+				if (e.jaxis.which == mSDL->getGamepadID()) mPlayer->playerInputPadStick(e.caxis);
 				break;
 
-			case SDL_KEYDOWN:												// Handle keyboard key down
+			case SDL_CONTROLLERBUTTONDOWN:																// Handle gamepad buttons
+				if (e.jaxis.which == mSDL->getGamepadID()) mPlayer->playerInputPadBtn(e.cbutton, true);
+				break;
+
+			case SDL_CONTROLLERBUTTONUP:																// Handle gamepad buttons
+				if (e.jaxis.which == mSDL->getGamepadID()) mPlayer->playerInputPadBtn(e.cbutton, false);
+				break;
+
+			case SDL_KEYDOWN:																			// Handle keyboard key down
 				mPlayer->playerInput(e.key.keysym.sym, true);
 				break;
 
-			case SDL_KEYUP:													// Handle keyboard key released
+			case SDL_KEYUP:																				// Handle keyboard key released
 				mPlayer->playerInput(e.key.keysym.sym, false);
 				break;
 		}

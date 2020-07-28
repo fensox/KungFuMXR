@@ -113,7 +113,7 @@ protected:
 	std::weak_ptr<Level> mLevel{ std::shared_ptr<Level>() };
 
 	// Smart pointer to the SDLMan object passed in during construction.
-	std::weak_ptr<SDLMan> mSDLMan{ std::shared_ptr<SDLMan>() };
+	std::weak_ptr<SDLMan> mSDL{ std::shared_ptr<SDLMan>() };
 
 	// Holds velocity/momentum for the four 2d directions. These modify speed/position in jumps, falls, etc.
 	// Gravity, friction, hits taken, etc can also modify these in return.

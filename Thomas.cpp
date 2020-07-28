@@ -25,29 +25,72 @@ void Thomas::outputDebug() {
 }
 
 // Handles jopystick input from the player.
-void Thomas::playerInputJoystick(const SDL_Event& e) {
+void Thomas::playerInputPadStick(const SDL_ControllerAxisEvent e) {
     using namespace FuGlobals;
 
     //X axis motion
-    if (e.jaxis.axis == 0) {
-        if (e.jaxis.value < -JOYSTICK_DEAD_ZONE) {          // Left of dead zone
+    if (e.axis == 0) {
+        if (e.value < -JOYSTICK_DEAD_ZONE) {          // Left of dead zone
             LEFT = true;
             RIGHT = false;
-        } else if (e.jaxis.value > JOYSTICK_DEAD_ZONE) {    // Right of dead zone
+        } else if (e.value > JOYSTICK_DEAD_ZONE) {    // Right of dead zone
             RIGHT = true;
             LEFT = false;
-        } else {                                            // Stick not engaged on x axis
+        } else {                                      // Stick not engaged on x axis
             RIGHT = false;
             LEFT = false;
         }
-    } else if (e.jaxis.axis == 1) {                         // Y axis motion
-        if (e.jaxis.value < -JOYSTICK_DEAD_ZONE) {          // Up above dead zone
-            JUMP = true;
-        } else if (e.jaxis.value > JOYSTICK_DEAD_ZONE) {    // Down below dead zone
-            // do something with joystick down press
-        } else {                                            // Stick not engaged on y axis
-            JUMP = false;
+    } else if (e.axis == 1) {                         // Y axis motion
+        if (e.value < -JOYSTICK_DEAD_ZONE) {          // Up above dead zone
+            // Analog stick up
+        } else if (e.value > JOYSTICK_DEAD_ZONE) {    // Down below dead zone
+            // Analog stick down
+        } else {                                      // Stick not engaged on y axis
+            // Analog stick not up or down
         }
+    }
+}
+
+// Handles gamepad button input from the player.
+void Thomas::playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press) {
+    switch (e.button) {
+        case SDL_CONTROLLER_BUTTON_A:
+            JUMP = press;
+            break;
+        case SDL_CONTROLLER_BUTTON_B:
+            // B button
+            break;
+        case SDL_CONTROLLER_BUTTON_X:
+            // X button
+            break;
+        case SDL_CONTROLLER_BUTTON_Y:
+            // Y button
+            break;
+        case SDL_CONTROLLER_BUTTON_DPAD_UP:
+            // dpad up
+            break;
+        case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+            // dpad down
+            break;
+        case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+            LEFT = press;
+            break;
+        case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+            RIGHT = press;
+            break;
+        case SDL_CONTROLLER_BUTTON_START:
+            // start button
+            break;
+        case SDL_CONTROLLER_BUTTON_BACK:
+            // back button (or select on NES type controller)
+            break;
+        case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+            // left shoulder button
+            break;
+        case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+            // right shoulder button
+            break;
+
     }
 }
 
