@@ -13,7 +13,7 @@ Thomas::Thomas(std::shared_ptr<SDLMan> sdlMan) : Sprite(sdlMan) {
     mActionMode = "WALK_LEFT";
 	mTrans = SDL_Color{ 255, 0, 255, 0 };
 	mName = "Thomas";
-    mScale = 4;
+    mScale = 3;
 };
 
 //***DEBUG*** Outputs some debugging info
@@ -31,14 +31,14 @@ void Thomas::playerInputPadStick(const SDL_ControllerAxisEvent e) {
     //X axis motion
     if (e.axis == 0) {
         if (e.value < -JOYSTICK_DEAD_ZONE) {          // Left of dead zone
-            LEFT = true;
-            RIGHT = false;
+            mWalkingLeft = true;
+            mWalkingRight = false;
         } else if (e.value > JOYSTICK_DEAD_ZONE) {    // Right of dead zone
-            RIGHT = true;
-            LEFT = false;
+            mWalkingRight = true;
+            mWalkingLeft = false;
         } else {                                      // Stick not engaged on x axis
-            RIGHT = false;
-            LEFT = false;
+            mWalkingRight = false;
+            mWalkingLeft = false;
         }
     } else if (e.axis == 1) {                         // Y axis motion
         if (e.value < -JOYSTICK_DEAD_ZONE) {          // Up above dead zone
@@ -55,7 +55,7 @@ void Thomas::playerInputPadStick(const SDL_ControllerAxisEvent e) {
 void Thomas::playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press) {
     switch (e.button) {
         case SDL_CONTROLLER_BUTTON_A:
-            JUMP = press;
+            mJumping = press;
             break;
         case SDL_CONTROLLER_BUTTON_B:
             // B button
@@ -73,10 +73,10 @@ void Thomas::playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press) {
             // dpad down
             break;
         case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-            LEFT = press;
+            mWalkingLeft = press;
             break;
         case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-            RIGHT = press;
+            mWalkingRight = press;
             break;
         case SDL_CONTROLLER_BUTTON_START:
             // start button
@@ -103,7 +103,7 @@ void Thomas::playerInput(const SDL_Keycode& key, bool press) {
             break;
 
         case SDLK_SPACE:
-            JUMP = press;
+            mJumping = press;
             break;
 
         case SDLK_DOWN:
@@ -111,11 +111,11 @@ void Thomas::playerInput(const SDL_Keycode& key, bool press) {
             break;
 
         case SDLK_LEFT:
-            LEFT = press;
+            mWalkingLeft = press;
             break;
 
         case SDLK_RIGHT:
-            RIGHT = press;
+            mWalkingRight = press;
             break;
 
         default:
@@ -136,6 +136,8 @@ void Thomas::moveRight() {
             advanceFrame();
             mVeloc.right += WALK_VELOCITY_PER;
             if (mVeloc.right > WALK_MAX) mVeloc.right = WALK_MAX;
+            //***DEBUG***
+            std::cout << mVeloc.right << std::endl;
         }
     }
 }
@@ -152,6 +154,8 @@ void Thomas::moveLeft() {
             advanceFrame();
             mVeloc.left += WALK_VELOCITY_PER;
             if (mVeloc.left > WALK_MAX) mVeloc.left = WALK_MAX;
+            //***DEBUG***
+            std::cout << mVeloc.left << std::endl;
         }
     }
 }
@@ -164,6 +168,7 @@ void Thomas::jump() {
         // only launch into a jump if we have something to launch off of
         if (downBump() && mVeloc.up <= 0) {
             mVeloc.up += JUMP_VELOCITY;
+            outputDebug();
             mLastJumpTime = currentTime;
         }
     }
@@ -198,9 +203,9 @@ void Thomas::adjustForLevelBounds() {
 // Moves player based on velocities adjusting for gravity, friction, and collisions. Overrides the Sprite class default move function
 // for a few custom player effects like respecting level boundries that other sprites do not need to do.
 void Thomas::move() {
-    if (JUMP) jump();
-    if (LEFT) moveLeft();
-    if (RIGHT) moveRight();
+    if (mJumping) jump();
+    if (mWalkingLeft) moveLeft();
+    if (mWalkingRight) moveRight();
 
     Sprite::move();
 

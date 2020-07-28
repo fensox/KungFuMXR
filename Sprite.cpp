@@ -258,16 +258,26 @@ void Sprite::applyGravity(bool standing) {
     }
 }
 
-// Applies friction to the sprite
+// Applies friction to the sprite if enough time has passed and not actively walking
 void Sprite::applyFriction(bool standing) {
-    // set what friction value we will use
-    decimal friction{ FuGlobals::GROUND_FRICTION };
-    if (!standing) friction = FuGlobals::AIR_FRICTION;
+    // if enough time has passed since last friction application
+    if (SDL_GetTicks() - mLastFricTime >= FuGlobals::FRICTION_TIME) {
+        // set what friction value we will use
+        decimal friction{ FuGlobals::GROUND_FRICTION };
+        if (!standing) friction = FuGlobals::AIR_FRICTION;
 
-    mVeloc.left -= friction;
-    if (mVeloc.left < 0) mVeloc.left = 0;
-    mVeloc.right -= friction;
-    if (mVeloc.right < 0) mVeloc.right = 0;
+        // only apply friction if not actively trying to move in that direction
+        if (!mWalkingLeft) {
+            mVeloc.left -= friction;
+            if (mVeloc.left < 0) mVeloc.left = 0;
+        }
+        if (!mWalkingRight) {
+            mVeloc.right -= friction;
+            if (mVeloc.right < 0) mVeloc.right = 0;
+        }
+
+        mLastFricTime = SDL_GetTicks();
+    }
 }
 
 // Moves Sprite based on velocities adjusting for gravity, friction, and collisions. May be overridden or extended for custom movement routines.

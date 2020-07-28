@@ -26,11 +26,11 @@ private:
 	// Time between walk speed increases
 	const Uint32 WALK_WAIT_TIME { 100 };
 
-	// Walk velocity increase per mWalkWaitTime
-	const decimal WALK_VELOCITY_PER { 5 };
+	// Walk velocity increase per WALK_WAIT_TIME
+	const decimal WALK_VELOCITY_PER { 2 };
 
 	// Maximum velocity player can walk
-	const decimal WALK_MAX { 5 };
+	const decimal WALK_MAX { 4.0 };
 
 	// Jump power is the amount added to upward velocity when jump action initiated
 	const decimal JUMP_VELOCITY { 6 };
@@ -49,10 +49,6 @@ private:
 
 	// Handles the player requesting to move to the right.
 	void moveLeft();
-
-	//***DEBUG***
-	// Control switches
-	bool RIGHT{ false }, LEFT{ false }, JUMP{ false };
 
 	// Handles the player requesting a jump.
 	void jump();

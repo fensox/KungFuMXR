@@ -127,8 +127,20 @@ protected:
 	// Instance of Velocity struct for this sprite
 	Velocity mVeloc{};
 
+	// If we are actively walking left
+	bool mWalkingLeft{ false };
+
+	// If we are actively walking right
+	bool mWalkingRight{ false };
+
+	// If we are actively jumping
+	bool mJumping{ false };
+
 	// Last time we increased down velocity becasue of gravity. Used to regulate gravity adjustments by time and not by frame as frame rates vary.
 	Uint32 mLastGravTime{};
+
+	// Last time we decreased walking velocity due to ground friction. Used to regulate gravity adjustments by time and not by frame as frame rates vary.
+	Uint32 mLastFricTime{};
 
 	// Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 	bool downBump();
@@ -157,4 +169,5 @@ private:
 
 	// Load in the sprite sheet specified in the const string mSpriteSheet and set transparency. Return boolean success.
 	bool loadSpriteSheet();
+
 };

@@ -103,14 +103,13 @@ bool SDLMan::init() {
 // Open a gamepad for use. Prints a warning to the error output stream if cannot open a controller but does not prevent game from continuing.
 void SDLMan::openGamepad() {
 	// make sure there is a gamepad connected and open the first one
-	if (FuGlobals::DEBUG_MODE) std::cout << "SDLMan::openGamepad - Game controller open attempt." << std::endl;
 	for (int i = 0; i < SDL_NumJoysticks(); ++i) {
 		if (SDL_IsGameController(i)) {
 			mController1 = SDL_GameControllerOpen(i);
 			mControllerID = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(mController1));			
 			if (mController1) {
 				if (FuGlobals::DEBUG_MODE) {
-					std::cout << "SDLMan::openGamepad - Game controller open success." << std::endl;
+					std::cout << "SDLMan::openGamepad - Game controller ID" << mControllerID << " opened." << std::endl;
 					std::cout << "SDLMan::openGamepad - Using controller map: " << SDL_GameControllerMapping(mController1) << std::endl;
 				}
 			} else {
@@ -127,9 +126,9 @@ int SDLMan::getGamepadID() {
 
 // Close the gamepad device we may have opened.
 void SDLMan::closeGamepad() {
-	if (FuGlobals::DEBUG_MODE) std::cout << "SDLMan::closeGamepad - Game controller closed." << std::endl;
 	SDL_GameControllerClose(mController1);
 	mController1 = nullptr;
+	if (FuGlobals::DEBUG_MODE) std::cout << "SDLMan::closeGamepad - Game controller ID" << mControllerID << " closed." << std::endl;
 	mControllerID = -1;
 }
 
