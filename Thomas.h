@@ -32,26 +32,14 @@ private:
 	// Maximum velocity player can walk
 	const decimal WALK_MAX { 4.0 };
 
-	// Jump power is the amount added to upward velocity when jump action initiated
-	const decimal JUMP_VELOCITY { 6 };
-
-	// Time after a jump that has to pass before another jump
-	const Uint32 JUMP_WAIT_TIME{ 0 };
-
 	// Last time we took a step in SDL ticks. Used to regulate walking speed.
 	Uint32 mLastWalkTime{};
-
-	// Last time we jumped in SDL ticks. Used to regulate time between jumps.
-	Uint32 mLastJumpTime{};
 
 	// Handles the player requesting to move to the right.
 	void moveRight();
 
 	// Handles the player requesting to move to the right.
 	void moveLeft();
-
-	// Handles the player requesting a jump.
-	void jump();
 
 	// Check if enough time has passed to walk then work with viewport position and move player if so
 	bool checkWalkTime();

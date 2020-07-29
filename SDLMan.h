@@ -23,6 +23,14 @@
  * a caption argument for the window and a width/height for the
  * back buffer texture. This buffer size will stay constant despite
  * the window size and be scaled to fit window when render() is called.
+ *
+ * If your application physics depend on accurate FPS calculation then
+ * calculateFPS() must be called every game loop. It stores an average
+ * of the last ten FPS calculations in a member variable that can be
+ * obtained with getFPS() or output to the console with outputFPS().
+ * The seconds since last frame can also be obtained with a call
+ * to getFrameTime().
+ *
  */
 class SDLMan {
 
@@ -104,8 +112,17 @@ public:
 	// Provide a pointer to our renderer for others to use to draw themselves.
 	SDL_Renderer* getRenderer();
 
+	// Calculates the current FPS using an averaging method of the last ten frames. Must be called every game tick for other FPS functions to work correctly.
+	void calculateFPS();
+
 	// Outputs the FPS count to console using an averaging method.
 	void outputFPS();
+
+	// Returns the current average FPS count.
+	decimal getFPS();
+
+	// Returns the seconds elapsed since last frame
+	Uint32 getFrameTime();
 
 private:
 	// Holds the music that will be played in the background
@@ -137,15 +154,15 @@ private:
 	bool mWindowFull{ false };
 
 	// An array to store frame times for averaging FPS to smooth out calculation
-	Uint32 fpsTimes[10];
+	Uint32 mFPSTimes[10];
 
 	// Last calculated SDL_GetTicks
-	Uint32 fpsLast;
+	Uint32 mFPSLast;
 
 	// total frames rendered
-	Uint32 fpsCount;
+	Uint32 mFPSCount;
 
-	// the value you want
-	decimal fps;
+	// the current average FPS value
+	decimal mFPS;
 
 };

@@ -82,14 +82,17 @@ protected:
 	 * for the sprite. The SDL_Color set's the transparency for the sprite sheet.     *
 	 * The mName string is simply a name for the sprite (i.e. Ninja, Ghost, etc.)     *
 	 * primarily used to identify debugging output. mScale is a multiplyer to scale   *
-	 * the sprite by when rendering. Defaults below.                                  *
+	 * the sprite by when rendering. The JUMP_VELOCITY constant is how much velocity  *
+	 * in pixels to add to upward velocity when a sprite initiates a jump.			  *
+	 * Defaults below.								                                  *
 	 **********************************************************************************/
-	std::string mMetaFilename		{ "data/example.dat" };
-	std::string mSpriteSheet		{ "data/example_sheet.png" };
-	std::string mActionMode			{ "WALK_LEFT" };
-	SDL_Color mTrans				{ 255, 0, 255, 0 };
-	std::string	mName				{ "Example Man" };
-	int mScale						{ 1 };
+	std::string		mMetaFilename		{ "data/example.dat" };
+	std::string		mSpriteSheet		{ "data/example_sheet.png" };
+	std::string		mActionMode			{ "WALK_LEFT" };
+	SDL_Color		mTrans				{ 255, 0, 255, 0 };
+	std::string		mName				{ "Example Man" };
+	int				mScale				{ 1 };
+	const decimal	JUMP_VELOCITY		{ 4.5 };						// Initial force a sprite generates to start a jump in pixels per second
 	/**********************************************************************************/
 
 	// A ClipsMap is a std::unordered_map container with the string name of an action (the key) mapped to a vector of SDL_Rect holding all sprite sheet clip information for that action.
@@ -136,14 +139,14 @@ protected:
 	// If we are actively jumping
 	bool mJumping{ false };
 
-	// Last time we increased down velocity becasue of gravity. Used to regulate gravity adjustments by time and not by frame as frame rates vary.
-	Uint32 mLastGravTime{};
-
 	// Last time we decreased walking velocity due to ground friction. Used to regulate gravity adjustments by time and not by frame as frame rates vary.
 	Uint32 mLastFricTime{};
 
 	// Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 	bool downBump();
+
+	// Handles the sprite initiating a jump.
+	void jump();
 
 	// Applies gravity to the sprite depending on boolean parameter. Also checks if just finished a fall and cleans up some variables if so.
 	void applyGravity(bool standing);

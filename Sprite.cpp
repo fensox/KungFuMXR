@@ -230,31 +230,37 @@ void Sprite::render() {
 
 // Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 bool Sprite::downBump() {
-    // get current collision rectagle and shrink it down to just the bottom
+    // get current collision rectagle and shrink it down to just the bottom a couple pixels tall
     SDL_Rect rect{ getCollisionRect() };
     rect.y += static_cast<int>(rect.h / 2);
     rect.h = 2;
-    
-    return mLevel.lock()->isACollision( rect );
+
+    return mLevel.lock()->isACollision(rect);
+}
+
+// Handles the sprite initiating a jump.
+void Sprite::jump() {
+    // only launch into a jump if we have something to launch off of
+    if (downBump()) {
+        mVeloc.down = 0;
+        mVeloc.up = JUMP_VELOCITY;
+    }
 }
 
 // Applies gravity to the sprite if parameter set to true otherwise checks if sprite just finished a fall and cleans up velocity variables.
 void Sprite::applyGravity(bool standing) {
-    if (standing) {
-        // we are standing on something, if its the end of a fall, stop and downward velocity AND upward velocity to make sure up/down both canceled out.
-        // Stops a bouncing player effect if they have not evenly canceled each other out upon landing.
-        if (mVeloc.down != 0) {
-            mVeloc.up = 0;
-            mVeloc.down = 0;
-        }
-    } else {
-        // we are falling. If enough time has passed apply some gravity to our downward velocity.
-        if (SDL_GetTicks() - mLastGravTime >= FuGlobals::GRAVITY_TIME) {
-            mVeloc.up -= FuGlobals::GRAVITY;
-            if (mVeloc.up < 0) mVeloc.up = 0;
-            mVeloc.down += FuGlobals::GRAVITY;
-            mLastGravTime = SDL_GetTicks();
-        }
+    // If we are standing but have downward velocity still we have just landed. Reset y velocities to stop bouncing and other jump artifacts.
+    if (standing && (mVeloc.down > 0)) {
+        mVeloc.up = 0;
+        mVeloc.down = 0;
+    } else if (!standing) {
+        // we are falling, apply proper amount of gravity depending on framerate timing to hit our real world GRAVITY constant
+        decimal fps{ mSDL.lock()->getFPS() };
+        
+        mVeloc.up -= (FuGlobals::GRAVITY / fps);
+        if (mVeloc.up < 0) mVeloc.up = 0;
+        mVeloc.down += (FuGlobals::GRAVITY / fps);
+        if (mVeloc.down > FuGlobals::TERMINAL_VELOCITY) mVeloc.down = FuGlobals::TERMINAL_VELOCITY;
     }
 }
 

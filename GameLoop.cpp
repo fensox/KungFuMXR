@@ -79,7 +79,7 @@ void GameLoop::runGameLoop() {
 	// Start the main loop
 	// Game loop uses "Fixed update time step, variable rendering" method written about
 	// in the book Game Programming Patterns by Robert Nystrom. Adjust performance
-	// of this loop by setting the integer variable in the Globals.h file.
+	// of this loop by setting the integer variable FPS_TARGET in the Globals.h file.
 	while (!quit) {
 		// some time calculations to manage game loop speed
 		double current = SDL_GetTicks();
@@ -104,6 +104,9 @@ void GameLoop::runGameLoop() {
 
 			//***DEBUG***
 			if (FuGlobals::SHOW_FPS) mSDL->outputFPS();
+
+			// have our SDL wrapper update it's FPS calculations once per frame so our physics works correctly
+			mSDL->calculateFPS();
 
 			// if FPS target is set to 0 break out as we are going for as many frames as we can
 			if (FuGlobals::FPS_TARGET == 0) break;

@@ -21,7 +21,8 @@ void Thomas::outputDebug() {
     std::cout << "Player:\t\t\t" << mXPos << "\t" << mYPos << "\t" << getRect().w * mScale << "\t" << getRect().h * mScale << "\n";
     std::cout << "P Veloc L, R / U, D:\t" << mVeloc.left << "\t" << mVeloc.right << "\t/\t" << mVeloc.up << "\t" << mVeloc.down << "\n";
     std::cout << "Collision Rect:\t\t" << getCollisionRect().x << "\t" << getCollisionRect().y << "\t" << getCollisionRect().w << "\t" << getCollisionRect().h << "\n";
-    std::cout << "Downbump:\t\t" << std::boolalpha << downBump() << std::endl;
+    std::cout << "Downbump:\t\t" << std::boolalpha << downBump() << "\n";
+    std::cout << "FPS:\t\t" << mSDL.lock()->getFPS() << "\nMS Since Last Frame: " << mSDL.lock()->getFrameTime() << std::endl;
 }
 
 // Handles jopystick input from the player.
@@ -156,20 +157,6 @@ void Thomas::moveLeft() {
             if (mVeloc.left > WALK_MAX) mVeloc.left = WALK_MAX;
             //***DEBUG***
             std::cout << mVeloc.left << std::endl;
-        }
-    }
-}
-
-// Handles the player requesting a jump.
-void Thomas::jump() {
-    // check if enough time has passed before another jump is allowed
-    Uint32 currentTime{ SDL_GetTicks() };
-    if (currentTime - mLastJumpTime >= JUMP_WAIT_TIME) {
-        // only launch into a jump if we have something to launch off of
-        if (downBump() && mVeloc.up <= 0) {
-            mVeloc.up += JUMP_VELOCITY;
-            outputDebug();
-            mLastJumpTime = currentTime;
         }
     }
 }
