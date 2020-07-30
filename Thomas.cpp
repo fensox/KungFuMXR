@@ -22,7 +22,7 @@ void Thomas::outputDebug() {
     std::cout << "P Veloc L, R / U, D:\t" << mVeloc.left << "\t" << mVeloc.right << "\t/\t" << mVeloc.up << "\t" << mVeloc.down << "\n";
     std::cout << "Collision Rect:\t\t" << getCollisionRect().x << "\t" << getCollisionRect().y << "\t" << getCollisionRect().w << "\t" << getCollisionRect().h << "\n";
     std::cout << "Downbump:\t\t" << std::boolalpha << downBump() << "\n";
-    std::cout << "FPS:\t\t" << mSDL.lock()->getFPS() << "\nMS Since Last Frame: " << mSDL.lock()->getFrameTime() << std::endl;
+    std::cout << "FPS:\t\t" << mSDL.lock()->getFPS() << std::endl;
 }
 
 // Handles jopystick input from the player.

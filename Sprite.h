@@ -32,9 +32,11 @@ public:
 
 	/*  Returns current Sprite's action frame collision rectangle by value. The position of the rectangle is set to player
 	coordinates in the level. Width and height are set to the size of the sprite sheet animation we are currently on and
-	scaled based on the Sprite mScale scaling factor. For more accurate	collision boxes than just the bounding box, this
-	function may be overidden by derived classes. */
-	virtual SDL_Rect getCollisionRect();
+	scaled based on the Sprite mScale scaling factor. */
+	SDL_Rect getCollisionRect();
+
+	// Returns a 2 pixel tall and 8 pixel width trimmed rectangle at the bottom of the current collision rectangle. Used for downBump collision detection, drawing debugging rectangles, etc.
+	SDL_Rect getCollRectBtm();
 
 	// Sets the smart pointer member variable that points to the Level currently being played.
 	void setLevel(std::shared_ptr<Level> level);
@@ -63,9 +65,6 @@ public:
 	// Returns by value the current animation frame's rectangle. Sprite sheet coordinate relative.
 	const SDL_Rect& getRect();
 
-	// Draw collision points as crosshairs. Useful for debugging purposes.
-	void drawCollisionPoints();
-
 	// Moves Sprite based on velocities adjusting for gravity, friction, and collisions. May be overridden or extended for custom movement routines.
 	virtual void move();
 
@@ -92,7 +91,7 @@ protected:
 	SDL_Color		mTrans				{ 255, 0, 255, 0 };
 	std::string		mName				{ "Example Man" };
 	int				mScale				{ 1 };
-	const decimal	JUMP_VELOCITY		{ 4.5 };						// Initial force a sprite generates to start a jump in pixels per second
+	const decimal	JUMP_VELOCITY		{ 8.5 };						// Initial force a sprite generates to start a jump in pixels per second
 	/**********************************************************************************/
 
 	// A ClipsMap is a std::unordered_map container with the string name of an action (the key) mapped to a vector of SDL_Rect holding all sprite sheet clip information for that action.
@@ -139,9 +138,6 @@ protected:
 	// If we are actively jumping
 	bool mJumping{ false };
 
-	// Last time we decreased walking velocity due to ground friction. Used to regulate gravity adjustments by time and not by frame as frame rates vary.
-	Uint32 mLastFricTime{};
-
 	// Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 	bool downBump();
 
@@ -172,5 +168,8 @@ private:
 
 	// Load in the sprite sheet specified in the const string mSpriteSheet and set transparency. Return boolean success.
 	bool loadSpriteSheet();
+
+	// Draw collision points as crosshairs. Useful for debugging purposes.
+	void drawCollisionPoints();
 
 };

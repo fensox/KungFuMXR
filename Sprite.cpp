@@ -30,9 +30,8 @@ Sprite::~Sprite() {
 }
 
 /*  Returns current Sprite's action frame collision rectangle by value. The position of the rectangle is set to player
-    coordinates in the level. Width and height are set to the size of the sprite sheet animation we are currently on and
-    scaled based on the Sprite mScale scaling factor. For more accurate	collision boxes than just the bounding box, this
-    function may be overidden by derived classes. */
+    coordinates in the level. Position is not viewport compensated. Width and height are set to the size of the sprite
+    sheet animation we are currently on and scaled based on the Sprite mScale scaling factor. */
 SDL_Rect Sprite::getCollisionRect() {
     // get current sprite sheet clip rectangle
     SDL_Rect rect{ mAnimMap[mActionMode].at(mCurrentFrame) };
@@ -47,6 +46,20 @@ SDL_Rect Sprite::getCollisionRect() {
     
     return rect;
 }
+
+/* Gets the collision rectangle from getCollisionRect() and returns a 2 pixel tall and 8 pixel width trimmed rectangle
+   at the bottom of the current collision rectangle. Position not viewport compensated. Used for downBump collision
+   detection, drawing debugging rectangles, etc. */
+SDL_Rect Sprite::getCollRectBtm() {
+    SDL_Rect rect{ getCollisionRect() };
+    rect.y += static_cast<int>(rect.h / 2);
+    rect.h = 2;
+    rect.x += 4;
+    rect.w -= 8;
+
+    return rect;
+}
+
 
 // Load sprite data from files - Needs to be called before any other functions can be called.
 bool Sprite::load() {
@@ -187,11 +200,13 @@ void Sprite::drawCollisionPoints() {
     // draw a circle at our center coordinates
     mSDL.lock()->drawCircleFilled(static_cast<int>(mXPos - mLevel.lock()->getPosition().x), static_cast<int>(mYPos - mLevel.lock()->getPosition().y), radius);
 
-    // draw our collision rectangle
-    SDL_Rect rect{ getCollisionRect() };
+    // draw lines at our collision edges
+    SDL_Rect rect{ getCollRectBtm() };
+
+    // draw bottom compensating for viewport position
     rect.x -= static_cast<int>(mLevel.lock()->getPosition().x + rect.w / 2);
-    rect.y -= static_cast<int>(mLevel.lock()->getPosition().y + rect.h / 2);
-    mSDL.lock()->drawRect(rect);
+    rect.y -= static_cast<int>(mLevel.lock()->getPosition().y - rect.h / 2);
+    mSDL.lock()->drawLine(rect.x, rect.y + rect.h, rect.x + rect.w, rect.y + rect.h);
 
     // return draw color to black
     mSDL.lock()->setDrawColor(0, 0, 0);
@@ -230,12 +245,10 @@ void Sprite::render() {
 
 // Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 bool Sprite::downBump() {
-    // get current collision rectagle and shrink it down to just the bottom a couple pixels tall
-    SDL_Rect rect{ getCollisionRect() };
-    rect.y += static_cast<int>(rect.h / 2);
-    rect.h = 2;
+    // if we are rising up we don't need to do a downward collision check
+    if (mVeloc.up > mVeloc.down) return false;
 
-    return mLevel.lock()->isACollision(rect);
+    return mLevel.lock()->isACollision( getCollRectBtm() );
 }
 
 // Handles the sprite initiating a jump.
@@ -255,22 +268,28 @@ void Sprite::applyGravity(bool standing) {
         mVeloc.down = 0;
     } else if (!standing) {
         // we are falling, apply proper amount of gravity depending on framerate timing to hit our real world GRAVITY constant
-        decimal fps{ mSDL.lock()->getFPS() };
-        
-        mVeloc.up -= (FuGlobals::GRAVITY / fps);
+        decimal gravThisFrame{ FuGlobals::GRAVITY / mSDL.lock()->getFPS() };
+        mVeloc.up -= gravThisFrame;
         if (mVeloc.up < 0) mVeloc.up = 0;
-        mVeloc.down += (FuGlobals::GRAVITY / fps);
-        if (mVeloc.down > FuGlobals::TERMINAL_VELOCITY) mVeloc.down = FuGlobals::TERMINAL_VELOCITY;
+        mVeloc.down += gravThisFrame;
+
+        // adjust to be sure we don't exceed terminal velocity
+        decimal tvThisFrame{ FuGlobals::TERMINAL_VELOCITY / mSDL.lock()->getFPS() };
+        if (mVeloc.down > tvThisFrame) mVeloc.down = tvThisFrame;
+        
+        //***DEBUG*** Display gravity readout.
+        if (FuGlobals::DEBUG_MODE) {
+            std::cout << "Grav This Frame: " << gravThisFrame << "\t\t\tVel. Down: " << mVeloc.down << "\t\t\tFPS: " << mSDL.lock()->getFPS() << std::endl;
+        }
     }
 }
 
-// Applies friction to the sprite if enough time has passed and not actively walking
+// Applies friction to the sprite to slow horizontal movement. Handles surface and air friction depending on bool parameter true of false respectively.
 void Sprite::applyFriction(bool standing) {
-    // if enough time has passed since last friction application
-    if (SDL_GetTicks() - mLastFricTime >= FuGlobals::FRICTION_TIME) {
-        // set what friction value we will use
+        // set what friction value we will use and divide it by current FPS average to get our pixels per real world second
         decimal friction{ FuGlobals::GROUND_FRICTION };
         if (!standing) friction = FuGlobals::AIR_FRICTION;
+        friction = friction / mSDL.lock()->getFPS();
 
         // only apply friction if not actively trying to move in that direction
         if (!mWalkingLeft) {
@@ -281,9 +300,6 @@ void Sprite::applyFriction(bool standing) {
             mVeloc.right -= friction;
             if (mVeloc.right < 0) mVeloc.right = 0;
         }
-
-        mLastFricTime = SDL_GetTicks();
-    }
 }
 
 // Moves Sprite based on velocities adjusting for gravity, friction, and collisions. May be overridden or extended for custom movement routines.
@@ -336,10 +352,10 @@ void Sprite::move() {
         }
     } else if (tryY < 0) {                          // going up - don't check for level collisions so we jump through platforms
         rect.y += tryY;
-        /* Old routine that detects platforms while velocity is taking us up. Commented out to allow jump through platforms plus was a little sticky on things.
-        for (int i{ 0 }; i > tryY; --i) {
+        // Old routine that detects platforms while velocity is taking us up. Commented out to allow jump through platforms plus was a little sticky on things.
+        /*for (int i{ 0 }; i > tryY; --i) {
             rect.y -= 1;
-            if (mLevel->isACollision(rect)) {
+            if (mLevel.lock()->isACollision(rect)) {
                 rect.y += 1;
                 break;
             }

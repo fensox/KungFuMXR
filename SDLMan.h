@@ -26,15 +26,16 @@
  *
  * If your application physics depend on accurate FPS calculation then
  * calculateFPS() must be called every game loop. It stores an average
- * of the last ten FPS calculations in a member variable that can be
+ * of the last FPS_AVG frames calculations in a member variable that can be
  * obtained with getFPS() or output to the console with outputFPS().
- * The seconds since last frame can also be obtained with a call
- * to getFrameTime().
  *
  */
 class SDLMan {
 
 public:
+	const static Uint32 FPS_AVG		{ 250 };				// How many FPS calculations to store in an array for FPS averaging. Smooths FPS calc.
+	const static Uint32 FPS_INIT	{ 120 };				// Initial value to fill FPS averaging array with. Smooths initial few seconds of calculations depending on FPS_AVG size.
+
 	// Constructor. Takes window caption string, bool to start with a fullscreen window, and width and height of starting window
 	// if we are not full screen. Width and height may be not used and will default to FuGlobals::VIEWPORT_WIDTH &
 	// FuGlobals::VIEWPORT_WIDTH.
@@ -121,9 +122,6 @@ public:
 	// Returns the current average FPS count.
 	decimal getFPS();
 
-	// Returns the seconds elapsed since last frame
-	Uint32 getFrameTime();
-
 private:
 	// Holds the music that will be played in the background
 	Mix_Music* mMusic{ nullptr };
@@ -154,7 +152,7 @@ private:
 	bool mWindowFull{ false };
 
 	// An array to store frame times for averaging FPS to smooth out calculation
-	Uint32 mFPSTimes[10];
+	Uint32 mFPSTimes[ FPS_AVG ];
 
 	// Last calculated SDL_GetTicks
 	Uint32 mFPSLast;

@@ -92,9 +92,10 @@ bool SDLMan::init() {
 	SDL_GameControllerEventState(SDL_ENABLE);
 
 	// Initialize variables used for FPS calculation
-	memset(mFPSTimes, 0, sizeof(mFPSTimes));
+	//memset(mFPSTimes, 0, sizeof(mFPSTimes)); //***DEBUG*** delete this if our new for loop works
+	for (int i{}; i < FPS_AVG; ++i) mFPSTimes[i] = FPS_INIT;
 	mFPSCount = 0;
-	mFPS = 0;
+	mFPS = FPS_INIT;
 	mFPSLast = SDL_GetTicks();
 
 	return true;
@@ -335,8 +336,8 @@ void SDLMan::toggleMusic() {
 
 // Calculates the current FPS using an averaging method of the last ten frames. Must be called every game tick for other FPS functions to work correctly.
 void SDLMan::calculateFPS() {
-	// fpsIndex is the position in the FPS averaging array. It ranges from 0 to 10 and rotates back to 0 after reaching 10.
-	Uint32 fpsIndex{ mFPSCount % 10 };
+	// fpsIndex is the position in the FPS averaging array. It ranges from 0 to FPS_AVG and rotates back to 0 after reaching FPS_AVG.
+	Uint32 fpsIndex{ mFPSCount % FPS_AVG };
 
 	// store the current time
 	Uint32 getticks{ SDL_GetTicks() };
@@ -350,12 +351,12 @@ void SDLMan::calculateFPS() {
 	// increment the frame count
 	++mFPSCount;
 
-	// test to see if the whole array has been written to or not. Stops strange values first 10 frames
-	Uint32 count;
-	if (mFPSCount < 10) {
+	// test to see if the whole array has been written to or not. Stops strange values first FPS_AVG frames
+	Uint32 count{};
+	if (mFPSCount < FPS_AVG) {
 		count = mFPSCount;
 	} else {
-		count = 10;
+		count = FPS_AVG;
 	}
 
 	// add up all the values and divide to get the average frame time.
@@ -364,20 +365,17 @@ void SDLMan::calculateFPS() {
 	mFPS /= count;
 
 	// now to make it an actual frames per second value
-	mFPS = 1000.f / mFPS;
+	mFPS = 1000.0 / mFPS;
 }
 
 // Returns the current average FPS count.
 decimal SDLMan::getFPS() {
-	return mFPS;
+	// if this is the first five seconds of SDL running, return the FPS_INIT value to give our averaging time to catch up.
+	if (SDL_GetTicks() > 5000) 	return mFPS;
+	else return FPS_INIT;
 }
 
 // Outputs the FPS count to console.
 void SDLMan::outputFPS() {
 	std::cout << getFPS() << "\n";
-}
-
-// Returns the seconds elapsed since last frame
-Uint32 SDLMan::getFrameTime() {
-	return 1000 / static_cast<Uint32>(mFPS);
 }
