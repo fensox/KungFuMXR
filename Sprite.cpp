@@ -13,7 +13,7 @@
 #include <memory>
 #include <vector>
 
-/* Constructor. Derived classes should have a constructor that fills in all their sprite specific variables. See section in Sprite.h.
+/* Constructor. Derived classes should have a constructor that fills in all their sprite specific variables. See protected section in Sprite.h.
    After the Sprite derived is constructed a call to load() must be made before any other function calls will operate correctly.
 */
 Sprite::Sprite(std::shared_ptr<SDLMan> sdlMan) {
@@ -127,8 +127,8 @@ bool Sprite::loadDataFile() {
 
 // Load in the sprite sheet specified in the const string mSpriteSheet and set transparency. Return boolean success.
 bool Sprite::loadSpriteSheet() {    
-    mTexture = mSDL.lock()->loadImage(mSpriteSheet, mTrans, true);
-    
+    mTexture = mSDL.lock()->loadImage(mSpriteSheet);
+
     return (!(mTexture==nullptr));
 }
 
@@ -251,15 +251,6 @@ bool Sprite::downBump() {
     return mLevel.lock()->isACollision( getCollRectBtm() );
 }
 
-// Handles the sprite initiating a jump.
-void Sprite::jump() {
-    // only launch into a jump if we have something to launch off of
-    if (downBump()) {
-        mVeloc.down = 0;
-        mVeloc.up = JUMP_VELOCITY;
-    }
-}
-
 // Applies gravity to the sprite if parameter set to true otherwise checks if sprite just finished a fall and cleans up velocity variables.
 void Sprite::applyGravity(bool standing) {
     // If we are standing but have downward velocity still we have just landed. Reset y velocities to stop bouncing and other jump artifacts.
@@ -291,15 +282,12 @@ void Sprite::applyFriction(bool standing) {
         if (!standing) friction = FuGlobals::AIR_FRICTION;
         friction = friction / mSDL.lock()->getFPS();
 
-        // only apply friction if not actively trying to move in that direction
-        if (!mWalkingLeft) {
-            mVeloc.left -= friction;
-            if (mVeloc.left < 0) mVeloc.left = 0;
-        }
-        if (!mWalkingRight) {
-            mVeloc.right -= friction;
-            if (mVeloc.right < 0) mVeloc.right = 0;
-        }
+        // apply the friction being sure velocity not reduced below 0
+        mVeloc.left -= friction;
+        if (mVeloc.left < 0) mVeloc.left = 0;
+
+        mVeloc.right -= friction;
+        if (mVeloc.right < 0) mVeloc.right = 0;
 }
 
 // Moves Sprite based on velocities adjusting for gravity, friction, and collisions. May be overridden or extended for custom movement routines.
@@ -311,7 +299,7 @@ void Sprite::move() {
     applyGravity(standing);
 
     // apply friction
-    applyFriction(standing);
+    if (!mPoweredMotion) applyFriction(standing);
 
     // add up how much we are trying to move
     int tryX{ static_cast<int>(std::round(mVeloc.right - mVeloc.left)) };

@@ -18,8 +18,8 @@ namespace FuGlobals {
 	constexpr int		JOYSTICK_DEAD_ZONE		{ 8000 };				// Analog joystick dead zone
 	constexpr decimal	GRAVITY					{ 15 };					// Gravity defined as pixels/second of downward velocity to add to sprites
 	constexpr decimal	TERMINAL_VELOCITY		{ 720 };				// Maximum pixels/second of downward velocity that gravity can make a player fall
-	constexpr decimal	GROUND_FRICTION			{ 21.2 };				// Amount of horizontal pixels/second a solid surface slows a sprite. Not applied when sprite under powered motion.
-	constexpr decimal	AIR_FRICTION			{ 21.2 };				// Amount of horizontal pixels/second the air slows a sprite when not standing on a solid surface. Not applied when sprite under powered motion.
+	constexpr decimal	GROUND_FRICTION			{ 31.2 };				// Amount of horizontal pixels/second a solid surface slows a sprite. Not applied when sprite under powered motion.
+	constexpr decimal	AIR_FRICTION			{ 31.2 };				// Amount of horizontal pixels/second the air slows a sprite when not standing on a solid surface. Not applied when sprite under powered motion.
 	constexpr int		LEVEL_BOUNDS			{ 1 };					// Distance in pixels a player can get to the edge of the viewport when level boundry has been reached.
 
 }

@@ -13,10 +13,12 @@
 // Forward declaration for Level class...ran into a circular reference between Sprite<->Level
 class Level;
 
+/* Provides basic Sprite functionality. Loading in sprite sheet meta info, animations, collision detection, basic movement with gravity, friction, and boundry checking. 
+ * Includes some basic actions like walking and jumping. Derived sprite classes can build on these basic actions. */
 class Sprite {
 
 public:
-	/* Constructor. Derived classes should have a constructor that fills in all their sprite specific variables. See section in Sprite.h.
+	/* Constructor. Derived classes should have a constructor that fills in all their sprite specific variables. See protected section in Sprite.h.
 	   After the Sprite derived is constructed a call to load() must be made before any other function calls will operate correctly.
 	*/
 	Sprite(std::shared_ptr<SDLMan> sdlMan);
@@ -74,24 +76,16 @@ public:
 protected:
 	/**********************************************************************************
 	 *         SPRITE SPECIFIC MEMBERS TO BE SET BY EACH DERIVED CLASS                *
-	 *                                                                                *
-	 * Two constant std::string members holding the paths and filenames of the        *
-	 * sprite's data files relative to executable. Overridden by derived classes for  *
-	 * each sprite type. The mActionMode needs to be set to the starting action mode  *
-	 * for the sprite. The SDL_Color set's the transparency for the sprite sheet.     *
-	 * The mName string is simply a name for the sprite (i.e. Ninja, Ghost, etc.)     *
-	 * primarily used to identify debugging output. mScale is a multiplyer to scale   *
-	 * the sprite by when rendering. The JUMP_VELOCITY constant is how much velocity  *
-	 * in pixels to add to upward velocity when a sprite initiates a jump.			  *
-	 * Defaults below.								                                  *
 	 **********************************************************************************/
-	std::string		mMetaFilename		{ "data/example.dat" };
-	std::string		mSpriteSheet		{ "data/example_sheet.png" };
-	std::string		mActionMode			{ "WALK_LEFT" };
-	SDL_Color		mTrans				{ 255, 0, 255, 0 };
-	std::string		mName				{ "Example Man" };
-	int				mScale				{ 1 };
-	const decimal	JUMP_VELOCITY		{ 8.5 };						// Initial force a sprite generates to start a jump in pixels per second
+
+	std::string		mMetaFilename		{ "data/example.dat" };			// The path to the sprite meta data file. See meta data file header for file layout information.
+	std::string		mSpriteSheet		{ "data/example_sheet.png" };	// The path to the sprite sheet containing the animation frames for this sprite.
+	std::string		mActionMode			{ "WALK_LEFT" };				// The starting action mode for the sprite.
+	SDL_Color		mTrans				{ 255, 0, 255, 0 };				// The transparency for the sprite sheet. Derived sprites may choose to auto detect transparency color or use this color.
+	std::string		mName				{ "Example Man" };				// A name for the sprite (i.e.Ninja, Ghost, etc.) primarily used to identify debugging output.
+	int				mScale				{ 1 };							// multiplyer to scale the sprite size by when rendering.
+	bool			mFacingRight		{ false };						// On start of game indicates whethar the sprite is facing right or not. If false then sprite is facing left.
+
 	/**********************************************************************************/
 
 	// A ClipsMap is a std::unordered_map container with the string name of an action (the key) mapped to a vector of SDL_Rect holding all sprite sheet clip information for that action.
@@ -106,6 +100,9 @@ protected:
 	// Center position of sprite within the level. This is not viewport relative but level relative. This is not derived from
 	// the size of the current animation frame. The render function renders the animation frame texture around this point.
 	decimal mXPos{ 0 }; decimal mYPos{ 0 };
+
+	// Indicates whethar the sprite is under self powered motion. Allow friction to be disabled during movements. Must be toggled by derived Sprites for various actions.
+	bool mPoweredMotion{ false };
 
 	// Advances the current action mode animation frame ahead or loops to beginning if at end of animation frames.
 	void advanceFrame();
@@ -129,20 +126,10 @@ protected:
 	// Instance of Velocity struct for this sprite
 	Velocity mVeloc{};
 
-	// If we are actively walking left
-	bool mWalkingLeft{ false };
 
-	// If we are actively walking right
-	bool mWalkingRight{ false };
-
-	// If we are actively jumping
-	bool mJumping{ false };
 
 	// Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 	bool downBump();
-
-	// Handles the sprite initiating a jump.
-	void jump();
 
 	// Applies gravity to the sprite depending on boolean parameter. Also checks if just finished a fall and cleans up some variables if so.
 	void applyGravity(bool standing);

@@ -30,7 +30,7 @@ bool GameLoop::loadGameData() {
 	mSprites = std::make_unique<std::vector<Sprite>>();
 
 	// Load the player
-	mPlayer = std::make_unique<Thomas>(mSDL);
+	mPlayer = std::make_unique<MisterX>(mSDL);
 	if (!mPlayer->load()) success = false;
 
 	//***DEBUG***

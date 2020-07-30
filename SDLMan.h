@@ -110,6 +110,9 @@ public:
 	// Load in a Texture object using the passed in filename, transparancy color, and transparancy on/off switch. Returns a smart pointer to a Texture object.
 	std::unique_ptr<Texture> loadImage(std::string fileName, SDL_Color color, bool useTrans);
 
+	// Load in a Texture object using the passed in filename. Transparancy information is attempted to be read automatically from file. Returns a smart pointer to a Texture object.
+	std::unique_ptr<Texture> loadImage(std::string fileName);
+
 	// Provide a pointer to our renderer for others to use to draw themselves.
 	SDL_Renderer* getRenderer();
 

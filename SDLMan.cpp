@@ -301,6 +301,12 @@ std::unique_ptr<Texture> SDLMan::loadImage(std::string fileName, SDL_Color color
 	return std::make_unique<Texture>(newTexture);
 }
 
+// Load in a Texture object using the passed in filename. Transparancy information is attempted to be read automatically from file. Returns a smart pointer to a Texture object.
+std::unique_ptr<Texture> SDLMan::loadImage(std::string fileName) {
+	SDL_Color c{};
+	return loadImage(fileName, c, false);
+}
+
 // Provide a pointer to the renderer for others to use to draw themselves.
 SDL_Renderer* SDLMan::getRenderer() {
 	return mRenderer;

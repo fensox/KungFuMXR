@@ -23,13 +23,15 @@
 #
 #####################################################################################################################################
 
-# Begin Thomas' data file
+# Begin Mr. X's data file
 
-WALK_LEFT=1, 5, 18, 41
-WALK_LEFT=20, 5, 24, 41
-WALK_RIGHT=67, 5, 20, 41
-WALK_RIGHT=45, 5, 21, 41
-JUMP_LEFT=89, 6, 16, 40
-JUMP_LEFT_TOP=106, 2, 16, 44
+WALK_LEFT=194, 775, 10, 40
+WALK_LEFT=171, 776, 16, 40
+#WALK_LEFT=171, 776, 16, 39
+WALK_RIGHT=214, 775, 10, 40
+WALK_RIGHT=231, 776, 16, 40
+#WALK_RIGHT=231, 776, 16, 39
+DUCK_RIGHT=317, 785, 17, 30
+DUCK_LEFT=84, 785, 17, 30
 
-# End Thomas' data file
+# End Mr. X's data file

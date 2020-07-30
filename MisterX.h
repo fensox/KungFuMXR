@@ -3,11 +3,16 @@
 #include "SDLMan.h"
 #include <memory>
 
-class Thomas : public Sprite
+class MisterX : public Sprite
 {
 public:
+	const decimal	WALK_VELOCITY_PER		{ 5 };			// Walk velocity increase per real world second
+	const decimal	WALK_MAX				{ 7 };			// Maximum velocity player can walk per real world second
+	const Uint32	WALK_WAIT_TIME			{ 150 };		// Milliseconds between change of animation 
+	const decimal	JUMP_VELOCITY			{ 8.5 };		// Initial force a sprite generates to start a jump in pixels per second
+
 	// Use base Sprite constructor
-	Thomas(std::shared_ptr<SDLMan> sdlMan);
+	MisterX(std::shared_ptr<SDLMan> sdlMan);
 
 	// Handles keyboard input from the player. SDL_Keycode is the key and the bool is true on key pressed and false on key released.
 	void playerInput(const SDL_Keycode& key, bool press);
@@ -23,17 +28,20 @@ public:
 	void move();
 
 private:
-	// Time between walk speed increases
-	const Uint32 WALK_WAIT_TIME { 100 };
+	// If we are actively walking left. Used for all animations, as well as walking, to indicate direction.
+	bool mWalkingLeft{ false };
 
-	// Walk velocity increase per WALK_WAIT_TIME
-	const decimal WALK_VELOCITY_PER { 2 };
+	// If we are actively walking right. Used for all animations, as well as walking, to indicate direction.
+	bool mWalkingRight{ false };
 
-	// Maximum velocity player can walk
-	const decimal WALK_MAX { 4.0 };
+	// If we are actively jumping
+	bool mJumping{ false };
 
-	// Last time we took a step in SDL ticks. Used to regulate walking speed.
-	Uint32 mLastWalkTime{};
+	// If we are actively ducking
+	bool mDucking{ false };
+
+	// Holds the SDL ticks the last time an animation frame changed
+	Uint32 mLastAnimStep{};
 
 	// Handles the player requesting to move to the right.
 	void moveRight();
@@ -41,11 +49,17 @@ private:
 	// Handles the player requesting to move to the right.
 	void moveLeft();
 
-	// Check if enough time has passed to walk then work with viewport position and move player if so
-	bool checkWalkTime();
+	// Handles the player initiating a jump.
+	void jump();
+
+	// Handles the player initiating a duck.
+	void duck();
 
 	// Adjust the player position back inside the level if an out of bounds location has been detected.
 	void adjustForLevelBounds();
+
+	// Return bool whethar enough time has passed to change walk animation.
+	bool checkWalkTime();
 
 	//***DEBUG*** Outputs some debugging info
 	void outputDebug();
