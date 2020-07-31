@@ -6,10 +6,11 @@
 class MisterX : public Sprite
 {
 public:
-	const decimal	WALK_VELOCITY_PER		{ 5 };			// Walk velocity increase per real world second
+	const decimal	WALK_VELOCITY_PER		{ 100 };		// Walk velocity increase per real world second. Higher than WALK_MAX to overcome global friction constants.
 	const decimal	WALK_MAX				{ 7 };			// Maximum velocity player can walk per real world second
-	const Uint32	WALK_WAIT_TIME			{ 150 };		// Milliseconds between change of animation 
+	const Uint32	WALK_WAIT_TIME			{ 250 };		// Milliseconds between change of animation 
 	const decimal	JUMP_VELOCITY			{ 8.5 };		// Initial force a sprite generates to start a jump in pixels per second
+	const Uint32	ATTACK_HOLD				{ 1000 };		// Milliseconds to hold an attack animation on screen before returning to former animation
 
 	// Use base Sprite constructor
 	MisterX(std::shared_ptr<SDLMan> sdlMan);
@@ -40,6 +41,9 @@ private:
 	// If we are actively ducking
 	bool mDucking{ false };
 
+	// if we are actively punching
+	bool mPunching{ false };
+
 	// Holds the SDL ticks the last time an animation frame changed
 	Uint32 mLastAnimStep{};
 
@@ -54,6 +58,9 @@ private:
 
 	// Handles the player initiating a duck.
 	void duck();
+
+	// Handles the player initiating a punch
+	void punch();
 
 	// Adjust the player position back inside the level if an out of bounds location has been detected.
 	void adjustForLevelBounds();

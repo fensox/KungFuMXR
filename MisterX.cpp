@@ -64,7 +64,7 @@ void MisterX::playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press) {
             // B button
             break;
         case SDL_CONTROLLER_BUTTON_X:
-            // X button
+            mPunching = true;
             break;
         case SDL_CONTROLLER_BUTTON_Y:
             // Y button
@@ -73,7 +73,7 @@ void MisterX::playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press) {
             // dpad up
             break;
         case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-            mDucking = press;
+            if (press) mDucking = true;
             duck(); // initial call to go into duck anim or come out of it
             break;
         case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
@@ -103,7 +103,7 @@ void MisterX::playerInput(const SDL_Keycode& key, bool press) {
     switch (key) {
         case SDLK_UP:
             //***DEBUG***
-            outputDebug();
+            if (FuGlobals::DEBUG_MODE) outputDebug();
             break;
 
         case SDLK_SPACE:
@@ -123,6 +123,8 @@ void MisterX::playerInput(const SDL_Keycode& key, bool press) {
             mWalkingRight = press;
             break;
 
+        case SDLK_a:
+            if (press) mPunching = true;
         default:
 
             break;
@@ -217,19 +219,32 @@ void MisterX::duck() {
     }
 }
 
+// Handles the player initiating a punch. mPunching bool not tied to button release like other actions. We turn off when animation complete to end punching action.
+void MisterX::punch() {
+    // if not in punch mode yet pick correct punch mode
+    if (mActionMode == "DUCK_RIGHT") mActionMode == "PUNCH_DUCK_RIGHT";
+    else if (mActionMode == "DUCK_LEFT") mActionMode == "PUNCH_DUCK_LEFT";
+    else if (mActionMode == "WALK_LEFT") mActionMode == "PUNCH_LEFT";
+    else if (mActionMode == "WALK_RIGHT") mActionMode == "PUNCH_RIGHT";
+    
+    // check if enough time has passed
+}
+
 // Moves player based on velocities adjusting for gravity, friction, and collisions. Extends then calls the Sprite class
 // default move function for a few custom player effects like respecting level boundries that other things sprites do not need to do.
 void MisterX::move() {
-    // set Sprite's powered motion switch to engage/disengage friction
-    mPoweredMotion = (mWalkingRight || mWalkingLeft);
-
-    if (mJumping) jump();
-    if (mDucking) duck();
+    // perform various actions on request
+    if (mJumping && !mDucking) jump();
+    if (mDucking) duck(); // ***DEBUG*** do something so can't duck in air?
     if (!mDucking) {
         if (mWalkingLeft) moveLeft();
         if (mWalkingRight) moveRight();
     }
+    if (mPunching) punch();
+
+    // call Sprite move function to perform the actual movement that handles collision detection, etc
     Sprite::move();
 
+    // make sure we haven't exceeded level bounds. Sprite class doesn't do this for us as enemies can leave level bounds.
     adjustForLevelBounds();
 }

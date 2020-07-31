@@ -267,11 +267,6 @@ void Sprite::applyGravity(bool standing) {
         // adjust to be sure we don't exceed terminal velocity
         decimal tvThisFrame{ FuGlobals::TERMINAL_VELOCITY / mSDL.lock()->getFPS() };
         if (mVeloc.down > tvThisFrame) mVeloc.down = tvThisFrame;
-        
-        //***DEBUG*** Display gravity readout.
-        if (FuGlobals::DEBUG_MODE) {
-            std::cout << "Grav This Frame: " << gravThisFrame << "\t\t\tVel. Down: " << mVeloc.down << "\t\t\tFPS: " << mSDL.lock()->getFPS() << std::endl;
-        }
     }
 }
 
@@ -299,7 +294,7 @@ void Sprite::move() {
     applyGravity(standing);
 
     // apply friction
-    if (!mPoweredMotion) applyFriction(standing);
+    applyFriction(standing);
 
     // add up how much we are trying to move
     int tryX{ static_cast<int>(std::round(mVeloc.right - mVeloc.left)) };
@@ -353,4 +348,25 @@ void Sprite::move() {
     // set the position now that all tests have completed
     mXPos = rect.x + rect.w / 2;
     mYPos = rect.y + rect.h / 2;
+
+    // Final check and fix that we didn't put the sprite somewhere in the floor becasue of animation frame size differences
+    correctFrame();
+}
+
+// Corrects for height differences of various animation frames so we don't get stuck in floor, have jumpy animations, etc.
+void Sprite::correctFrame() {
+    // are we standing on the floor
+    bool standing{ downBump() };
+
+    // if we are standing on the floor do a test loop raising our position until we are above floor a pixel
+    while (standing) {
+        // move up one pixel and see if we are still standing
+        mYPos -= 1;
+
+        // check if we are standing on something now
+        standing = downBump();
+
+        // if not standing now then we are one pixel above the floor because of our testing, put it back to floor level and the loop will end
+        if (!standing) mYPos += 1;
+    }
 }

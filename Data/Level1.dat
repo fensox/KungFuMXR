@@ -24,6 +24,8 @@
 #
 #	COLRECT=x, y, w, h		- Collision rectangles in the level. Include as many of these lines as needed per level.
 #					  Rectangles are specified as integers: Top Left X position, Top Left Y position, Width, Height
+#					  Important Note: If the collision rectangle height is shorter than the difference in animation
+#					  frame heights then a sprite could get caught in the floor. Keep heights as tall as possible.
 #
 # 3) Note all level design is based on a 720 pixel tall background resolution with a 1280 pixel wide scrolling viewport.
 #    Larger/smaller game windows scale this up or down to fit.
@@ -35,7 +37,6 @@
 #	BACKGROUND=data/Level1.png
 #	TRANS_COLOR=92,148,252,1
 #	MUSIC=data/kung_fu_music.ogg
-#	START_VIEWPORT=0,0,1280,720
 #	PLAYER_START=1280, 720
 # 	COLRECT=0, 0, 7000, 100
 #	COLRECT=31, 0, 30, 100
@@ -57,7 +58,7 @@ PLAYER_START=1100, 0
 COLRECT=0, 470, 7680, 250
 
 #Table
-COLRECT=2231,383,309,1
+COLRECT=2231,383,309,25
 
 #Ceiling
 #COLRECT=0,0,7680,1

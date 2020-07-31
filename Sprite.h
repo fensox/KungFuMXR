@@ -101,9 +101,6 @@ protected:
 	// the size of the current animation frame. The render function renders the animation frame texture around this point.
 	decimal mXPos{ 0 }; decimal mYPos{ 0 };
 
-	// Indicates whethar the sprite is under self powered motion. Allow friction to be disabled during movements. Must be toggled by derived Sprites for various actions.
-	bool mPoweredMotion{ false };
-
 	// Advances the current action mode animation frame ahead or loops to beginning if at end of animation frames.
 	void advanceFrame();
 
@@ -136,6 +133,9 @@ protected:
 
 	// Applies friction to the sprite's velocity.
 	void applyFriction(bool standing);
+
+	// Corrects for height differences of various animation frames so we don't get stuck in floor, have jumpy animations, etc.
+	void correctFrame();
 
 private:
 	// Smart pointer to the Texture holding our sprite's sprite sheet.
