@@ -70,6 +70,15 @@ public:
 	// Moves Sprite based on velocities adjusting for gravity, friction, and collisions. May be overridden or extended for custom movement routines.
 	virtual void move();
 
+	// Set the action mode
+	void setActionMode(std::string actionMode);
+
+	// Returns the current action mode
+	std::string getActionMode();
+
+	// Returns the last action mode
+	std::string getLastActionMode();
+
 	// Returns information about the Sprite object represented as a std::string for debugging purposes.
 	virtual std::string toString();
 
@@ -80,7 +89,7 @@ protected:
 
 	std::string		mMetaFilename		{ "data/example.dat" };			// The path to the sprite meta data file. See meta data file header for file layout information.
 	std::string		mSpriteSheet		{ "data/example_sheet.png" };	// The path to the sprite sheet containing the animation frames for this sprite.
-	std::string		mActionMode			{ "WALK_LEFT" };				// The starting action mode for the sprite.
+	std::string		mStartingActionMode	{ "WALK_LEFT" };				// The starting action mode for the sprite.
 	SDL_Color		mTrans				{ 255, 0, 255, 0 };				// The transparency for the sprite sheet. Derived sprites may choose to auto detect transparency color or use this color.
 	std::string		mName				{ "Example Man" };				// A name for the sprite (i.e.Ninja, Ghost, etc.) primarily used to identify debugging output.
 	int				mScale				{ 1 };							// multiplyer to scale the sprite size by when rendering.
@@ -101,7 +110,7 @@ protected:
 	// the size of the current animation frame. The render function renders the animation frame texture around this point.
 	decimal mXPos{ 0 }; decimal mYPos{ 0 };
 
-	// Advances the current action mode animation frame ahead or loops to beginning if at end of animation frames.
+	// Advances the current action mode animation frame ahead or starts at the beginning if at end of animation frames or a new action has been started.
 	void advanceFrame();
 
 	// Smart pointer to the level we are on. Various Level functions allow sprites to move level viewport and
@@ -122,8 +131,6 @@ protected:
 
 	// Instance of Velocity struct for this sprite
 	Velocity mVeloc{};
-
-
 
 	// Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 	bool downBump();
@@ -149,6 +156,12 @@ private:
 
 	// The sprite's instance of the Velocity struct
 	Velocity veloc{};
+
+	// The current action mode for the sprite.
+	std::string mActionMode{};
+
+	// The last action mode we were in before the current one or an empty string if beginning of Sprite life.
+	std::string mLastActionMode{};
 
 	// Load the initial data file in with action mode names and animation frame counts. Store in passed in map and return boolean success.
 	bool loadDataFile();

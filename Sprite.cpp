@@ -19,6 +19,9 @@
 Sprite::Sprite(std::shared_ptr<SDLMan> sdlMan) {
     // store the SDLMan smart shared pointer in our weak_ptr. Using weak to prevent cyclic shared_ptr problems as multiple objects hold a reference to SDLMan.
     mSDL = sdlMan;
+
+    // set default action mode set for this sprite into our action mode member
+    mActionMode = mStartingActionMode;
 }
 
 // Destructor
@@ -152,6 +155,23 @@ std::string Sprite::toString() {
     return output.str();
 }
 
+// Set the action mode
+void Sprite::setActionMode(std::string actionMode) {
+    mLastActionMode = mActionMode;
+    mActionMode = actionMode;
+    mCurrentFrame = 0;
+}
+
+// Returns the current action mode
+std::string Sprite::getActionMode() {
+    return mActionMode;
+}
+
+// Returns the last action mode
+std::string Sprite::getLastActionMode() {
+    return mLastActionMode;
+}
+
 int Sprite::getDepth() {
     return mDepth;
 }
@@ -179,6 +199,12 @@ std::string Sprite::getName() {
 
 // Advances the current action mode animation frame ahead or loops to beginning if at end of animation frames.
 void Sprite::advanceFrame() {
+    // check if this is a new action mode since last frame change. If so store the new mode name and start at frame 0.
+    if (mActionMode != mLastActionMode) {
+        mCurrentFrame = 0;
+        mLastActionMode = mActionMode;
+    }
+
     // get the number of frames this animation has
     std::size_t count = mAnimMap[mActionMode].size();
 

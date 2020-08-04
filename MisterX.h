@@ -6,11 +6,11 @@
 class MisterX : public Sprite
 {
 public:
-	const decimal	WALK_VELOCITY_PER		{ 100 };		// Walk velocity increase per real world second. Higher than WALK_MAX to overcome global friction constants.
-	const decimal	WALK_MAX				{ 7 };			// Maximum velocity player can walk per real world second
-	const Uint32	WALK_WAIT_TIME			{ 250 };		// Milliseconds between change of animation 
-	const decimal	JUMP_VELOCITY			{ 8.5 };		// Initial force a sprite generates to start a jump in pixels per second
-	const Uint32	ATTACK_HOLD				{ 1000 };		// Milliseconds to hold an attack animation on screen before returning to former animation
+	const decimal	WALK_VELOCITY_PER{ 100 };		// Walk velocity increase per real world second. Higher than WALK_MAX to overcome global friction constants.
+	const decimal	WALK_MAX{ 7 };			// Maximum velocity player can walk per real world second
+	const Uint32	WALK_WAIT_TIME{ 250 };		// Milliseconds between change of animation 
+	const decimal	JUMP_VELOCITY{ 8.5 };		// Initial force a sprite generates to start a jump in pixels per second
+	const Uint32	ATTACK_TIME{ 100 };		// Milliseconds to hold an attack animation on screen before returning to former animation
 
 	// Use base Sprite constructor
 	MisterX(std::shared_ptr<SDLMan> sdlMan);
@@ -44,8 +44,17 @@ private:
 	// if we are actively punching
 	bool mPunching{ false };
 
-	// Holds the SDL ticks the last time an animation frame changed
+	// indicates if an attack key has been released. Prevents player from just holding down button and having a turbo attack.
+	bool mAttackReleased{ true };
+
+	// indicates if we are in the middle of an attack.
+	bool mAttacking{ false };
+
+	// Holds the SDL ticks the last time an animation frame changed for the walking action
 	Uint32 mLastAnimStep{};
+
+	// Holds the SDL ticks the time that an attack started
+	Uint32 mAttackTime{};
 
 	// Handles the player requesting to move to the right.
 	void moveRight();
