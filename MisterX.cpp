@@ -64,7 +64,13 @@ void MisterX::playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press) {
             // B button
             break;
         case SDL_CONTROLLER_BUTTON_X:
-            mPunching = true;
+            if (press && mAttackReleased) {
+                mAttacking = true;
+                mPunching = true;
+                mAttackReleased = false;
+            } else if (!press) {
+                mAttackReleased = true;
+            }
             break;
         case SDL_CONTROLLER_BUTTON_Y:
             // Y button
@@ -73,7 +79,7 @@ void MisterX::playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press) {
             // dpad up
             break;
         case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-            if (press) mDucking = true;
+            mDucking = press;
             duck(); // initial call to go into duck anim or come out of it
             break;
         case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
@@ -228,8 +234,11 @@ void MisterX::duck() {
 void MisterX::punch() {
     using namespace FensoxUtils;
 
-    // set our punch start time if this is our first frame of attack
-    if (getActionMode().find("PUNCH_") == std::string::npos) mAttackTime = SDL_GetTicks();
+    // If start of punch action: set our punch start time and play sound effect
+    if (getActionMode().find("PUNCH_") == std::string::npos) {
+
+        mAttackTime = SDL_GetTicks();
+    }
     
     // if not in punch mode yet pick correct punch mode
     switch (hash( getActionMode().c_str() )) {
@@ -261,7 +270,7 @@ void MisterX::punch() {
 void MisterX::move() {
     // perform various actions on request
     if (mJumping && !mDucking) jump();
-    if (mDucking) duck();                       // ***DEBUG*** do something so can't duck in air? Unless we like ducking in the air.
+    if (mDucking && !mPunching) duck();                       // ***DEBUG*** do something so can't duck in air? Unless we like ducking in the air.
     if (!mDucking && !mAttacking) {
         if (mWalkingLeft) moveLeft();
         if (mWalkingRight) moveRight();

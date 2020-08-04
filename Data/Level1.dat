@@ -51,7 +51,7 @@
 NAME=Level 1
 BACKGROUND=data/Level1.png
 TRANS_COLOR=92,148,252,0
-MUSIC=data/kung_fu_music.mp3
+MUSIC=data/kung_fu_music_edited.mp3
 PLAYER_START=1100, 0
 
 #Floor

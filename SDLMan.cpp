@@ -72,7 +72,7 @@ bool SDLMan::init() {
 	setDrawColor(0, 0, 0);
 
 	// Initialize SDL_mixer for sound support
-	if (Mix_OpenAudio(MIX_DEFAULT_FORMAT, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
+	if (Mix_OpenAudio(8000, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
 	{
 		std::cerr << "Failed in SDLMan::init, SDL_mixer could not initialize. SDL_mixer Error: \n" << Mix_GetError() << std::endl;;
 		return false;
@@ -86,7 +86,7 @@ bool SDLMan::init() {
 	}
 
 	// Attempt to open a game controller if one is connected. We disable controller events during gamepad opening to keep an SDL_CONTROLLERDEVICEADDED
-	// event from being added to the event queue which would cause our openGamepad function to be called twice.
+	// event from being added to the event queue which would cause our openGamepad function to be called twice. Which isn't a problem at first glance but why do it.
 	SDL_GameControllerEventState(SDL_IGNORE);
 	openGamepad();
 	SDL_GameControllerEventState(SDL_ENABLE);
