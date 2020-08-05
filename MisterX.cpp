@@ -12,6 +12,9 @@ MisterX::MisterX(std::shared_ptr<SDLMan> sdlMan) : Sprite(sdlMan) {
 	mTrans = SDL_Color{ 255, 0, 255, 0 };
 	mName = "MisterX";
     mScale = 3;
+
+    // load sound effects
+    mSDL.lock()->addSoundEffect("MRX_PUNCH", "data/mrx_punch.wav");
 };
 
 //***DEBUG*** Outputs some debugging info
@@ -236,7 +239,7 @@ void MisterX::punch() {
 
     // If start of punch action: set our punch start time and play sound effect
     if (getActionMode().find("PUNCH_") == std::string::npos) {
-
+        mSDL.lock()->playSoundEffect("MRX_PUNCH");
         mAttackTime = SDL_GetTicks();
     }
     

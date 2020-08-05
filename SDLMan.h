@@ -5,6 +5,7 @@
 #include <string>
 #include "Texture.h"
 #include <memory>
+#include <unordered_map>
 #include "Globals.h"
 
 /* SDLMan - SDL Manager Utility Class
@@ -12,17 +13,20 @@
  * Helper class to manage all sorts of SDL goings on.
  * Wraps an SDL_Window and SDL_Renderer. Supplies functions
  * to assist in drawing things, a destructor to close down
- * SDL objects, functions for loading images, etc.
+ * SDL objects, functions for loading images, sound, etc.
  *
  * The FuGlobals namespace with the VIEWPORT_HEIGHT and
  * VIEWPORT_WIDTH is required and SDL's renderer is set to
  * those dimensions so it can properly scale on window changes.
  *
- * Constructor initializes SDL but no window is opened or renderer
- * obtained until a call to openWindow() is made. Constructor takes
- * a caption argument for the window and a width/height for the
- * back buffer texture. This buffer size will stay constant despite
- * the window size and be scaled to fit window when render() is called.
+ * Constructor initializes SDLMan but needs to have a call to
+ * init() before any functionality is possible. Once init() is
+ * called the SDLMan is ready. No window is opened until
+ * a call to showWindow() is made. Constructor takes
+ * a caption argument, a fullscreen toggle, and a width/height for
+ * the starting window dimensions. The window can change size but
+ * the back buffer rendered too will stay constant and be scaled to
+ * fit window when refresh() is called.
  *
  * If your application physics depend on accurate FPS calculation then
  * calculateFPS() must be called every game loop. It stores an average
@@ -37,14 +41,14 @@ public:
 	const static Uint32 FPS_INIT	{ 120 };				// Initial value to fill FPS averaging array with. Smooths initial few seconds of calculations depending on FPS_AVG size.
 
 	// Constructor. Takes window caption string, bool to start with a fullscreen window, and width and height of starting window
-	// if we are not full screen. Width and height may be not used and will default to FuGlobals::VIEWPORT_WIDTH &
-	// FuGlobals::VIEWPORT_WIDTH.
+	// if we are not full screen. Width and height may be not used and will default to FuGlobals::VIEWPORT_WIDTH & FuGlobals::VIEWPORT_WIDTH.
 	SDLMan(std::string windowCaption, bool fullScreen = false, int width = FuGlobals::VIEWPORT_WIDTH, int height = FuGlobals::VIEWPORT_HEIGHT);
+	SDLMan() = delete;
 
 	// Destructor
 	~SDLMan();
 
-	// Initilizes SDL, creates the window and renderer but does not show the window until a call to showWindow is made.
+	// Initilizes SDL, creates the window and renderer but does not show the window until a call to showWindow is made. This must be called first before SDLMan will function.
 	bool init();
 
 	// Show's the previously created window. Returns false on failure or false if SDL hasn't been initialized yet.
@@ -92,11 +96,23 @@ public:
 	// Returns the height and width of a texture as an SDL_Point.
 	SDL_Point getSize(std::shared_ptr<Texture> text);
 
-	// Load in a music file. Does not play immediately. Use playMusic(bool) to start and stop loaded music.
+	// Load in a music file into memory. Paramter string is the filepath to the music file. Does not play immediately. Use toggloeMusic() to start and stop playback.
 	bool loadMusic(std::string musicFile);
 
 	// Play the music file that is loaded in or resume it if it is paused. If it is already playing, pause it.
 	void toggleMusic();
+
+	// Add's a sound effect to the sound effect map. SDLMan load's the sound effect into memory from the filesystem and readies it for playback.
+	// Parameters are the lookup name to store the sound under and the file path. If the name already exists in our map we replace the existing one with the new sound.
+	// Return's false if the sound could not be loaded and prints a warning to the standard error stream.
+	bool addSoundEffect(std::string name, std::string filepath);
+
+	// Play's the specified sound effect stored in the sound map indicated by the string parameter. The sound effect had to been previously loaded using addSoundEffect().
+	// Prints a warning to the standard error stream if the sound could not be played for any reason.
+	void playSoundEffect(std::string name);
+
+	// Attempts to remove the specified sound effect stored in the sound map indicated by the string parameter if one exists.
+	void removeSoundEffect(std::string name);
 
 	// Try to open a gamepad for use. Prints a warning to the error output stream if cannot open a controller but does not prevent game from continuing.
 	void openGamepad();
@@ -126,8 +142,14 @@ public:
 	decimal getFPS();
 
 private:
+	// A typedef for the datatype that stores sound effects. The string is the ID of the sound effect stored in the map. The sound effect is stored as a pointer to a Mix_Chunk.
+	typedef std::unordered_map<std::string, Mix_Chunk*> SoundMap;
+
 	// Holds the music that will be played in the background
 	Mix_Music* mMusic{ nullptr };
+
+	// Holds the unordered map of lookup name/sound effect in a smart pointer.
+	std::unique_ptr<SoundMap> mSoundMap{ nullptr };
 
 	// Pointer holding the SDL_Window we'll be rendering to
 	SDL_Window* mWindow{ nullptr };
@@ -165,5 +187,4 @@ private:
 
 	// the current average FPS value
 	decimal mFPS;
-
 };

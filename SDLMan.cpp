@@ -1,5 +1,6 @@
 #include "SDLMan.h"
 #include <SDL_image.h>
+#include <SDL_thread.h>
 #include <iostream>
 #include <vector>
 
@@ -30,13 +31,18 @@ SDLMan::~SDLMan() {
 	Mix_FreeMusic(mMusic);
 	mMusic = nullptr;
 
+	// Free sound effects
+	for (auto i : (*mSoundMap)) Mix_FreeChunk(i.second);
+	mSoundMap->clear();
+	mSoundMap = nullptr;
+
 	// Quit SDL subsystems
 	SDL_Quit();
 	IMG_Quit();
 	Mix_Quit();
 }
 
-// Initilizes SDL, creates the window and renderer but does not show the window until a call to showWindow is made.
+// Initilizes SDL, creates the window and renderer but does not show the window until a call to showWindow is made. This must be called first before SDLMan will function.
 bool SDLMan::init() {
 	// Attempt to initialize SDL returning false on failure and logging an error.
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) < 0) {
@@ -72,11 +78,14 @@ bool SDLMan::init() {
 	setDrawColor(0, 0, 0);
 
 	// Initialize SDL_mixer for sound support
-	if (Mix_OpenAudio(8000, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+	if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
 	{
 		std::cerr << "Failed in SDLMan::init, SDL_mixer could not initialize. SDL_mixer Error: \n" << Mix_GetError() << std::endl;;
 		return false;
 	}
+
+	// Initialize our unordered map of sound effects
+	mSoundMap = std::make_unique<SoundMap>();
 
 	// Load in game controller mappings database.
 	int iMapResult{ SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt") };
@@ -312,11 +321,11 @@ SDL_Renderer* SDLMan::getRenderer() {
 	return mRenderer;
 }
 
-// Load in a music file. Does not play immediately. Use playMusic(bool) to start and stop loaded music.
+// Load in a music file into memory. Paramter string is the filepath to the music file. Does not play immediately. Use toggloeMusic() to start and stop playback.
 bool SDLMan::loadMusic(std::string musicFile) {
 	bool success{ true };
 
-	mMusic = Mix_LoadMUS(musicFile.c_str());
+	mMusic = Mix_LoadMUS( musicFile.c_str() );
 	if (!mMusic) {
 		success = false;
 		std::cerr << "Failed in SDLMan::loadMusic. SDL_mixer Error: \n" << Mix_GetError() << std::endl;
@@ -337,6 +346,56 @@ void SDLMan::toggleMusic() {
 		} else {
 			Mix_PauseMusic();
 		}
+	}
+}
+
+// Add's a sound effect to the sound effect map. SDLMan load's the sound effect into memory from the filesystem and readies it for playback.
+// Parameters are the lookup name to store the sound under and the file path. If the name already exists in our map we replace the existing one with the new sound.
+// Return's false if the sound could not be loaded or if SDLMan has not been initialized yet with a call to init().
+bool SDLMan::addSoundEffect(std::string name, std::string filepath) {
+	if (mSoundMap == nullptr) {
+		std::cerr << "Warning in SDLMan::addSoundEffect. Did not attempt to load \"" << filepath << "\". SDLMan SoundMap has not been initialized." << std::endl;
+		return false;
+	}
+
+	// Attempt to load the sound effect
+	Mix_Chunk* sound = Mix_LoadWAV( filepath.c_str() );
+	if (!sound) {
+		std::cerr << "Warning in SDLMan::addSoundEffect. Failed to load \"" << filepath << "\". SDL_mixer Error: " << Mix_GetError() << std::endl;
+		return false;
+	}
+
+	// Add the sound effect to the SoundMap
+	(*mSoundMap)[name] = sound;
+
+	return true;
+}
+
+// Play's the specified sound effect stored in the sound map indicated by the string parameter. The sound effect had to been previously loaded using addSoundEffect().
+// Returns false if no sound with that name could be found.
+void SDLMan::playSoundEffect(std::string name) {
+	if (mSoundMap == nullptr) {
+		std::cerr << "Warning in SDLMan::playSoundEffect. Did not attempt to play sound effect with the name \"" << name << "\". SDLMan SoundMap has not been initialized." << std::endl;
+		return;
+	}
+
+	Mix_Chunk* sound{ (*mSoundMap)[name] };
+	if (Mix_PlayChannel(-1, sound, 0) == -1) {
+		std::cerr << "Warning in SDLMan::playSoundEffect. Failed to play sound named \"" << name << "\". SDL_Mixer Error: " << Mix_GetError() << std::endl;
+	}
+}
+
+// Attempts to remove the specified sound effect stored in the sound map indicated by the string parameter if one exists.
+void SDLMan::removeSoundEffect(std::string name) {
+	if (mSoundMap == nullptr) {
+		std::cerr << "Warning in SDLMan::removeSoundEffect. Did not attempt to remove sound effect with the name \"" << name << "\". SDLMan SoundMap has not been initialized." << std::endl;
+		return;
+	}
+
+	Mix_FreeChunk( (*mSoundMap)[name] );
+	std::size_t numErased = mSoundMap->erase(name);
+	if (numErased == 0) {
+		std::cerr << "Warning in SDLMan::removeSoundEffect. No sound effect was removed with the name \"" << name << "\"." << std::endl;
 	}
 }
 
