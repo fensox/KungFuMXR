@@ -44,6 +44,9 @@ private:
 	// if we are actively punching
 	bool mPunching{ false };
 
+	// if we are actively kicking
+	bool mKicking{ false };
+
 	// indicates if an attack key has been released. Prevents player from just holding down button and having a turbo attack.
 	bool mAttackReleased{ true };
 
@@ -62,14 +65,17 @@ private:
 	// Handles the player requesting to move to the right.
 	void moveLeft();
 
-	// Handles the player initiating a jump.
+	// Handles the player jumping
 	void jump();
 
-	// Handles the player initiating a duck.
+	// Handles the player ducking
 	void duck();
 
-	// Handles the player initiating a punch
+	// Handles the player punching
 	void punch();
+
+	// Handles the player kicking 
+	void kick();
 
 	// Adjust the player position back inside the level if an out of bounds location has been detected.
 	void adjustForLevelBounds();

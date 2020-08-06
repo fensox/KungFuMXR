@@ -4,9 +4,8 @@
 #include <iostream>
 #include <vector>
 
-// Constructor. Takes window caption string, bool to start with a fullscreen window, and width and height of starting window
-// if we are not full screen. Width and height may be not used and will default to FuGlobals::VIEWPORT_WIDTH &
-// FuGlobals::VIEWPORT_WIDTH.
+// Constructor. Takes window caption string, bool to start with a fullscreen window, and width and height of starting window.
+// If not full screen and no width and height supplied then defaults to global VIEWPORT_W & VIEWPORT_H size.
 SDLMan::SDLMan(std::string windowCaption, bool fullScreen, int width, int height) {
 	mWindowCaption = windowCaption;
 	mWindowW = width;
@@ -16,7 +15,7 @@ SDLMan::SDLMan(std::string windowCaption, bool fullScreen, int width, int height
 
 // Destructor. Close down SDL.
 SDLMan::~SDLMan() {
-	if (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: SDLMan" << std::endl;
+	if (DEBUG_MODE) std::cerr << "Destructor: SDLMan" << std::endl;
 
 	// Destroy buffer texture, renderer, and the window
 	SDL_DestroyRenderer(mRenderer);
@@ -69,7 +68,7 @@ bool SDLMan::init() {
 	}
 	
 	// Set resolution for renderer so SDL will keep our viewport aspect ratio when window size changes
-	if (SDL_RenderSetLogicalSize(mRenderer, FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT) != 0) {
+	if (SDL_RenderSetLogicalSize(mRenderer, VIEWPORT_W, VIEWPORT_H) != 0) {
 		std::cerr << "Failed in SDLMan:init: Renderer could not be set to our viewport width/height. SDL Error: \n" << SDL_GetError();
 		return false;
 	}
@@ -77,19 +76,20 @@ bool SDLMan::init() {
 	// Initialize renderer color for clearing the screen (using black)
 	setDrawColor(0, 0, 0);
 
-	// Initialize SDL_mixer for sound support
+	// Initialize SDL_mixer for sound support and allocate mixing channels
 	if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
 	{
 		std::cerr << "Failed in SDLMan::init, SDL_mixer could not initialize. SDL_mixer Error: \n" << Mix_GetError() << std::endl;;
 		return false;
 	}
+	Mix_AllocateChannels(MIXING_CHANNELS);
 
 	// Initialize our unordered map of sound effects
 	mSoundMap = std::make_unique<SoundMap>();
 
 	// Load in game controller mappings database.
 	int iMapResult{ SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt") };
-	if (FuGlobals::DEBUG_MODE) std::cout << "SDLMan::openGamepad - Loaded gamecontrollerdb.txt mappings file with result: " << iMapResult << std::endl;
+	if (DEBUG_MODE) std::cout << "SDLMan::openGamepad - Loaded gamecontrollerdb.txt mappings file with result: " << iMapResult << std::endl;
 	if (iMapResult == -1) {
 		std::cerr << "SDLMan::openGamepad - Warning: Unable to load controller mapping database! SDL Error: " << SDL_GetError() << std::endl;
 	}
@@ -118,7 +118,7 @@ void SDLMan::openGamepad() {
 			mController1 = SDL_GameControllerOpen(i);
 			mControllerID = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(mController1));			
 			if (mController1) {
-				if (FuGlobals::DEBUG_MODE) {
+				if (DEBUG_MODE) {
 					std::cout << "SDLMan::openGamepad - Game controller ID" << mControllerID << " opened." << std::endl;
 					std::cout << "SDLMan::openGamepad - Using controller map: " << SDL_GameControllerMapping(mController1) << std::endl;
 				}
@@ -138,7 +138,7 @@ int SDLMan::getGamepadID() {
 void SDLMan::closeGamepad() {
 	SDL_GameControllerClose(mController1);
 	mController1 = nullptr;
-	if (FuGlobals::DEBUG_MODE) std::cout << "SDLMan::closeGamepad - Game controller ID" << mControllerID << " closed." << std::endl;
+	if (DEBUG_MODE) std::cout << "SDLMan::closeGamepad - Game controller ID" << mControllerID << " closed." << std::endl;
 	mControllerID = -1;
 }
 

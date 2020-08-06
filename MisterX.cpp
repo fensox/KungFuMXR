@@ -1,6 +1,6 @@
 #include "MisterX.h"
 #include "FensoxUtils.h"
-#include "Globals.h"
+#include "FuGlobals.h"
 #include <iostream>
 #include <cstdlib>
 
@@ -15,6 +15,7 @@ MisterX::MisterX(std::shared_ptr<SDLMan> sdlMan) : Sprite(sdlMan) {
 
     // load sound effects
     mSDL.lock()->addSoundEffect("MRX_PUNCH", "data/mrx_punch.wav");
+    mSDL.lock()->addSoundEffect("MRX_KICK", "data/mrx_kick.wav");
 };
 
 //***DEBUG*** Outputs some debugging info
@@ -61,10 +62,16 @@ void MisterX::playerInputPadStick(const SDL_ControllerAxisEvent e) {
 void MisterX::playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press) {
     switch (e.button) {
         case SDL_CONTROLLER_BUTTON_A:
-            mJumping = press;
+            if(press && !mJumping && !mDucking) mJumping = true;
             break;
         case SDL_CONTROLLER_BUTTON_B:
-            // B button
+            if (press && mAttackReleased) {
+                mAttacking = true;
+                mKicking = true;
+                mAttackReleased = false;
+            } else if (!press) {
+                mAttackReleased = true;
+            }
             break;
         case SDL_CONTROLLER_BUTTON_X:
             if (press && mAttackReleased) {
@@ -110,13 +117,13 @@ void MisterX::playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press) {
 // Handles keyboard input from the player. SDL_Keycode is the key and the bool is true on key pressed and false on key released.
 void MisterX::playerInput(const SDL_Keycode& key, bool press) {
     switch (key) {
-        case SDLK_UP:
+        case SDLK_SLASH:
             //***DEBUG***
-            if (FuGlobals::DEBUG_MODE) outputDebug();
+            outputDebug();
             break;
 
         case SDLK_SPACE:
-            mJumping = press;
+            if (press && !mJumping && !mDucking) mJumping = true;
             break;
 
         case SDLK_DOWN:
@@ -141,7 +148,15 @@ void MisterX::playerInput(const SDL_Keycode& key, bool press) {
                 mAttackReleased = true;
             }
             break;
-
+        case SDLK_d:
+            if (press && mAttackReleased) {
+                mAttacking = true;
+                mKicking = true;
+                mAttackReleased = false;
+            } else if (!press) {
+                mAttackReleased = true;
+            }
+            break;
         default:
 
             break;
@@ -151,9 +166,13 @@ void MisterX::playerInput(const SDL_Keycode& key, bool press) {
 // Handles the player requesting to move to the right.
 void MisterX::moveRight() {
     // if the previous action was different set new mActionMode, mCurrentFrame 0, and don't move player position
-    if (getActionMode() != "WALK_RIGHT") {
-        setActionMode("WALK_RIGHT");
+    if ( (getActionMode() != "WALK_RIGHT") && (getActionMode() != "JUMP_RIGHT") ) {
         mFacingRight = true;
+        if (!downBump()) {
+            setActionMode("JUMP_RIGHT");
+        } else {
+            setActionMode("WALK_RIGHT");
+        }        
     } else {
         // step animation frame if enough time has passed
         if (checkWalkTime()) advanceFrame();
@@ -167,9 +186,13 @@ void MisterX::moveRight() {
 // Handles the player requesting to move to the left.
 void MisterX::moveLeft() {
     // if the previous action was different set new mActionMode, mCurrentFrame 0, and don't move player position
-    if (getActionMode() != "WALK_LEFT") {
-        setActionMode("WALK_LEFT");
+    if ( (getActionMode() != "WALK_LEFT") && (getActionMode() != "JUMP_LEFT") ) {
         mFacingRight = false;
+        if (!downBump()) {
+            setActionMode("JUMP_LEFT");
+        } else {
+            setActionMode("WALK_LEFT");
+        }
     } else {
         // step animation frame if enough time has passed
         if (checkWalkTime()) advanceFrame();
@@ -210,8 +233,25 @@ void MisterX::adjustForLevelBounds() {
 void MisterX::jump() {
     // only launch into a jump if we have something to launch off of
     if (downBump()) {
-        mVeloc.down = 0;
-        mVeloc.up = JUMP_VELOCITY;
+        // check if we are already in the jump animation. Which means we are just landing not taking off
+        if ( getActionMode().compare("JUMP_RIGHT") == 0 ) {
+            setActionMode("WALK_RIGHT");
+            mJumping = false;
+        } else if ( getActionMode().compare("JUMP_LEFT") == 0 ) {
+            setActionMode("WALK_LEFT");
+            mJumping = false;
+        } else {
+            // we weren't finishing a jump so we will start one - change into jump animation
+            if (mFacingRight) {
+                setActionMode("JUMP_RIGHT");
+            } else {
+                setActionMode("JUMP_LEFT");
+            }
+
+            // increase our upward velocity
+            mVeloc.down = 0;
+            mVeloc.up = JUMP_VELOCITY;
+        }
     }
 }
 
@@ -233,11 +273,11 @@ void MisterX::duck() {
     }
 }
 
-// Handles the player initiating a punch. mPunching bool not tied to button release like other actions. We turn off when animation complete to end punching action.
+// Handles the player punching. mPunching bool not tied to button release like other actions. We turn off when animation complete to end punching action.
 void MisterX::punch() {
     using namespace FensoxUtils;
 
-    // If start of punch action: set our punch start time and play sound effect
+    // If start of punch action set our attack start time and play sound effect
     if (getActionMode().find("PUNCH_") == std::string::npos) {
         mSDL.lock()->playSoundEffect("MRX_PUNCH");
         mAttackTime = SDL_GetTicks();
@@ -268,17 +308,53 @@ void MisterX::punch() {
     }
 }
 
+// Handles the player kicking. mKicking bool not tied to button release like other actions. We turn off when animation complete to end punching action.
+void MisterX::kick() {
+    using namespace FensoxUtils;
+
+    // If start of kick action set our attack start time and play sound effect
+    if (getActionMode().find("KICK_") == std::string::npos) {
+        mSDL.lock()->playSoundEffect("MRX_KICK");
+        mAttackTime = SDL_GetTicks();
+    }
+
+    // if not in kick mode yet pick correct kick mode
+    switch (hash(getActionMode().c_str())) {
+        case (hash("DUCK_RIGHT")):
+            setActionMode("KICK_DUCK_RIGHT");
+            break;
+        case (hash("DUCK_LEFT")):
+            setActionMode("KICK_DUCK_LEFT");
+            break;
+        case (hash("WALK_RIGHT")):
+            setActionMode("KICK_RIGHT");
+            break;
+        case (hash("WALK_LEFT")):
+            setActionMode("KICK_LEFT");
+            break;
+    }
+
+    // stay in kick mode animation until ATTACK_TIME has passed
+    Uint32 time{ SDL_GetTicks() - mAttackTime };
+    if ((time) >= ATTACK_TIME) {
+        setActionMode(getLastActionMode());
+        mKicking = false;
+        mAttacking = false;
+    }
+}
+
 // Moves player based on velocities adjusting for gravity, friction, and collisions. Extends then calls the Sprite class
 // default move function for a few custom player effects like respecting level boundries that other sprites do not need to do.
 void MisterX::move() {
     // perform various actions on request
     if (mJumping && !mDucking) jump();
-    if (mDucking && !mPunching) duck();                       // ***DEBUG*** do something so can't duck in air? Unless we like ducking in the air.
+    if (mDucking && !mAttacking && !mJumping) duck();
     if (!mDucking && !mAttacking) {
         if (mWalkingLeft) moveLeft();
         if (mWalkingRight) moveRight();
     }
-    if (mPunching) punch();
+    if (mPunching  && !mKicking) punch();
+    if (mKicking && !mPunching) kick();
 
     // call Sprite move function to perform the actual movement that handles collision detection, etc
     Sprite::move();

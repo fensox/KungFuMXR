@@ -1,17 +1,10 @@
 #include "Sprite.h"
 #include "FensoxUtils.h"
-#include "SDLMan.h"
-#include "Globals.h"
-#include <SDL.h>
+#include "FuGlobals.h"
 #include <SDL_image.h>
 #include <iostream>
-#include <unordered_map>
-#include <string>
 #include <fstream>
 #include <sstream>
-#include <tuple>
-#include <memory>
-#include <vector>
 
 /* Constructor. Derived classes should have a constructor that fills in all their sprite specific variables. See protected section in Sprite.h.
    After the Sprite derived is constructed a call to load() must be made before any other function calls will operate correctly.
