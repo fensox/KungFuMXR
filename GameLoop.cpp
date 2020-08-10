@@ -1,7 +1,7 @@
-#include <iostream>
 #include "GameLoop.h"
 #include "SDLMan.h"
-#include "Globals.h"
+#include "FuGlobals.h"
+#include <iostream>
 
 // Destructor
 GameLoop::~GameLoop() {

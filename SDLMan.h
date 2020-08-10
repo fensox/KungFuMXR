@@ -1,12 +1,12 @@
 #pragma once
 
+#include "Texture.h"
+#include "FuGlobals.h"
 #include <SDL.h>
 #include <SDL_mixer.h>
 #include <string>
-#include "Texture.h"
 #include <memory>
 #include <unordered_map>
-#include "Globals.h"
 
 /* SDLMan - SDL Manager Utility Class
  *
@@ -14,10 +14,6 @@
  * Wraps an SDL_Window and SDL_Renderer. Supplies functions
  * to assist in drawing things, a destructor to close down
  * SDL objects, functions for loading images, sound, etc.
- *
- * The FuGlobals namespace with the VIEWPORT_HEIGHT and
- * VIEWPORT_WIDTH is required and SDL's renderer is set to
- * those dimensions so it can properly scale on window changes.
  *
  * Constructor initializes SDLMan but needs to have a call to
  * init() before any functionality is possible. Once init() is
@@ -37,12 +33,18 @@
 class SDLMan {
 
 public:
-	const static Uint32 FPS_AVG		{ 250 };				// How many FPS calculations to store in an array for FPS averaging. Smooths FPS calc.
-	const static Uint32 FPS_INIT	{ 120 };				// Initial value to fill FPS averaging array with. Smooths initial few seconds of calculations depending on FPS_AVG size.
+	const static Uint32 FPS_AVG			{ 250 };						// How many FPS calculations to store in an array for FPS averaging. Smooths FPS calc.
+	const static Uint32 FPS_INIT		{ 120 };						// Initial value to fill FPS averaging array with. Smooths initial few seconds of calculations depending on FPS_AVG size.
+	const static Uint32 MIXING_CHANNELS	{ 16 };							// How many audio mixing channels to allocate. Increase if getting "SDL_Mixer Error: No free channels available" errors.
+	const static Uint32 WINDOW_DEF_W	{ FuGlobals::VIEWPORT_WIDTH };	// Default window width
+	const static Uint32 WINDOW_DEF_H	{ FuGlobals::VIEWPORT_HEIGHT };	// Default window height
+	const static Uint32 VIEWPORT_W		{ FuGlobals::VIEWPORT_WIDTH };	// The width of the internal renderer. Scaked to fit window but all rendering happens at this width.
+	const static Uint32 VIEWPORT_H		{ FuGlobals::VIEWPORT_HEIGHT };	// The width of the internal renderer. Scaked to fit window but all rendering happens at this width.
+	const static bool	DEBUG_MODE		{ FuGlobals::DEBUG_MODE };		// Turns debugging mode on.
 
-	// Constructor. Takes window caption string, bool to start with a fullscreen window, and width and height of starting window
-	// if we are not full screen. Width and height may be not used and will default to FuGlobals::VIEWPORT_WIDTH & FuGlobals::VIEWPORT_WIDTH.
-	SDLMan(std::string windowCaption, bool fullScreen = false, int width = FuGlobals::VIEWPORT_WIDTH, int height = FuGlobals::VIEWPORT_HEIGHT);
+	// Constructor. Takes window caption string, bool to start with a fullscreen window, and width and height of starting window.
+	// If not full screen and no width and height supplied then defaults to global VIEWPORT_W & VIEWPORT_H size.
+	SDLMan(std::string windowCaption, bool fullScreen = false, int width = VIEWPORT_W, int height = VIEWPORT_H);
 	SDLMan() = delete;
 
 	// Destructor
@@ -170,8 +172,8 @@ private:
 	std::string mWindowCaption{};
 
 	// Store's the window width and height with defaults.
-	int mWindowW{ FuGlobals::VIEWPORT_WIDTH };
-	int mWindowH{ FuGlobals::VIEWPORT_HEIGHT };
+	int mWindowW{ WINDOW_DEF_W };
+	int mWindowH{ WINDOW_DEF_H };
 
 	// Full screen window or not
 	bool mWindowFull{ false };

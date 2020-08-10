@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Globals.h"
+#include "FuGlobals.h"
 #include <SDL.h>
 
 // Represents a point in 2D screen space with floating point precision
