@@ -165,15 +165,21 @@ void MisterX::playerInput(const SDL_Keycode& key, bool press) {
 
 // Handles the player requesting to move to the right.
 void MisterX::moveRight() {
-    // if the previous action was different set new mActionMode, mCurrentFrame 0, and don't move player position
+    // if the previous action was different set new mActionMode, set animation frame to 0, and don't move player position
     if ( (getActionMode() != "WALK_RIGHT") && (getActionMode() != "JUMP_RIGHT") ) {
         mFacingRight = true;
-        if (!downBump()) {
+        //if (!downBump()) { //***DEBUG*** Did this change work?
+        if (mVeloc.down > 0 || mVeloc.up > 0) {
             setActionMode("JUMP_RIGHT");
         } else {
             setActionMode("WALK_RIGHT");
         }        
     } else {
+        // if we have no vertical velocity make sure we are not in the jump animation
+        if (mVeloc.down == 0 && mVeloc.up == 0 && getActionMode().compare("WALK_RIGHT") != 0) {
+            setActionMode("WALK_RIGHT");
+        }
+
         // step animation frame if enough time has passed
         if (checkWalkTime()) advanceFrame();
 
@@ -188,7 +194,8 @@ void MisterX::moveLeft() {
     // if the previous action was different set new mActionMode, mCurrentFrame 0, and don't move player position
     if ( (getActionMode() != "WALK_LEFT") && (getActionMode() != "JUMP_LEFT") ) {
         mFacingRight = false;
-        if (!downBump()) {
+        //if (!downBump()) { //***DEBUG*** Did this change work?
+        if (mVeloc.down > 0 || mVeloc.up > 0) {
             setActionMode("JUMP_LEFT");
         } else {
             setActionMode("WALK_LEFT");
@@ -250,7 +257,7 @@ void MisterX::jump() {
 
             // increase our upward velocity
             mVeloc.down = 0;
-            mVeloc.up = JUMP_VELOCITY;
+            mVeloc.up = JUMP_VELOCITY; //***DEBUG*** need to adjust to be FPS bases so jump height doesn't change depending on performance! Like moveRight and moveLeft
         }
     }
 }

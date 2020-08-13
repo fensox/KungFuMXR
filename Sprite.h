@@ -40,6 +40,15 @@ public:
 	// Returns a 2 pixel tall and 8 pixel width trimmed rectangle at the bottom of the current collision rectangle. Used for downBump collision detection, drawing debugging rectangles, etc.
 	SDL_Rect getCollRectBtm();
 
+	// Returns a 2 pixel wide rectangle at the left side of the current collision rectangle. Used for leftBump collision detection, drawing debugging rectangles, etc.
+	SDL_Rect getCollRectLeft();
+
+	// Returns a 2 pixel wide rectangle at the right side of the current collision rectangle. Used for leftBump collision detection, drawing debugging rectangles, etc.
+	SDL_Rect getCollRectRight();
+
+	// Takes a rectangle with level relative coordinates and converts them to viewport relative. Returns a copy of the rectangle with updates coordinates.
+	SDL_Rect getVPRelative(const SDL_Rect& inRect);
+
 	// Sets the smart pointer member variable that points to the Level currently being played.
 	void setLevel(std::shared_ptr<Level> level);
 
@@ -134,6 +143,9 @@ protected:
 
 	// Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 	bool downBump();
+
+	// Handles check for right side collisions with level elements. Returns true if made contact with a collidable level object.
+	bool rightBump();
 
 	// Applies gravity to the sprite depending on boolean parameter. Also checks if just finished a fall and cleans up some variables if so.
 	void applyGravity(bool standing);

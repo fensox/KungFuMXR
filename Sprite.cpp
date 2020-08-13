@@ -39,7 +39,7 @@ SDL_Rect Sprite::getCollisionRect() {
     // adjust x, y coordinates from sprite sheet relative to level relative
     rect.x = static_cast<int>(mXPos);
     rect.y = static_cast<int>(mYPos);
-    
+
     return rect;
 }
 
@@ -48,7 +48,7 @@ SDL_Rect Sprite::getCollisionRect() {
    detection, drawing debugging rectangles, etc. */
 SDL_Rect Sprite::getCollRectBtm() {
     SDL_Rect rect{ getCollisionRect() };
-    rect.y += static_cast<int>(rect.h / 2);
+    rect.y += rect.h / 2;
     rect.h = 2;
     rect.x += 4;
     rect.w -= 8;
@@ -56,6 +56,25 @@ SDL_Rect Sprite::getCollRectBtm() {
     return rect;
 }
 
+// Returns a 2 pixel wide rectangle at the left side of the current collision rectangle. Used for leftBump collision detection, drawing debugging rectangles, etc.
+SDL_Rect Sprite::getCollRectLeft() {
+    SDL_Rect rect{ getCollisionRect() };
+    rect.x -= rect.w / 2;
+    rect.y -= rect.h; //***DEBUG*** Why does this work..should be height/2. Moving on for now...
+    rect.w = 1;
+    
+    return rect;
+}
+
+// Returns a 2 pixel wide rectangle at the right side of the current collision rectangle. Used for leftBump collision detection, drawing debugging rectangles, etc.
+SDL_Rect Sprite::getCollRectRight() {
+    SDL_Rect rect{ getCollisionRect() };
+    rect.x += (rect.w / 2);
+    rect.y -= rect.h;
+    rect.w = 1;
+
+    return rect;
+}
 
 // Load sprite data from files - Needs to be called before any other functions can be called.
 bool Sprite::load() {
@@ -219,16 +238,29 @@ void Sprite::drawCollisionPoints() {
     // draw a circle at our center coordinates
     mSDL.lock()->drawCircleFilled(static_cast<int>(mXPos - mLevel.lock()->getPosition().x), static_cast<int>(mYPos - mLevel.lock()->getPosition().y), radius);
 
-    // draw lines at our collision edges
-    SDL_Rect rect{ getCollRectBtm() };
+    // draw collision edges
+    SDL_Rect rect{ getVPRelative(getCollRectBtm()) };
+    mSDL.lock()->drawRect(rect);
 
-    // draw bottom compensating for viewport position
-    rect.x -= static_cast<int>(mLevel.lock()->getPosition().x + rect.w / 2);
-    rect.y -= static_cast<int>(mLevel.lock()->getPosition().y - rect.h / 2);
-    mSDL.lock()->drawLine(rect.x, rect.y + rect.h, rect.x + rect.w, rect.y + rect.h);
+    // draw left compensating for viewport position
+    rect = getVPRelative(getCollRectLeft());
+    mSDL.lock()->drawRect(rect);
+
+    // draw right compensating for viewport position
+    rect = getVPRelative(getCollRectRight());
+    mSDL.lock()->drawRect(rect);
 
     // return draw color to black
     mSDL.lock()->setDrawColor(0, 0, 0);
+}
+
+// Takes a rectangle with level relative coordinates and converts them to viewport relative. Returns a copy of the rectangle with updates coordinates.
+SDL_Rect Sprite::getVPRelative(const SDL_Rect& inRect) {
+    SDL_Rect outRect{ inRect };
+    outRect.x -= static_cast<int>(mLevel.lock()->getPosition().x + outRect.w / 2);
+    outRect.y -= static_cast<int>(mLevel.lock()->getPosition().y - outRect.h / 2);
+
+    return outRect;
 }
 
 // Renders the sprite based on position, action mode, animation frame using a SDL_Renderer from SDLMan.
@@ -245,7 +277,7 @@ void Sprite::render() {
     decimal y{ mYPos - (scaledH / 2) };
     mDest = { static_cast<int>(x), static_cast<int>(y), static_cast<int>(scaledW), static_cast<int>(scaledH) };
    
-    // adjust the Sprite coordinates by the distance the viewport is from origin (fixed a 3 day bug hunt where character exponentially ran faster than bg scroll)
+    // adjust the Sprite coordinates to viewport relative
     mDest.x -= mLevel.lock()->getPosition().x;
     mDest.y -= mLevel.lock()->getPosition().y;
 
@@ -268,6 +300,11 @@ bool Sprite::downBump() {
     if (mVeloc.up > mVeloc.down) return false;
 
     return mLevel.lock()->isACollision( getCollRectBtm() );
+}
+
+// Handles check for right side collisions with level elements. Returns true if made contact with a collidable level object.
+bool Sprite::rightBump() {
+    return mLevel.lock()->isACollision( getCollRectRight() );
 }
 
 // Applies gravity to the sprite if parameter set to true otherwise checks if sprite just finished a fall and cleans up velocity variables.
@@ -368,24 +405,35 @@ void Sprite::move() {
     mXPos = rect.x + rect.w / 2;
     mYPos = rect.y + rect.h / 2;
 
-    // Final check and fix that we didn't put the sprite somewhere in the floor becasue of animation frame size differences
+    // Final check and fix that we didn't put the sprite somewhere in a floor or wall becasue of animation frame size differences
     correctFrame();
 }
 
 // Corrects for height differences of various animation frames so we don't get stuck in floor, have jumpy animations, etc.
 void Sprite::correctFrame() {
-    // are we standing on the floor
-    bool standing{ downBump() };
-
+    // Correct for downward intersection
+    bool colliding{ downBump() };
     // if we are standing on the floor do a test loop raising our position until we are above floor a pixel
-    while (standing) {
+    while (colliding) {
         // move up one pixel and see if we are still standing
         mYPos -= 1;
-
-        // check if we are standing on something now
-        standing = downBump();
+        colliding = downBump();
 
         // if not standing now then we are one pixel above the floor because of our testing, put it back to floor level and the loop will end
-        if (!standing) mYPos += 1;
+        if (!colliding) mYPos += 1;
     }
+
+    // correct for right side intersection
+    colliding = rightBump();
+    // if we are intersecting something on our right side do a test loop moving our position left until we are not colliding
+    while (colliding) {
+        // move left one pixel and see if we are still colliding
+        mXPos -= 1;
+        colliding = rightBump();
+
+        // if not colliding now then we are one pixel to the left of last collision, put us back to very edge of right collision and the loop will end
+        //if (!colliding) mXPos += 1;
+    }
+
+
 }

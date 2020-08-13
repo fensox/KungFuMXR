@@ -1,5 +1,5 @@
 #include "Texture.h"
-#include "Globals.h"
+#include "FuGlobals.h"
 #include <iostream>
 
 // Constructor takes a pointer to an SDL_Texture and stores some information about it for quick access later.
