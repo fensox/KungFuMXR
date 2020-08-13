@@ -217,6 +217,11 @@ void SDLMan::drawLine(int x1, int y1, int x2, int y2) {
 	SDL_RenderDrawLine(mRenderer, x1, y1, x2, y2);
 }
 
+// Draw's a line on screen with given Line struct using currently set draw color.
+void SDLMan::drawLine(Line line) {
+	SDL_RenderDrawLine(mRenderer, line.x1, line.y1, line.x2, line.y2);
+}
+
 // Draw's a line on screen with given starting and ending points using currently set draw color. Casts floating point parameter values to integers for screen drawing.
 void SDLMan::drawLine(decimal x1, decimal y1, decimal x2, decimal y2) {
 	SDL_RenderDrawLine(	mRenderer,

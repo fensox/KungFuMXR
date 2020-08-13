@@ -2,6 +2,7 @@
 
 #include "Texture.h"
 #include "FuGlobals.h"
+#include "Line.h"
 #include <SDL.h>
 #include <SDL_mixer.h>
 #include <string>
@@ -82,6 +83,9 @@ public:
 
 	// Draw's a line on screen with given starting and ending points using currently set draw color. Casts floating point parameter values to integers for screen drawing.
 	void drawLine(decimal x1, decimal y1, decimal x2, decimal y2);
+
+	// Draw's a line on screen with given Line struct using currently set draw color.
+	void drawLine(Line line);
 
 	// Draw's a rectangle outline with given integer coordinates and size.
 	void drawRect(int x, int y, int w, int h);

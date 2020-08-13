@@ -3,6 +3,7 @@
 #include "Level.h"
 #include "Texture.h"
 #include "SDLMan.h"
+#include "Line.h"
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -37,17 +38,20 @@ public:
 	scaled based on the Sprite mScale scaling factor. */
 	SDL_Rect getCollisionRect();
 
-	// Returns a 2 pixel tall and 8 pixel width trimmed rectangle at the bottom of the current collision rectangle. Used for downBump collision detection, drawing debugging rectangles, etc.
-	SDL_Rect getCollRectBtm();
+	// Returns a line representing the bottom of the current collision rectangle. Used for downBump collision detection, drawing debugging rectangles, etc.
+	Line getCollRectBtm();
 
-	// Returns a 2 pixel wide rectangle at the left side of the current collision rectangle. Used for leftBump collision detection, drawing debugging rectangles, etc.
-	SDL_Rect getCollRectLeft();
+	// Returns a line representing the left side of the current collision rectangle. Used for leftBump collision detection, drawing debugging rectangles, etc.
+	Line getCollRectLeft();
 
-	// Returns a 2 pixel wide rectangle at the right side of the current collision rectangle. Used for leftBump collision detection, drawing debugging rectangles, etc.
-	SDL_Rect getCollRectRight();
+	// Returns a line representing the right side of the current collision rectangle. Used for rightBump collision detection, drawing debugging rectangles, etc.
+	Line getCollRectRight();
 
-	// Takes a rectangle with level relative coordinates and converts them to viewport relative. Returns a copy of the rectangle with updates coordinates.
+	// Takes a rectangle with level relative coordinates and converts them to viewport relative. Returns a copy of the rectangle with updated coordinates.
 	SDL_Rect getVPRelative(const SDL_Rect& inRect);
+
+	// Takes a line with level relative coordinates and converts them to viewport relative. Returns a copy of the line with updated coordinates.
+	Line getVPRelative(const Line& inLine);
 
 	// Sets the smart pointer member variable that points to the Level currently being played.
 	void setLevel(std::shared_ptr<Level> level);
@@ -61,10 +65,10 @@ public:
 	// Returns the name of this sprite from the global mName constant.
 	std::string getName();
 
-	// Sets the sprite's x coordinate position relative to level.
+	// Sets the sprite's x coordinate position relative to level and stores the previous coordinates as our last x position.
 	void setX(decimal x);
 
-	// Sets the sprite's y coordinate position relative to level.
+	// Sets the sprite's y coordinate position relative to level and stores the previous coordinates as our last y position.
 	void setY(decimal y);
 
 	// Returns the sprite's x coordinate position relative to level.
@@ -72,6 +76,12 @@ public:
 
 	// Returns the sprite's y coordinate position relative to level.
 	decimal getY();
+
+	// Returns the sprite's last x coordinate position relative to level.
+	decimal getLastX();
+
+	// Returns the sprite's last y coordinate position relative to level.
+	decimal getLastY();
 
 	// Returns by value the current animation frame's rectangle. Sprite sheet coordinate relative.
 	const SDL_Rect& getRect();
@@ -115,10 +125,6 @@ protected:
 	// Unordered map to hold key/value pairs of action names (the key) and their animation frame coordinates on the sprite sheet (the value).
 	ClipsMap mAnimMap{};
 
-	// Center position of sprite within the level. This is not viewport relative but level relative. This is not derived from
-	// the size of the current animation frame. The render function renders the animation frame texture around this point.
-	decimal mXPos{ 0 }; decimal mYPos{ 0 };
-
 	// Advances the current action mode animation frame ahead or starts at the beginning if at end of animation frames or a new action has been started.
 	void advanceFrame();
 
@@ -147,6 +153,9 @@ protected:
 	// Handles check for right side collisions with level elements. Returns true if made contact with a collidable level object.
 	bool rightBump();
 
+	// Handles check for left side collisions with level elements. Returns true if made contact with a collidable level object.
+	bool leftBump();
+
 	// Applies gravity to the sprite depending on boolean parameter. Also checks if just finished a fall and cleans up some variables if so.
 	void applyGravity(bool standing);
 
@@ -157,6 +166,13 @@ protected:
 	void correctFrame();
 
 private:
+	// Center position of sprite within the level. This is not viewport relative but level relative. This is not derived from
+	// the size of the current animation frame. The render function renders the animation frame texture around this point.
+	decimal mXPos{ 0 }; decimal mYPos{ 0 };
+
+	// Last position sprite was in before current position.
+	decimal mLastXPos{ 0 }; decimal mLastYPos{ 0 };
+
 	// Smart pointer to the Texture holding our sprite's sprite sheet.
 	std::unique_ptr<Texture> mTexture{ nullptr };
 

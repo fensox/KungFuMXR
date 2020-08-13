@@ -3,6 +3,7 @@
 #include "Sprite.h"
 #include "PointF.h"
 #include "SDLMan.h"
+#include "Line.h"
 #include <memory>
 #include <vector>
 #include <SDL.h>
@@ -33,11 +34,14 @@ public:
 	// Checks if the given point is contained in a collision rectangle for the level.
 	bool isACollision(const SDL_Point& pnt);
 
+	// Checks if the given point is contained in a collision rect for the level. Parameter of PointF is cast to integer type SDL_Point.
+	bool isACollision(PointF pnt);
+
 	// Checks if the given rectangle is intersecting a collision rectangle for the level.
 	bool isACollision(const SDL_Rect& rect);
 
-	// Checks if the given point is contained in a collision rect for the level. Parameter of PointF is cast to integer type SDL_Point.
-	bool isACollision(PointF pnt);
+	// Checks if the given line is intersecting a collision rectangle for the level.
+	bool isACollision(Line line);
 
 	// Load in the data filefor the level. Must be called before other functions for proper operation. Returns success or failure.
 	bool load();

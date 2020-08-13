@@ -248,6 +248,11 @@ bool Level::isACollision(const SDL_Point& pnt) {
     return false;
 }
 
+// Checks if the given point is contained in a collision rect for the level. Parameter of PointF is cast to integer type SDL_Point.
+bool Level::isACollision(PointF pnt) {
+    return isACollision(pnt.getSDL_Point());
+}
+
 // Checks if the given rectangle is intersecting a collision rectangle for the level.
 bool Level::isACollision(const SDL_Rect& rect) {
     // loop through all our level collision rectangles checking for a collision
@@ -259,7 +264,13 @@ bool Level::isACollision(const SDL_Rect& rect) {
     return false;
 }
 
-// Checks if the given point is contained in a collision rect for the level. Parameter of PointF is cast to integer type SDL_Point.
-bool Level::isACollision(PointF pnt) {
-    return isACollision( pnt.getSDL_Point() );
+// Checks if the given line is intersecting a collision rectangle for the level.
+bool Level::isACollision(Line line) {
+    // loop through all our level collision rectangles checking for a collision
+    for (int i{ 0 }; i < mColRects->size(); ++i) {
+        const SDL_Rect& r = mColRects->at(i);
+        if (SDL_IntersectRectAndLine(&r, &line.x1, &line.y1, &line.x2, &line.y2)) return true;
+    }
+
+    return false;
 }

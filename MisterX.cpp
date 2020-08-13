@@ -20,7 +20,7 @@ MisterX::MisterX(std::shared_ptr<SDLMan> sdlMan) : Sprite(sdlMan) {
 
 //***DEBUG*** Outputs some debugging info
 void MisterX::outputDebug() {
-    std::cout << "Player: " << mXPos << "\t" << mYPos << "\t" << getRect().w * mScale << "\t" << getRect().h * mScale << "\n";
+    std::cout << "Player: " << getX() << "\t" << getY() << "\t" << getRect().w * mScale << "\t" << getRect().h * mScale << "\n";
     std::cout << "P Veloc L, R / U, D: " << mVeloc.left << "\t" << mVeloc.right << "\t/\t" << mVeloc.up << "\t" << mVeloc.down << "\n";
     std::cout << "Collision Rect: " << getCollisionRect().x << "\t" << getCollisionRect().y << "\t" << getCollisionRect().w << "\t" << getCollisionRect().h << "\n";
     std::cout << "mActionMode: " << getActionMode() << "\tmLastActionMode: " << getLastActionMode() << "\tmCurrentFrame: " << mCurrentFrame << "\n";
@@ -119,7 +119,7 @@ void MisterX::playerInput(const SDL_Keycode& key, bool press) {
     switch (key) {
         case SDLK_SLASH:
             //***DEBUG***
-            outputDebug();
+            if (press) outputDebug();
             break;
 
         case SDLK_SPACE:
@@ -168,8 +168,7 @@ void MisterX::moveRight() {
     // if the previous action was different set new mActionMode, set animation frame to 0, and don't move player position
     if ( (getActionMode() != "WALK_RIGHT") && (getActionMode() != "JUMP_RIGHT") ) {
         mFacingRight = true;
-        //if (!downBump()) { //***DEBUG*** Did this change work?
-        if (mVeloc.down > 0 || mVeloc.up > 0) {
+        if (!downBump()) {
             setActionMode("JUMP_RIGHT");
         } else {
             setActionMode("WALK_RIGHT");
@@ -194,13 +193,17 @@ void MisterX::moveLeft() {
     // if the previous action was different set new mActionMode, mCurrentFrame 0, and don't move player position
     if ( (getActionMode() != "WALK_LEFT") && (getActionMode() != "JUMP_LEFT") ) {
         mFacingRight = false;
-        //if (!downBump()) { //***DEBUG*** Did this change work?
-        if (mVeloc.down > 0 || mVeloc.up > 0) {
+        if (!downBump()) {
             setActionMode("JUMP_LEFT");
         } else {
             setActionMode("WALK_LEFT");
         }
     } else {
+        // if we have no vertical velocity make sure we are not in the jump animation
+        if (mVeloc.down == 0 && mVeloc.up == 0 && getActionMode().compare("WALK_LEFT") != 0) {
+            setActionMode("WALK_LEFT");
+        }
+
         // step animation frame if enough time has passed
         if (checkWalkTime()) advanceFrame();
 
@@ -228,12 +231,12 @@ void MisterX::adjustForLevelBounds() {
     int rightBound{ mLevel.lock()->getSize().x - FuGlobals::LEVEL_BOUNDS };
     
     // x
-    if (mXPos < FuGlobals::LEVEL_BOUNDS) mXPos = FuGlobals::LEVEL_BOUNDS;
-    else if (mXPos > rightBound) mXPos = rightBound;
+    if (getX() < FuGlobals::LEVEL_BOUNDS) setX( FuGlobals::LEVEL_BOUNDS );
+    else if (getX() > rightBound) setX( rightBound );
 
     // y
-    if (mYPos < FuGlobals::LEVEL_BOUNDS) mYPos = FuGlobals::LEVEL_BOUNDS;
-    else if (mYPos > downBound) mYPos = downBound;
+    if (getY() < FuGlobals::LEVEL_BOUNDS) setY( FuGlobals::LEVEL_BOUNDS );
+    else if (getY() > downBound) setY( downBound );
 }
 
 // Handles player initiating a jump.
