@@ -14,7 +14,7 @@ namespace FuGlobals {
 	constexpr Uint32	FPS_TARGET				{ 8 };					// FPS target for game loop as milliseconds per frame (0 for unlimited). i.e. for 60fps set to 16, 120fps set to 8, etc.
 	constexpr int		VIEWPORT_WIDTH			{ 1280 };				// Internal rendering width - independant of window size. Scaled to fit whatever window needed.
 	constexpr int		VIEWPORT_HEIGHT			{ 720 };				// Internal rendering height - independant of window size. Scaled to fit whatever window needed.
-	constexpr int		VIEWPORT_BUFFER			{ 100 };				// Pixel sized area in center of viewport sprite can move without scrolling viewport.
+	constexpr int		VIEWPORT_BUFFER			{ 75 };					// Pixel sized area in center of viewport sprite can move without scrolling viewport.
 
 	constexpr int		JOYSTICK_DEAD_ZONE		{ 8000 };				// Analog joystick dead zone
 	constexpr decimal	GRAVITY					{ 15 };					// Gravity defined as pixels/second of downward velocity to add to sprites

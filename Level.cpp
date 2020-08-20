@@ -207,10 +207,24 @@ void Level::render() {
 
 // Centers the viewport on given x, y coordinates adjusting for level boundries and movement buffer specified in FuGlobals::VIEWPORT_BUFFER.
 void Level::centerViewport() {
-    // move the viewport to center on the sprite we're told to follow. Allow for small buffer in center sprite can move in and we don't follow
-    mViewport.x = static_cast<int>(mFollowSprite.lock()->getX() - (FuGlobals::VIEWPORT_WIDTH / 2));
-    mViewport.y = static_cast<int>(mFollowSprite.lock()->getY() - (FuGlobals::VIEWPORT_HEIGHT / 2));
-    
+    // get center coordinates of viewport and sprite position
+    int centerX{ FuGlobals::VIEWPORT_WIDTH / 2 };
+    int centerY{ FuGlobals::VIEWPORT_HEIGHT / 2 };
+    int spriteX{ static_cast<int>(mFollowSprite.lock()->getX()) };
+    int spriteY{ static_cast<int>(mFollowSprite.lock()->getY()) };
+
+    // calculate travel limits of sprite before we must scroll viewport
+    int leftBound{ mViewport.x + centerX - FuGlobals::VIEWPORT_BUFFER / 2 };
+    int rightBound{ mViewport.x + centerX + FuGlobals::VIEWPORT_BUFFER / 2 };
+    int upBound{ mViewport.y + centerY - FuGlobals::VIEWPORT_BUFFER / 2 };
+    int downBound{ mViewport.y + centerY + FuGlobals::VIEWPORT_BUFFER / 2 };
+
+    // move viewport over sprite allowing for buffer zone in middle where we don't scroll. Size of buffer is FuGlobals::VIEWPORT_BUFFER    
+    if (spriteX < leftBound) mViewport.x -= leftBound - spriteX;
+    else if (spriteX > rightBound) mViewport.x += spriteX - rightBound;
+    if (spriteY < upBound) mViewport.y -= upBound - spriteY;
+    else if (spriteY > downBound) mViewport.y += spriteY - downBound;
+
     // check against level boundries and move back some if need be
     int limitX{ mBGTexture->getSize().x - FuGlobals::VIEWPORT_WIDTH };
     int limitY{ mBGTexture->getSize().y - FuGlobals::VIEWPORT_HEIGHT };

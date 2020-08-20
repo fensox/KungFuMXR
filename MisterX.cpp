@@ -307,6 +307,12 @@ void MisterX::punch() {
         case (hash("WALK_LEFT")):
             setActionMode("PUNCH_LEFT");
             break;
+        case (hash("JUMP_RIGHT")):
+            setActionMode("PUNCH_JUMP_RIGHT");
+            break;
+        case (hash("JUMP_LEFT")):
+            setActionMode("PUNCH_JUMP_LEFT");
+            break;
     }
 
     // stay in punch mode animation until ATTACK_TIME has passed
@@ -341,6 +347,12 @@ void MisterX::kick() {
             break;
         case (hash("WALK_LEFT")):
             setActionMode("KICK_LEFT");
+            break;
+        case (hash("JUMP_LEFT")):
+            setActionMode("KICK_JUMP_LEFT");
+            break;
+        case (hash("JUMP_RIGHT")):
+            setActionMode("KICK_JUMP_RIGHT");
             break;
     }
 
