@@ -205,9 +205,9 @@ void Level::render() {
     if (FuGlobals::DEBUG_MODE) drawColRects();
 }
 
-// Centers the viewport on given x, y coordinates adjusting for level boundries.
+// Centers the viewport on given x, y coordinates adjusting for level boundries and movement buffer specified in FuGlobals::VIEWPORT_BUFFER.
 void Level::centerViewport() {
-    // move the viewport to given coordinates
+    // move the viewport to center on the sprite we're told to follow. Allow for small buffer in center sprite can move in and we don't follow
     mViewport.x = static_cast<int>(mFollowSprite.lock()->getX() - (FuGlobals::VIEWPORT_WIDTH / 2));
     mViewport.y = static_cast<int>(mFollowSprite.lock()->getY() - (FuGlobals::VIEWPORT_HEIGHT / 2));
     

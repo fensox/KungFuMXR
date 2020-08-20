@@ -79,7 +79,7 @@ void GameLoop::runGameLoop() {
 	// Start the main loop
 	// Game loop uses "Fixed update time step, variable rendering" method written about
 	// in the book Game Programming Patterns by Robert Nystrom. Adjust performance
-	// of this loop by setting the integer variable FPS_TARGET in the Globals.h file.
+	// of this loop by setting the integer variable FPS_TARGET in the FuGlobals.h header.
 	while (!quit) {
 		// some time calculations to manage game loop speed
 		double current = SDL_GetTicks();

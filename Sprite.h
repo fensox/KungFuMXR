@@ -147,23 +147,26 @@ protected:
 	// Instance of Velocity struct for this sprite
 	Velocity mVeloc{};
 
-	// Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
+	// Check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 	bool downBump();
 
-	// Handles check for right side collisions with level elements. Returns true if made contact with a collidable level object.
+	// Check for right side collisions with level elements. Returns true if made contact with a collidable level object.
 	bool rightBump();
 
-	// Handles check for left side collisions with level elements. Returns true if made contact with a collidable level object.
+	// Checks if a right side collision is imminent 1 pixel beyond Sprite's collision boundry.
+	bool rightBumpImminent();
+
+	// Checks for left side collisions with level elements. Returns true if made contact with a collidable level object.
 	bool leftBump();
+
+	// Checks if a left side collision is imminent 1 pixel beyond Sprite's collision boundry.
+	bool leftBumpImminent();
 
 	// Applies gravity to the sprite depending on boolean parameter. Also checks if just finished a fall and cleans up some variables if so.
 	void applyGravity(bool standing);
 
 	// Applies friction to the sprite's velocity.
 	void applyFriction(bool standing);
-
-	// Corrects for height differences of various animation frames so we don't get stuck in floor, have jumpy animations, etc.
-	void correctFrame();
 
 private:
 	// Center position of sprite within the level. This is not viewport relative but level relative. This is not derived from
@@ -199,5 +202,8 @@ private:
 
 	// Draw collision points as crosshairs. Useful for debugging purposes.
 	void drawCollisionPoints();
+	
+	// After all movement for frame is calculated and implemented, adjusts Sprite position based on any collisions.
+	void correctFrame();
 
 };

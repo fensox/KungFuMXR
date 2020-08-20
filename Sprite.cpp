@@ -244,9 +244,10 @@ Line Sprite::getCollRectBtm() {
         rect.y + rect.h / 2
     };
 
-    // Shrink line a pixel from left and right to prevent obstacles from seeming like floor collisions
-    ++line.x1;
-    --line.x2;
+    // Shrink the line to just a small centered segement. Prevents right/left collisions from seeming like floor collisions.
+    int halfWidth = (line.x2 - line.x1) / 2;
+    line.x1 += halfWidth - 2;
+    line.x2 -= halfWidth + 2;
 
     return line;
 }
@@ -336,7 +337,7 @@ void Sprite::render() {
     if (FuGlobals::DEBUG_MODE) drawCollisionPoints();
 }
 
-// Handles check for collision downwards with level collision elements. Returns true if made contact with stable platform.
+// Check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 bool Sprite::downBump() {
     // if we are rising up we don't need to do a downward collision check
     if (mVeloc.up > mVeloc.down) return false;
@@ -344,14 +345,30 @@ bool Sprite::downBump() {
     return mLevel.lock()->isACollision( getCollRectBtm() );
 }
 
-// Handles check for right side collisions with level elements. Returns true if made contact with a collidable level object.
+// Check for right side collisions with level elements. Returns true if made contact with a collidable level object.
 bool Sprite::rightBump() {
     return mLevel.lock()->isACollision( getCollRectRight() );
 }
 
-// Handles check for right side collisions with level elements. Returns true if made contact with a collidable level object.
+// Checks if a right side collision is imminent 1 pixel beyond Sprite's collision boundry.
+bool Sprite::rightBumpImminent() {
+    Line rightLine{ getCollRectRight() };
+    ++rightLine.x1;
+    ++rightLine.x2;
+    return mLevel.lock()->isACollision(rightLine);
+}
+
+// Checks for left side collisions with level elements. Returns true if made contact with a collidable level object.
 bool Sprite::leftBump() {
-    return mLevel.lock()->isACollision(getCollRectLeft());
+    return mLevel.lock()->isACollision( getCollRectLeft() );
+}
+
+// Checks if a left side collision is imminent 1 pixel beyond Sprite's collision boundry.
+bool Sprite::leftBumpImminent() {
+    Line leftLine{ getCollRectLeft() };
+    --leftLine.x1;
+    --leftLine.x2;
+    return mLevel.lock()->isACollision( leftLine );
 }
 
 // Applies gravity to the sprite if parameter set to true otherwise checks if sprite just finished a fall and cleans up velocity variables.
@@ -399,24 +416,24 @@ void Sprite::move() {
     // apply friction
     applyFriction(standing);
 
-    // add up how much we are trying to move
-    mXPos += mVeloc.right - mVeloc.left;
-    mYPos += mVeloc.down - mVeloc.up;
+    // add up how much we are trying to move and make the change to our position
+    setX( getX() + mVeloc.right - mVeloc.left );
+    setY( getY() + mVeloc.down - mVeloc.up );
 
     // Final check for level collisions to remove the sprite from any floors or walls
     correctFrame();
 }
 
+//***DEBUG*** 
+// This correctFrame function can be optimized using lastXPos and lastYPos to determine which way we moved since last frame and allow us
+// to avoid doing collision detection in the other direction. May not matter that much but an option once game is complete.
 
-
-//***DEBUG*** Where I left off
-use lastX and last Y to determine which way we moved and thus which way to check for collision and which way to pull us back out of collision
-
-
-// Corrects for size differences of various animation frames so we don't get stuck in floor, have jumpy animations, etc.
+// After all movement for frame is calculated and implemented, adjusts Sprite position based on any collisions.
 void Sprite::correctFrame() {
-    // Correct for downward intersection raising our position until we are above the collision
-    bool colliding{ downBump() };
+    bool colliding{};
+
+    // Correct for downward collision if we moved down this frame
+    colliding = downBump();
     while (colliding) {
         // move up one pixel and see if we are still standing
         mYPos -= 1;

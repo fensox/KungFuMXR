@@ -21,6 +21,7 @@ public:
 	// Constructor takes path to metadata file for the level relative to game executable and an SDLMan pointer to hold for rendering.
 	// Note load() must be called after construction of this object before other functions will work.
 	Level(std::string filename, std::shared_ptr<SDLMan> sdlMan);
+	Level() = delete;
 
 	// Destructor
 	~Level();
@@ -88,6 +89,9 @@ private:
 
 	// Holds the current viewport rectangle over the level. Get's centered on mFollowSprite member's position.
 	SDL_Point mViewport{ 0, 0 };
+	
+	// Holds the last position viewport rectangle was in over the level. Assists with calculating movement buffer area in center of viewport.
+	SDL_Point mLastPos{ 0, 0 };
 
 	// Smart pointer to an SDLMan object used to draw the level.
 	std::weak_ptr<SDLMan> mSDL{ std::weak_ptr<SDLMan>() };
@@ -113,7 +117,7 @@ private:
 	// Load in the level's music file. Returns Success.
 	bool loadMusicFile();
 
-	// Centers the viewport over the given coordinates adjusting for level boundries.
+	// Centers the viewport on given x, y coordinates adjusting for level boundries and movement buffer specified in FuGlobals::VIEWPORT_BUFFER.
 	void centerViewport();
 
 	// Outlines all the collision rectangles in the level so visible on screen. Debugging and level design utility function.

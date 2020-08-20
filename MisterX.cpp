@@ -179,8 +179,8 @@ void MisterX::moveRight() {
             setActionMode("WALK_RIGHT");
         }
 
-        // step animation frame if enough time has passed
-        if (checkWalkTime()) advanceFrame();
+        // step animation frame if enough time has passed and we're not pressed up against an object
+        if ( checkWalkTime() && !rightBumpImminent() ) advanceFrame();
 
         // increase velocity based on FPS calc to reach our per second goal
         mVeloc.right += WALK_VELOCITY_PER / mSDL.lock()->getFPS();
@@ -198,14 +198,14 @@ void MisterX::moveLeft() {
         } else {
             setActionMode("WALK_LEFT");
         }
-    } else {
+    } else if (!leftBump()) {
         // if we have no vertical velocity make sure we are not in the jump animation
         if (mVeloc.down == 0 && mVeloc.up == 0 && getActionMode().compare("WALK_LEFT") != 0) {
             setActionMode("WALK_LEFT");
         }
 
-        // step animation frame if enough time has passed
-        if (checkWalkTime()) advanceFrame();
+        // step animation frame if enough time has passed and we're not pressed up against an object
+        if ( checkWalkTime() && !leftBumpImminent() ) advanceFrame();
 
         // increase velocity based on FPS calc to reach our per second goal
         mVeloc.left += WALK_VELOCITY_PER / mSDL.lock()->getFPS();
