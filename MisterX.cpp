@@ -352,13 +352,15 @@ void MisterX::kick() {
 
 // Handles the player initiating or coming out of a duck action
 void MisterX::duck() {
+    if (mJumping) return;
+
     if (mDucking) {
         if (mFacingRight) {
             setActionMode("DUCK_RIGHT");
         } else {
             setActionMode("DUCK_LEFT");
         }
-    } else {
+    } else if ( getLastActionMode().find("DUCK_") == 0) {
         // restore walking action mode
         if (mFacingRight) {
             setActionMode("WALK_RIGHT");
