@@ -16,13 +16,13 @@ public:
 	MisterX(std::shared_ptr<SDLMan> sdlMan);
 
 	// Handles keyboard input from the player. SDL_Keycode is the key and the bool is true on key pressed and false on key released.
-	void playerInput(const SDL_Keycode& key, bool press);
+	void handleInputKeyboard(const SDL_Keycode& key, bool press);
 
 	// Handles gamepad stick input from the player.
-	void playerInputPadStick(const SDL_ControllerAxisEvent e);
+	void handleInputAnalogStick(const SDL_ControllerAxisEvent e);
 
 	// Handles gamepad button input from the player. bool press is true on key pressed and false on key released.
-	void playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press);
+	void handleInputGamepad(const SDL_ControllerButtonEvent e, bool press);
 
 	// Moves player based on velocities adjusting for gravity, friction, and collisions. Overrides the Sprite class default move function
 	// for a few custom player effects like respecting level boundries that other sprites do not need to do.

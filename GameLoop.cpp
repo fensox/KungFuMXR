@@ -142,23 +142,23 @@ bool GameLoop::handleEvents() {
 				break;
 
 			case SDL_CONTROLLERAXISMOTION:																// Handle gamepad analog sticks
-				if (e.jaxis.which == mSDL->getGamepadID()) mPlayer->playerInputPadStick(e.caxis);
+				if (e.jaxis.which == mSDL->getGamepadID()) mPlayer->handleInputAnalogStick(e.caxis);
 				break;
 
 			case SDL_CONTROLLERBUTTONDOWN:																// Handle gamepad buttons
-				if (e.jaxis.which == mSDL->getGamepadID()) mPlayer->playerInputPadBtn(e.cbutton, true);
+				if (e.jaxis.which == mSDL->getGamepadID()) mPlayer->handleInputGamepad(e.cbutton, true);
 				break;
 
 			case SDL_CONTROLLERBUTTONUP:																// Handle gamepad buttons
-				if (e.jaxis.which == mSDL->getGamepadID()) mPlayer->playerInputPadBtn(e.cbutton, false);
+				if (e.jaxis.which == mSDL->getGamepadID()) mPlayer->handleInputGamepad(e.cbutton, false);
 				break;
 
 			case SDL_KEYDOWN:																			// Handle keyboard key down
-				mPlayer->playerInput(e.key.keysym.sym, true);
+				mPlayer->handleInputKeyboard(e.key.keysym.sym, true);
 				break;
 
 			case SDL_KEYUP:																				// Handle keyboard key released
-				mPlayer->playerInput(e.key.keysym.sym, false);
+				mPlayer->handleInputKeyboard(e.key.keysym.sym, false);
 				break;
 		}
     }

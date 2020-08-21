@@ -28,7 +28,7 @@ void MisterX::outputDebug() {
 }
 
 // Handles jopystick input from the player.
-void MisterX::playerInputPadStick(const SDL_ControllerAxisEvent e) {
+void MisterX::handleInputAnalogStick(const SDL_ControllerAxisEvent e) {
     using namespace FuGlobals;
 
     //X axis motion
@@ -48,18 +48,14 @@ void MisterX::playerInputPadStick(const SDL_ControllerAxisEvent e) {
             mDucking = false;
         } else if (e.value > JOYSTICK_DEAD_ZONE) {                          // Down below dead zone
             mDucking = true;
-            // initial call to go into duck anim or come out of it
-            duck();
         } else {                                                            // Stick not engaged on y axis
             mDucking = false;
-            // initial call to go into duck anim or come out of it
-            duck();
         }
     }
 }
 
 // Handles gamepad button input from the player.
-void MisterX::playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press) {
+void MisterX::handleInputGamepad(const SDL_ControllerButtonEvent e, bool press) {
     switch (e.button) {
         case SDL_CONTROLLER_BUTTON_A:
             if(press && !mJumping && !mDucking) mJumping = true;
@@ -68,6 +64,7 @@ void MisterX::playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press) {
             if (press && mAttackReleased) {
                 mAttacking = true;
                 mKicking = true;
+                mPunching = false;
                 mAttackReleased = false;
             } else if (!press) {
                 mAttackReleased = true;
@@ -77,6 +74,7 @@ void MisterX::playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press) {
             if (press && mAttackReleased) {
                 mAttacking = true;
                 mPunching = true;
+                mKicking = false;
                 mAttackReleased = false;
             } else if (!press) {
                 mAttackReleased = true;
@@ -90,7 +88,6 @@ void MisterX::playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press) {
             break;
         case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
             mDucking = press;
-            duck(); // initial call to go into duck anim or come out of it
             break;
         case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
             mWalkingLeft = press;
@@ -115,22 +112,18 @@ void MisterX::playerInputPadBtn(const SDL_ControllerButtonEvent e, bool press) {
 }
 
 // Handles keyboard input from the player. SDL_Keycode is the key and the bool is true on key pressed and false on key released.
-void MisterX::playerInput(const SDL_Keycode& key, bool press) {
+void MisterX::handleInputKeyboard(const SDL_Keycode& key, bool press) {
     switch (key) {
         case SDLK_SLASH:
             //***DEBUG***
             if (press) outputDebug();
             break;
-
         case SDLK_SPACE:
             if (press && !mJumping && !mDucking) mJumping = true;
             break;
-
         case SDLK_DOWN:
             mDucking = press;
-            duck(); // initial call to go into duck anim or come out of it
             break;
-
         case SDLK_LEFT:
             mWalkingLeft = press;
             break;
@@ -138,11 +131,11 @@ void MisterX::playerInput(const SDL_Keycode& key, bool press) {
         case SDLK_RIGHT:
             mWalkingRight = press;
             break;
-
         case SDLK_a:
             if (press && mAttackReleased) {
                 mAttacking = true;
                 mPunching = true;
+                mKicking = false;
                 mAttackReleased = false;
             } else if (!press) {
                 mAttackReleased = true;
@@ -152,19 +145,19 @@ void MisterX::playerInput(const SDL_Keycode& key, bool press) {
             if (press && mAttackReleased) {
                 mAttacking = true;
                 mKicking = true;
+                mPunching = false;
                 mAttackReleased = false;
             } else if (!press) {
                 mAttackReleased = true;
             }
-            break;
-        default:
-
             break;
     }
 }
 
 // Handles the player requesting to move to the right.
 void MisterX::moveRight() {
+    if (mDucking || mAttacking || !mWalkingRight) return;
+
     // if the previous action was different set new mActionMode, set animation frame to 0, and don't move player position
     if ( (getActionMode() != "WALK_RIGHT") && (getActionMode() != "JUMP_RIGHT") ) {
         mFacingRight = true;
@@ -190,6 +183,8 @@ void MisterX::moveRight() {
 
 // Handles the player requesting to move to the left.
 void MisterX::moveLeft() {
+    if ( mDucking || mAttacking || !mWalkingLeft) return;
+
     // if the previous action was different set new mActionMode, mCurrentFrame 0, and don't move player position
     if ( (getActionMode() != "WALK_LEFT") && (getActionMode() != "JUMP_LEFT") ) {
         mFacingRight = false;
@@ -241,6 +236,8 @@ void MisterX::adjustForLevelBounds() {
 
 // Handles player initiating a jump.
 void MisterX::jump() {
+    if (mDucking || !mJumping) return;
+
     // only launch into a jump if we have something to launch off of
     if (downBump()) {
         // check if we are already in the jump animation. Which means we are just landing not taking off
@@ -260,25 +257,9 @@ void MisterX::jump() {
 
             // increase our upward velocity
             mVeloc.down = 0;
-            mVeloc.up = JUMP_VELOCITY; //***DEBUG*** need to adjust to be FPS bases so jump height doesn't change depending on performance! Like moveRight and moveLeft
-        }
-    }
-}
-
-// Handles the player initiating a duck.
-void MisterX::duck() {
-    if (mDucking) {
-        if (mFacingRight) {
-            setActionMode("DUCK_RIGHT");
-        } else {
-            setActionMode("DUCK_LEFT");
-        }
-    } else {
-        // will restore walking anim frame but won't move player as player doesn't move first time an actionmode changes
-        if (mFacingRight) {
-            moveRight();
-        } else {
-            moveLeft();
+            mVeloc.up = JUMP_VELOCITY; 
+            //***DEBUG*** need to adjust above to be FPS bases so jump height doesn't change depending on performance! Like moveRight and moveLeft
+            // ... work's if framerate is capped at 120fps but on a slow device that can't make 120fps jump height will be smaller
         }
     }
 }
@@ -286,6 +267,8 @@ void MisterX::duck() {
 // Handles the player punching. mPunching bool not tied to button release like other actions. We turn off when animation complete to end punching action.
 void MisterX::punch() {
     using namespace FensoxUtils;
+
+    if (!mPunching || mKicking) return;
 
     // If start of punch action set our attack start time and play sound effect
     if (getActionMode().find("PUNCH_") == std::string::npos) {
@@ -328,6 +311,8 @@ void MisterX::punch() {
 void MisterX::kick() {
     using namespace FensoxUtils;
 
+    if (!mKicking || mPunching) return;
+
     // If start of kick action set our attack start time and play sound effect
     if (getActionMode().find("KICK_") == std::string::npos) {
         mSDL.lock()->playSoundEffect("MRX_KICK");
@@ -365,22 +350,40 @@ void MisterX::kick() {
     }
 }
 
+// Handles the player initiating or coming out of a duck action
+void MisterX::duck() {
+    if (mDucking) {
+        if (mFacingRight) {
+            setActionMode("DUCK_RIGHT");
+        } else {
+            setActionMode("DUCK_LEFT");
+        }
+    } else {
+        // restore walking action mode
+        if (mFacingRight) {
+            setActionMode("WALK_RIGHT");
+        } else {
+            setActionMode("WALK_LEFT");
+        }
+    }
+}
+
 // Moves player based on velocities adjusting for gravity, friction, and collisions. Extends then calls the Sprite class
 // default move function for a few custom player effects like respecting level boundries that other sprites do not need to do.
 void MisterX::move() {
-    // perform various actions on request
-    if (mJumping && !mDucking) jump();
-    if (mDucking && !mAttacking && !mJumping) duck();
-    if (!mDucking && !mAttacking) {
-        if (mWalkingLeft) moveLeft();
-        if (mWalkingRight) moveRight();
-    }
-    if (mPunching  && !mKicking) punch();
-    if (mKicking && !mPunching) kick();
+    jump();                 // Handle any jumping
+    
+    moveLeft();             // Handle any requests to move left
 
-    // call Sprite move function to perform the actual movement that handles collision detection, etc
-    Sprite::move();
+    moveRight();            // Handle any requests to move right
 
-    // make sure we haven't exceeded level bounds. Sprite class doesn't do this for us as enemies can leave level bounds.
-    adjustForLevelBounds();
+    punch();                // Handle any requests to punch
+
+    kick();                 // Handle any requests to kick
+
+    duck();                 // Handle any requests to duck
+
+    Sprite::move();         // call Sprite move function to perform actual movement, handling collision detection, etc
+
+    adjustForLevelBounds(); // Check player hasn't exceeded level bounds. Sprite class doesn't do this for us as other Sprites can leave level bounds.
 }
