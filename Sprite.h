@@ -89,8 +89,8 @@ public:
 	// Moves Sprite based on velocities adjusting for gravity, friction, and collisions. May be overridden or extended for custom movement routines.
 	virtual void move();
 
-	// Set the action mode
-	void setActionMode(std::string actionMode);
+	// Set the action mode to enter into and also if it is a looping animation or not.
+	void setActionMode(std::string actionMode, bool looping);
 
 	// Returns the current action mode
 	std::string getActionMode();
@@ -98,10 +98,22 @@ public:
 	// Returns the last action mode
 	std::string getLastActionMode();
 
+	// Returns whethar the current action mode is a looping animation or not.
+	bool getActionModeLooping();
+
+	// Returns whethar the last action mode was a looping animation or not.
+	bool getLastActionModeLooping();
+
+	// Reverts action mode to the last action mode. Sets last action mode as mode we just changed out of. Swaps the two.
+	void revertLastActionMode();
+
 	// Returns information about the Sprite object represented as a std::string for debugging purposes.
 	virtual std::string toString();
 
 protected:
+	//***DEBUG*** Get rid of this and make a constructor that takes all of it so we could potential load it all from a file and not have to hard
+	//code it all. Either constructor takes all these parameters or it takes a struct that holds them all.
+
 	/**********************************************************************************
 	 *         SPRITE SPECIFIC MEMBERS TO BE SET BY EACH DERIVED CLASS                *
 	 **********************************************************************************/
@@ -193,6 +205,12 @@ private:
 
 	// The last action mode we were in before the current one or an empty string if beginning of Sprite life.
 	std::string mLastActionMode{};
+
+	// Is the current action mode a looping animation or not
+	bool mActionModeLooping{ false };
+
+	// Is the last action mode a looping animation or not
+	bool mLastActionModeLooping{ false };
 
 	// Load the initial data file in with action mode names and animation frame counts. Store in passed in map and return boolean success.
 	bool loadDataFile();

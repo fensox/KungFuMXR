@@ -20,11 +20,15 @@ MisterX::MisterX(std::shared_ptr<SDLMan> sdlMan) : Sprite(sdlMan) {
 
 //***DEBUG*** Outputs some debugging info
 void MisterX::outputDebug() {
-    std::cout << "Player: " << getX() << "\t" << getY() << "\t" << getRect().w * mScale << "\t" << getRect().h * mScale << "\n";
-    std::cout << "P Veloc L, R / U, D: " << mVeloc.left << "\t" << mVeloc.right << "\t/\t" << mVeloc.up << "\t" << mVeloc.down << "\n";
-    std::cout << "Collision Rect: " << getCollisionRect().x << "\t" << getCollisionRect().y << "\t" << getCollisionRect().w << "\t" << getCollisionRect().h << "\n";
-    std::cout << "mActionMode: " << getActionMode() << "\tmLastActionMode: " << getLastActionMode() << "\tmCurrentFrame: " << mCurrentFrame << "\n";
-    std::cout << "Downbump:" << std::boolalpha << downBump() << "\tFPS: " << mSDL.lock()->getFPS() << "\n";
+    std::cout << "Player x,y:\t\t" << getX() << ", " << getY() << "\n";
+    std::cout << "Velocity l,r,u,d:\t" << mVeloc.left << ", " << mVeloc.right << ", " << mVeloc.up << ", " << mVeloc.down << "\n";
+    std::cout << "mActionMode:\t\t" << getActionMode() << "\n";
+    std::cout << "mLastActionMode:\t" << getLastActionMode() << "\n";
+    std::cout << "Downbumping:\t\t" << std::boolalpha << downBump() << "\n";
+    std::cout << "mDucking:\t\t" << std::boolalpha << mDucking << "\n";
+    std::cout << "mAttacking:\t\t" << std::boolalpha << mAttacking << "\n";
+    std::cout << "mJumping:\t\t" << std::boolalpha << mJumping << "\n";
+    std::cout << "FPS:\t\t\t" << mSDL.lock()->getFPS() << "\n" << std::endl;
 }
 
 // Handles jopystick input from the player.
@@ -162,14 +166,14 @@ void MisterX::moveRight() {
     if ( (getActionMode() != "WALK_RIGHT") && (getActionMode() != "JUMP_RIGHT") ) {
         mFacingRight = true;
         if (!downBump()) {
-            setActionMode("JUMP_RIGHT");
+            setActionMode("JUMP_RIGHT", false);
         } else {
-            setActionMode("WALK_RIGHT");
+            setActionMode("WALK_RIGHT", true);
         }        
     } else {
         // if we have no vertical velocity make sure we are not in the jump animation
         if (mVeloc.down == 0 && mVeloc.up == 0 && getActionMode().compare("WALK_RIGHT") != 0) {
-            setActionMode("WALK_RIGHT");
+            setActionMode("WALK_RIGHT", true);
         }
 
         // step animation frame if enough time has passed and we're not pressed up against an object
@@ -189,14 +193,14 @@ void MisterX::moveLeft() {
     if ( (getActionMode() != "WALK_LEFT") && (getActionMode() != "JUMP_LEFT") ) {
         mFacingRight = false;
         if (!downBump()) {
-            setActionMode("JUMP_LEFT");
+            setActionMode("JUMP_LEFT", false);
         } else {
-            setActionMode("WALK_LEFT");
+            setActionMode("WALK_LEFT", true);
         }
     } else if (!leftBump()) {
         // if we have no vertical velocity make sure we are not in the jump animation
         if (mVeloc.down == 0 && mVeloc.up == 0 && getActionMode().compare("WALK_LEFT") != 0) {
-            setActionMode("WALK_LEFT");
+            setActionMode("WALK_LEFT", true);
         }
 
         // step animation frame if enough time has passed and we're not pressed up against an object
@@ -242,17 +246,17 @@ void MisterX::jump() {
     if (downBump()) {
         // check if we are already in the jump animation. Which means we are just landing not taking off
         if ( getActionMode().compare("JUMP_RIGHT") == 0 ) {
-            setActionMode("WALK_RIGHT");
+            setActionMode("WALK_RIGHT", true);
             mJumping = false;
         } else if ( getActionMode().compare("JUMP_LEFT") == 0 ) {
-            setActionMode("WALK_LEFT");
+            setActionMode("WALK_LEFT", true);
             mJumping = false;
         } else {
             // we weren't finishing a jump so we will start one - change into jump animation
             if (mFacingRight) {
-                setActionMode("JUMP_RIGHT");
+                setActionMode("JUMP_RIGHT", false);
             } else {
-                setActionMode("JUMP_LEFT");
+                setActionMode("JUMP_LEFT", false);
             }
 
             // increase our upward velocity
@@ -271,7 +275,7 @@ void MisterX::punch() {
     if (!mPunching || mKicking) return;
 
     // If start of punch action set our attack start time and play sound effect
-    if (getActionMode().find("PUNCH_") == std::string::npos) {
+    if (getActionMode().find("PUNCH_") != 0) {
         mSDL.lock()->playSoundEffect("MRX_PUNCH");
         mAttackTime = SDL_GetTicks();
     }
@@ -279,29 +283,29 @@ void MisterX::punch() {
     // if not in punch mode yet pick correct punch mode
     switch (hash( getActionMode().c_str() )) {
         case (hash("DUCK_RIGHT")):
-            setActionMode("PUNCH_DUCK_RIGHT");
+            setActionMode("PUNCH_DUCK_RIGHT", false);
             break;
         case (hash("DUCK_LEFT")):
-            setActionMode("PUNCH_DUCK_LEFT");
+            setActionMode("PUNCH_DUCK_LEFT", false);
             break;
         case (hash("WALK_RIGHT")):
-            setActionMode("PUNCH_RIGHT");
+            setActionMode("PUNCH_RIGHT", false);
             break;
         case (hash("WALK_LEFT")):
-            setActionMode("PUNCH_LEFT");
+            setActionMode("PUNCH_LEFT", false);
             break;
         case (hash("JUMP_RIGHT")):
-            setActionMode("PUNCH_JUMP_RIGHT");
+            setActionMode("PUNCH_JUMP_RIGHT", false);
             break;
         case (hash("JUMP_LEFT")):
-            setActionMode("PUNCH_JUMP_LEFT");
+            setActionMode("PUNCH_JUMP_LEFT", false);
             break;
     }
 
     // stay in punch mode animation until ATTACK_TIME has passed
     Uint32 time{ SDL_GetTicks() - mAttackTime };
     if ((time) >= ATTACK_TIME) {
-        setActionMode( getLastActionMode() );
+        revertLastActionMode();
         mPunching = false;
         mAttacking = false;
     }
@@ -317,34 +321,33 @@ void MisterX::kick() {
     if (getActionMode().find("KICK_") == std::string::npos) {
         mSDL.lock()->playSoundEffect("MRX_KICK");
         mAttackTime = SDL_GetTicks();
-    }
 
-    // if not in kick mode yet pick correct kick mode
-    switch (hash(getActionMode().c_str())) {
-        case (hash("DUCK_RIGHT")):
-            setActionMode("KICK_DUCK_RIGHT");
-            break;
-        case (hash("DUCK_LEFT")):
-            setActionMode("KICK_DUCK_LEFT");
-            break;
-        case (hash("WALK_RIGHT")):
-            setActionMode("KICK_RIGHT");
-            break;
-        case (hash("WALK_LEFT")):
-            setActionMode("KICK_LEFT");
-            break;
-        case (hash("JUMP_LEFT")):
-            setActionMode("KICK_JUMP_LEFT");
-            break;
-        case (hash("JUMP_RIGHT")):
-            setActionMode("KICK_JUMP_RIGHT");
-            break;
+        // choose correct action mode
+        switch (hash(getActionMode().c_str())) {
+            case (hash("DUCK_RIGHT")):
+                setActionMode("KICK_DUCK_RIGHT", false);
+                break;
+            case (hash("DUCK_LEFT")):
+                setActionMode("KICK_DUCK_LEFT", false);
+                break;
+            case (hash("WALK_RIGHT")):
+                setActionMode("KICK_RIGHT", false);
+                break;
+            case (hash("WALK_LEFT")):
+                setActionMode("KICK_LEFT", false);
+                break;
+            case (hash("JUMP_LEFT")):
+                setActionMode("KICK_JUMP_LEFT", false);
+                break;
+            case (hash("JUMP_RIGHT")):
+                setActionMode("KICK_JUMP_RIGHT", false);
+                break;
+        }
     }
-
     // stay in kick mode animation until ATTACK_TIME has passed
     Uint32 time{ SDL_GetTicks() - mAttackTime };
     if ((time) >= ATTACK_TIME) {
-        setActionMode(getLastActionMode());
+        revertLastActionMode();
         mKicking = false;
         mAttacking = false;
     }
@@ -352,20 +355,20 @@ void MisterX::kick() {
 
 // Handles the player initiating or coming out of a duck action
 void MisterX::duck() {
-    if (mJumping) return;
+    if (mJumping || mAttacking) return;
 
-    if (mDucking) {
+    if (mDucking && !(getActionMode().find("DUCK_") == 0)) {
         if (mFacingRight) {
-            setActionMode("DUCK_RIGHT");
+            setActionMode("DUCK_RIGHT", true);
         } else {
-            setActionMode("DUCK_LEFT");
+            setActionMode("DUCK_LEFT", true);
         }
-    } else if ( getLastActionMode().find("DUCK_") == 0) {
+    } else if ( !mDucking && (getActionMode().find("DUCK_") == 0) ) {
         // restore walking action mode
         if (mFacingRight) {
-            setActionMode("WALK_RIGHT");
+            setActionMode("WALK_RIGHT", true);
         } else {
-            setActionMode("WALK_LEFT");
+            setActionMode("WALK_LEFT", true);
         }
     }
 }
@@ -379,11 +382,11 @@ void MisterX::move() {
 
     moveRight();            // Handle any requests to move right
 
+    duck();                 // Handle any requests to duck
+
     punch();                // Handle any requests to punch
 
     kick();                 // Handle any requests to kick
-
-    duck();                 // Handle any requests to duck
 
     Sprite::move();         // call Sprite move function to perform actual movement, handling collision detection, etc
 

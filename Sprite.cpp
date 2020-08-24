@@ -116,10 +116,12 @@ std::string Sprite::toString() {
     return output.str();
 }
 
-// Set the action mode
-void Sprite::setActionMode(std::string actionMode) {
+// Set the action mode to enter into and also if it is a looping animation or not.
+void Sprite::setActionMode(std::string actionMode, bool looping) {
     mLastActionMode = mActionMode;
+    mLastActionModeLooping = mActionModeLooping;
     mActionMode = actionMode;
+    mActionModeLooping = looping;
     mCurrentFrame = 0;
 }
 
@@ -131,6 +133,30 @@ std::string Sprite::getActionMode() {
 // Returns the last action mode
 std::string Sprite::getLastActionMode() {
     return mLastActionMode;
+}
+
+// Returns whethar the current action mode is a looping animation or not.
+bool Sprite::getActionModeLooping() {
+    return mActionModeLooping;
+}
+
+// Returns whethar the last action mode was a looping animation or not.
+bool Sprite::getLastActionModeLooping() {
+    return mLastActionModeLooping;
+}
+
+// Reverts action mode to the last action mode. Sets last action mode as mode we just changed out of. Swaps the two.
+void Sprite::revertLastActionMode() {
+    bool looping{ mActionModeLooping };
+    std::string mode{ mActionMode };
+
+    mActionMode = mLastActionMode;
+    mActionModeLooping = mLastActionModeLooping;
+
+    mLastActionMode = mode;
+    mLastActionModeLooping = looping;
+
+    mCurrentFrame = 0;
 }
 
 int Sprite::getDepth() {
@@ -170,19 +196,19 @@ std::string Sprite::getName() {
     return mName;
 }
 
-// Advances the current action mode animation frame ahead or loops to beginning if at end of animation frames.
+// Advances the current action mode animation frame ahead or loops to beginning if at end of animation frames and defined as a looping action mode.
 void Sprite::advanceFrame() {
-    // check if this is a new action mode since last frame change. If so store the new mode name and start at frame 0.
-    if (mActionMode != mLastActionMode) {
-        mCurrentFrame = 0;
-        mLastActionMode = mActionMode;
-    }
-
     // get the number of frames this animation has
-    std::size_t count = mAnimMap[mActionMode].size();
+    std::size_t totalFrames = mAnimMap[mActionMode].size();
 
-    // increment the animation ahead or loop back to beginning if we reach the end of the frames available
-    if (++mCurrentFrame >= count) mCurrentFrame = 0;
+    // increment the animation ahead
+    ++mCurrentFrame;
+
+    // if we are greater or equal to total frames either loop or set to last valid frame depending on if this is a looping animation
+    if (mCurrentFrame >= totalFrames) {
+        if (mActionModeLooping) mCurrentFrame = 0; 
+        else mCurrentFrame = totalFrames - 1;
+    }
 }
 
 // Returns the current animation frame's rectangle from the sprite sheet. Sprite sheet coordinate relative.
