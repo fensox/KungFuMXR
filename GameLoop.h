@@ -33,7 +33,4 @@ private:
 
 	// The Sprite for the player. Held here as a shared_ptr and held by Level objects as a weak_ptr.
 	std::shared_ptr<MisterX> mPlayer{ nullptr };
-
-	// Container to hold all non-player sprites in the game (smart pointer to a vector)
-	std::unique_ptr<std::vector<Sprite>> mSprites{ nullptr };
 };

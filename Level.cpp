@@ -26,7 +26,10 @@ Level::~Level() {
 bool Level::load() {
     bool success{ true };
 
-    // Load in the level's metadata file into an unordered map
+    // Initialize/reset all member variables
+    resetLevel();
+
+    // Load in the level's metadata file
     if (!loadDataFile()) success = false;
 
     // Load in the level's music file
@@ -36,9 +39,16 @@ bool Level::load() {
     if (!loadBGTexture()) success = false;
 
     //***DEBUG***
-    //if (FuGlobals::DEBUG_MODE) std::cout << toString();
+    if (FuGlobals::DEBUG_MODE) std::cout << toString();
 
     return success;
+}
+
+// Initialize/reset all level variables. Used on game initialization and also to clear old data when loading a new level.
+void Level::resetLevel() {
+    // initialize our Sprite holding vector
+    mSprites = nullptr;
+    mSprites = std::make_unique<std::vector<SpriteStruct>>();
 }
 
 // Load in the level's background texture. Returns success.
@@ -57,6 +67,8 @@ bool Level::loadMusicFile() {
 
 // Load in the level's metadata file
 bool Level::loadDataFile() {
+    using namespace FensoxUtils;
+
     bool success{ true };
 
     // attempt to open a filestream on the filename or return a failure.
@@ -72,37 +84,49 @@ bool Level::loadDataFile() {
         std::istringstream stream(strInput);
         if (std::getline(stream, key, '=')) {
             // trim leading and trailing whitespace, uppercase, and if it is a comment skip
-            FensoxUtils::strTrim(key);
-            key = FensoxUtils::strToUpper(key);
+            strTrim(key);
+            key = strToUpper(key);
             if (key[0] == '#' || key.empty()) continue;
 
-            // we have the key now get the value and store different places depending on what the key is
+            // we have the key now get the value and store it in different places depending on what the key is
             std::getline(stream, value);
-            switch (FensoxUtils::hash(key.c_str())) {
-            case FensoxUtils::hash("NAME"):
-                mName = value;
-                break;
-            case FensoxUtils::hash("BACKGROUND"):
-                mBGFile = value;
-                break;
-            case FensoxUtils::hash("MUSIC"):
-                mMusicFile = value;
-                break;
-            case FensoxUtils::hash("PLAYER_START"):
-                mPlayStart = FensoxUtils::getPointFromCDV(value);
-                break;
-            case FensoxUtils::hash("TRANS_COLOR"):
-                if (!storeTrans(value)) success = false;
-                break;
-            case FensoxUtils::hash("COLRECT"):
-                if (!storeColRect(value)) success = false;
-                break;
-            default:
-                std::cerr << "Warning in Level::load. Undefined key value in level metadata file. Key was: " << key;
-                std::cerr << "\nAttempting to continue on reading metadata file." << std::endl;
+            switch (hash(key.c_str())) {
+                case hash("NAME"):
+                    mName = value;
+                    break;
+                case hash("BACKGROUND"):
+                    mBGFile = value;
+                    break;
+                case hash("MUSIC"):
+                    mMusicFile = value;
+                    break;
+                case hash("PLAYER_START"):
+                    mPlayStart = FensoxUtils::getPointFromCDV(value);
+                    break;
+                case hash("TRANS_COLOR"):
+                    if (!storeTrans(value)) success = false;
+                    break;
+                case hash("COLRECT"):
+                    if (!storeColRect(value)) success = false;
+                    break;
+                case hash("SPRITE"):
+                    if (!storeSprite(value)) success = false;
+                    break;
+                default:
+                    std::cerr << "Warning in Level::load. Undefined key value in level metadata file. Key was: " << key;
+                    std::cerr << "\nAttempting to continue reading metadata file." << std::endl;
             }
         }
     }
+
+    return true;
+}
+
+// Helper function to take a comma delimited group of sprite values from the level's metadata file and load the sprite into a the sprite vector.
+bool Level::storeSprite(std::string value) {
+    std::vector<std::string> vector{ FensoxUtils::getVectorFromCDV(value) };
+
+    for (int i{ 0 }; i < vector.size(); ++i) std::cout << vector[i] << "\n";
 
     return true;
 }
@@ -287,4 +311,9 @@ bool Level::isACollision(Line line) {
     }
 
     return false;
+}
+
+// Processes all non-player sprites per frame
+void Level::moveSprites() {
+
 }

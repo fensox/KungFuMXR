@@ -1,0 +1,31 @@
+# Kung Fu MXR - Standard Sprite Metadata File
+#
+# File format description:
+#
+# 1) Lines beginning with # are comments. Blank lines along with leading and trailing whitespace is attempted to be ignored.
+#
+# 2) This metadata file contains key/value pairs of (action mode names)/(sprite sheet clip coordinates) in format: NAME=x, y, w, h.
+# Coordinates are a clip area holding an animation frame for that action. For multiple animation frames for the same action
+# simply use the same action mode name on each line (see example below).
+#
+# An example file:
+#
+# i.e.
+# 	WALK_LEFT=0, 0, 30, 100
+#	WALK_LEFT=31, 0, 30, 100
+#	WALK_LEFT=62, 0, 28, 100
+#	WALK_RIGHT=91, 0, 30, 100
+#	WALK_RIGHT=122, 0, 30, 100
+#	FACE_SCREEN=153, 0, 40, 100
+#
+# The above example will set the sprite up with three action modes. There are three frames of animation for the "WALK_LEFT"
+# action mode. They will be cycled through as the sprite "WALK_LEFT" action is animated, etc.
+#
+#####################################################################################################################################
+
+# Begin Stick Fighters data file
+
+WALK_RIGHT=235, 449, 14, 40
+WALK_RIGHT=214, 449, 16, 40
+
+# End data file

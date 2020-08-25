@@ -4,7 +4,7 @@
 #
 # 1) Lines beginning with # are comments. Blank lines along with leading and trailing whitespace is attempted to be ignored.
 #
-# 2) This metadata file contains key/value pairs of information on game levels. The available settins for the game are:
+# 2) This metadata file contains key/value pairs of information on game levels. The available settings for the game are:
 #
 #	NAME=level name			- The name of the level.
 #
@@ -14,7 +14,7 @@
 #	TRANS_COLOR=r,g,b,a		- A transparency color to use on the background texture. Values from 0-255. The "a" (fourth)
 #					  value is not used as an alpha as might be thought. It is used to turn on/off if we are
 #					  using transparency at all. A value of 0 means transparency is off. Any value other
-#					  than 0 turns on transparency and used the RGB values given.
+#					  than 0 turns on transparency and uses the RGB values given.
 #
 #	MUSIC=path and file		- Background music to play on a loop during this level. File path rules same as for background.
 #					- Only include one of these per metafile.
@@ -22,10 +22,14 @@
 #	PLAYER_START=x, y		- The starting integer coordinates for the player on this level given as X, Y coordinates
 #					  to center of player.
 #
+#	SPRITE=name, sX, sY, pX, <G|L>	- Sprites for the level. Enemy or otherwise. Any number of these lines allowed. First is the
+#					  name of the sprite to spawn from the preloaded, hardcoded, group of game sprites. Then the
+#					  sprite spawn coordinates in the level, followed by the player X coordinate that must be
+#					  passed for the sprite to spawn in. Finally G or L which indicates that the players position
+#					  must be GREATER than or LESS than the pX coordinate for the sprite to spawn.
+#
 #	COLRECT=x, y, w, h		- Collision rectangles in the level. Include as many of these lines as needed per level.
 #					  Rectangles are specified as integers: Top Left X position, Top Left Y position, Width, Height
-#					  Important Note: If the collision rectangle height is shorter than the difference in animation
-#					  frame heights then a sprite could get caught in the floor. Keep heights as tall as possible.
 #
 # 3) Note all level design is based on a 720 pixel tall background resolution with a 1280 pixel wide scrolling viewport.
 #    Larger/smaller game windows scale this up or down to fit.
@@ -38,6 +42,7 @@
 #	TRANS_COLOR=92,148,252,1
 #	MUSIC=data/kung_fu_music.ogg
 #	PLAYER_START=1280, 720
+#	SPRITE=STICKMAN, 100, 200, 1500, L
 # 	COLRECT=0, 0, 7000, 100
 #	COLRECT=31, 0, 30, 100
 #	COLRECT=62, 0, 28, 100
@@ -52,7 +57,8 @@ NAME=Level 1
 BACKGROUND=data/Level1.png
 TRANS_COLOR=92,148,252,0
 MUSIC=data/kung_fu_music_edited.mp3
-PLAYER_START=1100, 0
+PLAYER_START=3000, 0
+SPRITE=STICKMAN, 100, 200, 1500, L
 
 #Floor
 COLRECT=0, 470, 7680, 250

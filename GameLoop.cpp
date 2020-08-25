@@ -8,7 +8,6 @@ GameLoop::~GameLoop() {
 	if (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: GameLoop" << std::endl;
 
 	mPlayer.reset();
-	mSprites.reset();
 	mLevel.reset();
 	mSDL.reset();
 }
@@ -25,9 +24,6 @@ bool GameLoop::initGameSystems() {
 // Loads in game data.
 bool GameLoop::loadGameData() {
 	bool success{ true };
-	
-	// initialize our Sprite holding vector. Holds all sprites but the player.
-	mSprites = std::make_unique<std::vector<Sprite>>();
 
 	// Load the player
 	mPlayer = std::make_unique<MisterX>(mSDL);
@@ -39,7 +35,7 @@ bool GameLoop::loadGameData() {
 	if (!loadLevel("data/level1.dat")) success = false;
 
 	// Return successful loading of game data.
-	return (mSprites && success);
+	return success;
 }
 
 // Load in the current level
@@ -95,17 +91,19 @@ void GameLoop::runGameLoop() {
 			// handle input events
 			quit = handleEvents();
 
-			// process movements of sprites
-			mPlayer->move(); // ***DEBUG***this could prob be stuffed inside the sprites vector..version 2 maybe
-			for (int i{ 0 }; i < mSprites->size(); ++i) mSprites->at(i).move();
+			// process movements of the player
+			mPlayer->move();
 			
+			// process movements of non-player sprites
+			mLevel->moveSprites();
+
 			// update our time lag calculations
 			lag -= FuGlobals::FPS_TARGET;
 
 			//***DEBUG***
 			if (FuGlobals::SHOW_FPS) mSDL->outputFPS();
 
-			// have our SDL wrapper update it's FPS calculations once per frame so our physics works correctly
+			// have our SDL wrapper update it's FPS averaging calculations once per frame so our physics works correctly
 			mSDL->calculateFPS();
 
 			// if FPS target is set to 0 break out as we are going for as many frames as we can
@@ -115,7 +113,6 @@ void GameLoop::runGameLoop() {
 		// render to back buffer
 		mLevel->render();
 		mPlayer->render();
-		for (int i{ 0 }; i < mSprites->size(); ++i) mSprites->at(i).render();
 
 		// update the screen
 		mSDL->refresh();

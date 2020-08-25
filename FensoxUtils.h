@@ -7,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 
+
 /*
     A static utility namespace with many helpful functions.
     i.e. random number generation, string trimming functionality, etc.
@@ -53,7 +54,7 @@ namespace FensoxUtils {
         return str;
     }
 
-    /* Used to allow std::string to be used in a switch statement. Found this on Stack Overflow.
+    /* Hashes a string into a format that allows std::string to be used in a switch statement. Found this on Stack Overflow.
      * Use: 
      *           switch( hash(str) ) {
      *               case hash("one"): // do something
@@ -126,5 +127,18 @@ namespace FensoxUtils {
         }
 
         return SDL_Point{ xy[0], xy[1] };
+    }
+
+    // Parses the given comma delimited string and returns the values in a vector of strings.
+    static inline std::vector<std::string> getVectorFromCDV(std::string str) {
+        std::vector<std::string> vector{ std::vector<std::string>() };
+
+        std::istringstream stream{ std::istringstream{str} };
+        std::string value{};
+        while ( std::getline(stream, value, ',') ) {
+            vector.push_back(value);
+        }
+
+        return vector;
     }
 };

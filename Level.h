@@ -56,6 +56,9 @@ public:
 	// Returns the viewport's top-left coordinates and width/height.
 	SDL_Point getPosition();
 
+	// Processes all non-player sprites per frame
+	void moveSprites();
+
 	// Render the level
 	void render();
 
@@ -66,6 +69,18 @@ public:
 	std::string toString();
 
 private:
+	// Struct to hold sprite info for one sprite for the current level. See level metadata file for member descriptions.
+	struct SpriteStruct {
+		Sprite sprite;
+		decimal spawnX{ 0 };
+		decimal spawnY{ 0 };
+		decimal playerX{ 0 };
+		char greatLess{ 'G' };
+	};
+
+	// Holds all non-player Sprite objects for the level in a vector of SpriteStruct.
+	std::unique_ptr<std::vector<SpriteStruct>> mSprites{ nullptr };
+	
 	// Holds the path and filename to the level's metadata file
 	std::string mMetaFile{};
 
@@ -102,8 +117,14 @@ private:
 	// Holds all collision rectangles in a vector wrapped in a smart pointer.
 	ColRects mColRects{nullptr};
 
+	// Initialize/reset all level variables. Used on game initialization and also to clear old data when loading a new level.
+	void resetLevel();
+
 	// Helper function to take a comma delimited value, convert to an SDL_Rect, and store in our ColRects member. Returns success or failure.
 	bool storeColRect(std::string value);
+
+	// Helper function to take a comma delimited group of values describing a sprite and load the sprite into SDLMan's sprite map for later access by our level.
+	bool storeSprite(std::string value);
 
 	// Helper function to take a comma delimited value from metadata file, convert to an SDL_Color, and store in our mTrans member. Returns success or failure.
 	bool storeTrans(std::string value);
