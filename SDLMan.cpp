@@ -201,9 +201,9 @@ void SDLMan::setFullscreen(bool fs) {
 }
 
 // Returns the height and width of a Texture object's wrapped SDL_Texture. Return type holding width/height is an SDL_Point.
-SDL_Point SDLMan::getSize(std::shared_ptr<Texture> text) {
+SDL_Point SDLMan::getSize(Texture &text) {
 	SDL_Point size{};
-	SDL_QueryTexture(text->getTexture(), NULL, NULL, &size.x, &size.y);
+	SDL_QueryTexture(text.getTexture(), NULL, NULL, &size.x, &size.y);
 	return size;
 }
 

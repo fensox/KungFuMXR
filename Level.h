@@ -20,17 +20,14 @@ class Level {
 public:
 	// Constructor takes path to metadata file for the level relative to game executable and an SDLMan pointer to hold for rendering.
 	// Note load() must be called after construction of this object before other functions will work.
-	Level(std::string filename, std::shared_ptr<SDLMan> sdlMan);
+	Level(std::string filename, std::weak_ptr<SDLMan> sdlMan);
 	Level() = delete;
 
 	// Destructor
 	~Level();
 
 	// Easier to work with typedef: A vector of SDL rectangle objects held by a smart pointer. Holds all hard collision objects for the level.
-	typedef std::shared_ptr<std::vector<SDL_Rect>> ColRects;
-
-	// Returns all hard collision objects in level.
-	ColRects getColRects();
+	typedef std::unique_ptr<std::vector<SDL_Rect>> ColRects;
 
 	// Checks if the given point is contained in a collision rectangle for the level.
 	bool isACollision(const SDL_Point& pnt);
@@ -63,20 +60,14 @@ public:
 	void render();
 
 	// Set's the Sprite pointer that this level's viewport will stay centered on.
-	void setFollowSprite(std::shared_ptr<Sprite> follow);
+	void setFollowSprite(std::weak_ptr<Sprite> follow);
 
 	// Outputs the object information represented as a string
 	std::string toString();
 
 private:
 	// Struct to hold sprite info for one sprite for the current level. See level metadata file for member descriptions.
-	struct SpriteStruct {
-		Sprite sprite;
-		decimal spawnX{ 0 };
-		decimal spawnY{ 0 };
-		decimal playerX{ 0 };
-		char greatLess{ 'G' };
-	};
+	struct SpriteStruct;
 
 	// Holds all non-player Sprite objects for the level in a vector of SpriteStruct.
 	std::unique_ptr<std::vector<SpriteStruct>> mSprites{ nullptr };
@@ -94,7 +85,7 @@ private:
 	std::string mBGFile{};
 
 	// Holds the SDL_Texture of the level background in a smart pointer
-	std::shared_ptr<Texture> mBGTexture{ nullptr };
+	std::unique_ptr<Texture> mBGTexture{ nullptr };
 
 	// Holds the transparency color for the background texture
 	SDL_Color mTrans{};
@@ -112,7 +103,7 @@ private:
 	std::weak_ptr<SDLMan> mSDL{ std::weak_ptr<SDLMan>() };
 
 	// Smart pointer to a Sprite object this viewport will center on. Usually holds player sprite but could be any sprite i.e. a scripted scene, etc..
-	std::weak_ptr<Sprite> mFollowSprite{ std::shared_ptr<Sprite>() };
+	std::weak_ptr<Sprite> mFollowSprite;
 
 	// Holds all collision rectangles in a vector wrapped in a smart pointer.
 	ColRects mColRects{nullptr};
@@ -128,6 +119,9 @@ private:
 
 	// Helper function to take a comma delimited value from metadata file, convert to an SDL_Color, and store in our mTrans member. Returns success or failure.
 	bool storeTrans(std::string value);
+
+	// Takes the name of a sprite and returns a pointer to the corresponding Sprite object or nullptr.
+	std::unique_ptr<Sprite> loadSprite(std::string name);
 
 	// Load in the level's metadata file. Returns success.
 	bool loadDataFile();

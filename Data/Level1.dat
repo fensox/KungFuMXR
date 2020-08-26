@@ -9,30 +9,31 @@
 #	NAME=level name			- The name of the level.
 #
 #	BACKGROUND=path and file	- This is the path and filename (game executable relative) of the level background graphic.
-#					- Only include one of these per metafile.
+#					- Only include one of these per file.
 #
 #	TRANS_COLOR=r,g,b,a		- A transparency color to use on the background texture. Values from 0-255. The "a" (fourth)
 #					  value is not used as an alpha as might be thought. It is used to turn on/off if we are
 #					  using transparency at all. A value of 0 means transparency is off. Any value other
-#					  than 0 turns on transparency and uses the RGB values given.
+#					  than 0 turns on transparency and uses the RGB values given. Only include one of these per file.
 #
 #	MUSIC=path and file		- Background music to play on a loop during this level. File path rules same as for background.
-#					- Only include one of these per metafile.
+#					- Only include one of these per file.
 #
 #	PLAYER_START=x, y		- The starting integer coordinates for the player on this level given as X, Y coordinates
-#					  to center of player.
+#					  to center of player. Only include one of these per file.
 #
-#	SPRITE=name, sX, sY, pX, <G|L>	- Sprites for the level. Enemy or otherwise. Any number of these lines allowed. First is the
-#					  name of the sprite to spawn from the preloaded, hardcoded, group of game sprites. Then the
-#					  sprite spawn coordinates in the level, followed by the player X coordinate that must be
-#					  passed for the sprite to spawn in. Finally G or L which indicates that the players position
-#					  must be GREATER than or LESS than the pX coordinate for the sprite to spawn.
+#	SPRITE=name, sX, sY, pX, <G|L>	- Sprites for the level. Enemy or otherwise. First is the name of the sprite to spawn from
+#					  the preloaded, hardcoded, group of game sprites. Then the sprite spawn coordinates in the
+#					  level, followed by the player X coordinate that must be passed for the sprite to spawn in.
+#					  Finally G or L which indicates that the players position must be GREATER than or LESS than
+#					  the pX coordinate for the sprite to spawn. Include as many of these lines as needed in file.
 #
 #	COLRECT=x, y, w, h		- Collision rectangles in the level. Include as many of these lines as needed per level.
 #					  Rectangles are specified as integers: Top Left X position, Top Left Y position, Width, Height
+#					  Include as many of these lines as needed in file.
 #
-# 3) Note all level design is based on a 720 pixel tall background resolution with a 1280 pixel wide scrolling viewport.
-#    Larger/smaller game windows scale this up or down to fit.
+# 3) Note all level design is based on a 1280 wide by 720 pixel tall scrolling viewport. This is the 'camera' the player sees the level
+#    through. Larger/smaller game windows, fullscreen, etc, simply scale this up or down to fit the current window size.
 #
 # An example file:
 #
@@ -58,7 +59,7 @@ BACKGROUND=data/Level1.png
 TRANS_COLOR=92,148,252,0
 MUSIC=data/kung_fu_music_edited.mp3
 PLAYER_START=3000, 0
-SPRITE=STICKMAN, 100, 200, 1500, L
+SPRITE=STICKMAN, 100, 200, 1500, L  
 
 #Floor
 COLRECT=0, 470, 7680, 250

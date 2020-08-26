@@ -13,7 +13,7 @@ public:
 	const Uint32	ATTACK_TIME{ 100 };				// Milliseconds to hold an attack animation on screen before returning to former animation
 
 	// Use base Sprite constructor
-	MisterX(std::shared_ptr<SDLMan> sdlMan);
+	MisterX(std::weak_ptr<SDLMan> sdlMan);
 
 	// Handles keyboard input from the player. SDL_Keycode is the key and the bool is true on key pressed and false on key released.
 	void handleInputKeyboard(const SDL_Keycode& key, bool press);

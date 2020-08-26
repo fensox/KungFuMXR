@@ -1,5 +1,6 @@
 #include "Level.h"
 #include "FensoxUtils.h"
+#include "StickMan.h"
 #include <fstream>
 #include <sstream>
 #include <tuple>
@@ -7,10 +8,10 @@
 
 // Constructor takes path to metadata file for the level relative to game executable and an SDLMan pointer to hold for rendering.
 // Note load() must be called after construction of this object before other functions will work.
-Level::Level(std::string filename, std::shared_ptr<SDLMan> sdlMan) {
+Level::Level(std::string filename, std::weak_ptr<SDLMan> sdlMan) {
 	mMetaFile = filename;
     mSDL = sdlMan;
-    mColRects = std::make_shared<std::vector<SDL_Rect>>();
+    mColRects = std::make_unique<std::vector<SDL_Rect>>();
 }
 
 // Destructor
@@ -21,6 +22,15 @@ Level::~Level() {
     mFollowSprite.reset();
     mSDL.reset();
 }
+
+// Struct to hold sprite info for one sprite for the current level. See level metadata file for member descriptions.
+struct Level::SpriteStruct {
+    std::unique_ptr<Sprite> sprite{ nullptr };
+    decimal spawnX{ 0 };
+    decimal spawnY{ 0 };
+    decimal playerX{ 0 };
+    char greatLess{ 'G' };
+};
 
 // Loads in the level
 bool Level::load() {
@@ -119,16 +129,51 @@ bool Level::loadDataFile() {
         }
     }
 
-    return true;
+    return success;
 }
 
 // Helper function to take a comma delimited group of sprite values from the level's metadata file and load the sprite into a the sprite vector.
 bool Level::storeSprite(std::string value) {
-    std::vector<std::string> vector{ FensoxUtils::getVectorFromCDV(value) };
+    bool success{ true };
 
-    for (int i{ 0 }; i < vector.size(); ++i) std::cout << vector[i] << "\n";
+    // parse the string into a vector of strings and return false if it does not contain the right amount of data
+    std::vector<std::string> vector{ FensoxUtils::getVectorFromCDV(value, true) };
+    if (vector.size() != 5) {
+        std::cerr << "Error in Level::storeSprite. Sprite data from metadata file was formatted wrong. Data was: " << value << std::endl;
+        return false;
+    }
 
-    return true;
+    // format data to correct variable types
+    std::string name{ vector[0] };
+    int spawnX{}, spawnY{}, playerX{};
+    try {
+        spawnX = std::stoi(vector[1]);
+        spawnY = std::stoi(vector[2]);
+        playerX = std::stoi(vector[3]);
+    } catch (const std::exception& e) {
+        std::cerr << "Error in Level::storeSprite. Could not convert string to int some of the Sprite data from metadata file. Error was: " << e.what() << std::endl;
+        return false;
+    }
+    FensoxUtils::strToUpper(vector[4]);
+    char greatLess{ vector[4].c_str()[0] };
+    
+    // get a Sprite object based on the provided name
+    //std::unique_ptr<Sprite> sprite{ loadSprite(name) };
+
+    // store data in a SpriteStruct
+    //SpriteStruct ss{ sprite, spawnX, spawnY, playerX, greatLess };
+
+    if (FuGlobals::DEBUG_MODE) {
+        std::cout << "Level::storeSprite data: " << name << ", " << spawnX << ", " << spawnY << ", " << playerX << ", " << greatLess << std::endl;
+    }
+
+    return success;
+}
+
+// Takes the name of a sprite and returns a pointer to the corresponding Sprite object or nullptr.
+std::unique_ptr<Sprite> Level::loadSprite(std::string name) {
+    //std::unique_ptr<Sprite> sprite = std::make_unique<StickMan>(mSDL);
+    return nullptr;
 }
 
 // Helper function to take a comma delimited value from metadata file, convert to an SDL_Color, and store in our mTrans member. Returns success or failure.
@@ -170,11 +215,6 @@ bool Level::storeColRect(std::string value) {
     return true;
 }
 
-// Returns all hard collision objects in level as our typedef'd ColRects type.
-Level::ColRects Level::getColRects() {
-    return mColRects;
-}
-
 // Return player start position
 SDL_Point Level::getPlayStart() {
     return mPlayStart;
@@ -185,12 +225,16 @@ SDL_Point Level::getPosition() {
     return mViewport;
 }
 
-// Outputs the level information represented as a string
+// Returns the level information represented as a string
 std::string Level::toString() {
     std::ostringstream str{};
-    str << "Level Name: " << mName << ", Meta: " << mMetaFile << ", BG: " << mBGFile;
-    str << ", Music: " << mMusicFile << ", Player Start: " << mPlayStart.x << ", " << mPlayStart.y;
-    str << ", # Collision Rectangles: " << mColRects->size() << "\nCollision Rectangles List:";
+    str << "Level Name: " << mName << "\n";
+    str << "Metafile: " << mMetaFile << "\n";
+    str << "Background: " << mBGFile << "\n";
+    str << "Music: " << mMusicFile << "\n";
+    str << "Player Start: " << mPlayStart.x << ", " << mPlayStart.y << "\n";
+    str << "# Collision Rectangles: " << mColRects->size() << "\n";
+    str << "Collision Rectangles List: ";
     for (int i{ 0 }; i < mColRects->size(); ++i) {
         str << "\n" << mColRects->at(i).x << ", " << mColRects->at(i).y << ", " << mColRects->at(i).w << ", " << mColRects->at(i).h;
     }
@@ -200,11 +244,11 @@ std::string Level::toString() {
 
 // Returns the height and width of the level background in an SDL_Point.
 SDL_Point Level::getSize() {
-    return mSDL.lock()->getSize(mBGTexture);
+    return mSDL.lock()->getSize( *(mBGTexture.get()) );
 }
 
 // Set's the Sprite pointer that this level's viewport will stay centered on.
-void Level::setFollowSprite(std::shared_ptr<Sprite> follow) {
+void Level::setFollowSprite(std::weak_ptr<Sprite> follow) {
     mFollowSprite = follow;
 }
 

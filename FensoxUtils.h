@@ -129,13 +129,14 @@ namespace FensoxUtils {
         return SDL_Point{ xy[0], xy[1] };
     }
 
-    // Parses the given comma delimited string and returns the values in a vector of strings.
-    static inline std::vector<std::string> getVectorFromCDV(std::string str) {
+    // Parses the given comma delimited string and returns the values in a vector of strings. Parameters are the string to parse and a bool whethar to trim whitespace or not.
+    static inline std::vector<std::string> getVectorFromCDV(std::string str, bool trim) {
         std::vector<std::string> vector{ std::vector<std::string>() };
 
         std::istringstream stream{ std::istringstream{str} };
         std::string value{};
         while ( std::getline(stream, value, ',') ) {
+            if (trim) strTrim(value);
             vector.push_back(value);
         }
 

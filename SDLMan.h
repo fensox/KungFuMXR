@@ -100,7 +100,7 @@ public:
 	void drawCircleFilled(int centerX, int centerY, int radius);
 
 	// Returns the height and width of a texture as an SDL_Point.
-	SDL_Point getSize(std::shared_ptr<Texture> text);
+	SDL_Point getSize(Texture &text);
 
 	// Load in a music file into memory. Paramter string is the filepath to the music file. Does not play immediately. Use toggloeMusic() to start and stop playback.
 	bool loadMusic(std::string musicFile);

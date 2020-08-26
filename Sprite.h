@@ -22,7 +22,7 @@ public:
 	/* Constructor. Derived classes should have a constructor that fills in all their sprite specific variables. See protected section in Sprite.h.
 	   After the Sprite derived is constructed a call to load() must be made before any other function calls will operate correctly.
 	*/
-	Sprite(std::shared_ptr<SDLMan> sdlMan);
+	Sprite(std::weak_ptr<SDLMan> sdlMan);
 	Sprite() = delete;
 
 	~Sprite();
@@ -54,7 +54,7 @@ public:
 	Line getVPRelative(const Line& inLine);
 
 	// Sets the smart pointer member variable that points to the Level currently being played.
-	void setLevel(std::shared_ptr<Level> level);
+	void setLevel(std::weak_ptr<Level> level);
 
 	// Access function to get the depth of this sprite as an int.
 	int getDepth();
@@ -142,10 +142,10 @@ protected:
 
 	// Smart pointer to the level we are on. Various Level functions allow sprites to move level viewport and
 	// check level collision rectangles, boundries, etc..
-	std::weak_ptr<Level> mLevel{ std::shared_ptr<Level>() };
+	std::weak_ptr<Level> mLevel;
 
 	// Smart pointer to the SDLMan object passed in during construction.
-	std::weak_ptr<SDLMan> mSDL{ std::shared_ptr<SDLMan>() };
+	std::weak_ptr<SDLMan> mSDL;
 
 	// Holds velocity/momentum for the four 2d directions. These modify speed/position in jumps, falls, etc.
 	// Gravity, friction, hits taken, etc can also modify these in return.

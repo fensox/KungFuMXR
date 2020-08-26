@@ -9,8 +9,8 @@
 /* Constructor. Derived classes should have a constructor that fills in all their sprite specific variables. See protected section in Sprite.h.
    After the Sprite derived is constructed a call to load() must be made before any other function calls will operate correctly.
 */
-Sprite::Sprite(std::shared_ptr<SDLMan> sdlMan) {
-    // store the SDLMan smart shared pointer in our weak_ptr. Using weak to prevent cyclic shared_ptr problems as multiple objects hold a reference to SDLMan.
+Sprite::Sprite(std::weak_ptr<SDLMan> sdlMan) {
+    // store the SDLMan in our weak_ptr
     mSDL = sdlMan;
 
     // set default action mode set for this sprite into our action mode member
@@ -97,7 +97,7 @@ bool Sprite::loadSpriteSheet() {
 }
 
 // Sets the smart pointer member variable that points to the Level currently being played.
-void Sprite::setLevel(std::shared_ptr<Level> level) {
+void Sprite::setLevel(std::weak_ptr<Level> level) {
     mLevel = level;
 }
 
