@@ -31,7 +31,7 @@
  * obtained with getFPS() or output to the console with outputFPS().
  *
  */
-class SDLMan {
+class SDLMan : std::enable_shared_from_this<SDLMan> {
 
 public:
 	const static Uint32 FPS_AVG			{ 250 };						// How many FPS calculations to store in an array for FPS averaging. Smooths FPS calc.

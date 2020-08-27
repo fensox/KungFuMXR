@@ -15,7 +15,7 @@ Texture::Texture(SDL_Texture* ptrText) {
 
 // Destructor destroys the texture properly.
 Texture::~Texture() {
-	if (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: Texture" << std::endl;
+	if constexpr (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: Texture" << std::endl;
 	SDL_DestroyTexture(mText);
 	mText = nullptr;
 };

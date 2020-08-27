@@ -19,7 +19,7 @@ Sprite::Sprite(std::weak_ptr<SDLMan> sdlMan) {
 
 // Destructor
 Sprite::~Sprite() {
-    if (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: Sprite" << std::endl;
+    if constexpr (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: Sprite" << std::endl;
     mTexture.reset();
     mLevel.reset();
     mSDL.reset();
@@ -360,7 +360,7 @@ void Sprite::render() {
                         SDL_FLIP_NONE);
 
     //***DEBUG*** Draw collision points as crosshairs if debug global is on.
-    if (FuGlobals::DEBUG_MODE) drawCollisionPoints();
+    if constexpr (FuGlobals::DEBUG_MODE) drawCollisionPoints();
 }
 
 // Check for collision downwards with level collision elements. Returns true if made contact with stable platform.

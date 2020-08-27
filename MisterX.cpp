@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstdlib>
 
-MisterX::MisterX(std::weak_ptr<SDLMan> sdlMan) : Sprite(sdlMan) {
+MisterX::MisterX(std::weak_ptr<SDLMan> sdlMan) : Sprite{ sdlMan } {
 	// set our Mr. X specific members
 	mMetaFilename = "data/MisterX.dat";
 	mSpriteSheet = "data/MasterSS.png";

@@ -114,13 +114,13 @@ private:
 	// Helper function to take a comma delimited value, convert to an SDL_Rect, and store in our ColRects member. Returns success or failure.
 	bool storeColRect(std::string value);
 
-	// Helper function to take a comma delimited group of values describing a sprite and load the sprite into SDLMan's sprite map for later access by our level.
+	// Takes a comma delimited string sprite values from the level's metadata file and loads the sprite into a the Level's sprite vector member.
 	bool storeSprite(std::string value);
 
 	// Helper function to take a comma delimited value from metadata file, convert to an SDL_Color, and store in our mTrans member. Returns success or failure.
 	bool storeTrans(std::string value);
 
-	// Takes the name of a sprite and returns a pointer to the corresponding Sprite object or nullptr.
+	// Takes the name of a sprite and returns a pointer to the corresponding Sprite object or nullptr on a load failure.
 	std::unique_ptr<Sprite> loadSprite(std::string name);
 
 	// Load in the level's metadata file. Returns success.

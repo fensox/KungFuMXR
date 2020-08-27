@@ -5,7 +5,7 @@
 
 // Destructor
 GameLoop::~GameLoop() {
-	if (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: GameLoop" << std::endl;
+	if constexpr (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: GameLoop" << std::endl;
 
 	mPlayer.reset();
 	mLevel.reset();

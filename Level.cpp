@@ -16,7 +16,7 @@ Level::Level(std::string filename, std::weak_ptr<SDLMan> sdlMan) {
 
 // Destructor
 Level::~Level() {
-    if (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: Level" << std::endl;
+    if constexpr (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: Level" << std::endl;
     mColRects.reset();
     mBGTexture.reset();
     mFollowSprite.reset();
@@ -49,7 +49,7 @@ bool Level::load() {
     if (!loadBGTexture()) success = false;
 
     //***DEBUG***
-    if (FuGlobals::DEBUG_MODE) std::cout << toString();
+    if constexpr (FuGlobals::DEBUG_MODE) std::cout << toString();
 
     return success;
 }
@@ -132,7 +132,7 @@ bool Level::loadDataFile() {
     return success;
 }
 
-// Helper function to take a comma delimited group of sprite values from the level's metadata file and load the sprite into a the sprite vector.
+// Takes a comma delimited string sprite values from the level's metadata file and loads the sprite into a the Level's sprite vector member.
 bool Level::storeSprite(std::string value) {
     bool success{ true };
 
@@ -145,7 +145,7 @@ bool Level::storeSprite(std::string value) {
 
     // format data to correct variable types
     std::string name{ vector[0] };
-    int spawnX{}, spawnY{}, playerX{};
+    decimal spawnX{}, spawnY{}, playerX{};
     try {
         spawnX = std::stoi(vector[1]);
         spawnY = std::stoi(vector[2]);
@@ -158,22 +158,34 @@ bool Level::storeSprite(std::string value) {
     char greatLess{ vector[4].c_str()[0] };
     
     // get a Sprite object based on the provided name
-    //std::unique_ptr<Sprite> sprite{ loadSprite(name) };
+    std::unique_ptr<Sprite> sprite{ loadSprite(name) };
+    if (sprite == nullptr) return false;
 
     // store data in a SpriteStruct
-    //SpriteStruct ss{ sprite, spawnX, spawnY, playerX, greatLess };
+    SpriteStruct ss{ std::move(sprite), spawnX, spawnY, playerX, greatLess };
+    mSprites->push_back( std::move(ss) );
 
-    if (FuGlobals::DEBUG_MODE) {
+    if constexpr (FuGlobals::DEBUG_MODE) {
         std::cout << "Level::storeSprite data: " << name << ", " << spawnX << ", " << spawnY << ", " << playerX << ", " << greatLess << std::endl;
     }
 
     return success;
 }
 
-// Takes the name of a sprite and returns a pointer to the corresponding Sprite object or nullptr.
+// Takes the name of a sprite and returns a pointer to the corresponding Sprite object or nullptr on a load failure.
 std::unique_ptr<Sprite> Level::loadSprite(std::string name) {
-    //std::unique_ptr<Sprite> sprite = std::make_unique<StickMan>(mSDL);
-    return nullptr;
+    using namespace FensoxUtils;
+    
+    std::unique_ptr<Sprite> sprite{ nullptr };
+    switch (hash(name.c_str())) {
+        case hash("STICKMAN"):
+            sprite = std::make_unique<StickMan>(mSDL);
+            break;
+        default:
+            std::cerr << "Error in Level::loadSprite. No such sprite exists named: " << name << std::endl;
+    }
+    
+    return std::move(sprite);
 }
 
 // Helper function to take a comma delimited value from metadata file, convert to an SDL_Color, and store in our mTrans member. Returns success or failure.
@@ -270,7 +282,7 @@ void Level::render() {
         SDL_FLIP_NONE);
 
     //***DEBUG*** if debug on draw all collision rectangles so visible on screen
-    if (FuGlobals::DEBUG_MODE) drawColRects();
+    if constexpr (FuGlobals::DEBUG_MODE) drawColRects();
 }
 
 // Centers the viewport on given x, y coordinates adjusting for level boundries and movement buffer specified in FuGlobals::VIEWPORT_BUFFER.
@@ -359,5 +371,6 @@ bool Level::isACollision(Line line) {
 
 // Processes all non-player sprites per frame
 void Level::moveSprites() {
-
+    //***DEBUG***
+    std::cout << mSprites->at(0).sprite->getName() << std::endl;
 }
