@@ -11,6 +11,9 @@ StickMan::StickMan(std::weak_ptr<SDLMan> mSDL) : Sprite{ mSDL } {
 	mName = "StickMan";
 	mScale = 3;
 
+	// set default action mode set for this sprite into our action mode member
+	setActionMode( mStartingActionMode, true );
+
 	// load sound effects
 	//mSDL.lock()->addSoundEffect("MRX_PUNCH", "data/mrx_punch.wav");
 	//mSDL.lock()->addSoundEffect("MRX_KICK", "data/mrx_kick.wav");

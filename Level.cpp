@@ -264,27 +264,6 @@ void Level::setFollowSprite(std::weak_ptr<Sprite> follow) {
     mFollowSprite = follow;
 }
 
-// Render the level to the screen
-void Level::render() {    
-    // center viewport on the Sprite we've been told to follow
-    centerViewport();
-
-    // put all viewport data into a rectangle for rendering
-    SDL_Rect vp{ mViewport.x, mViewport.y, FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT };
-
-    //Render the area of level our viewport is pointing at
-    SDL_RenderCopyEx(mSDL.lock()->getRenderer(),
-        mBGTexture->getTexture(),
-        &vp,
-        NULL,
-        0,
-        NULL,
-        SDL_FLIP_NONE);
-
-    //***DEBUG*** if debug on draw all collision rectangles so visible on screen
-    if constexpr (FuGlobals::DEBUG_MODE) drawColRects();
-}
-
 // Centers the viewport on given x, y coordinates adjusting for level boundries and movement buffer specified in FuGlobals::VIEWPORT_BUFFER.
 void Level::centerViewport() {
     // get center coordinates of viewport and sprite position
@@ -372,5 +351,36 @@ bool Level::isACollision(Line line) {
 // Processes all non-player sprites per frame
 void Level::moveSprites() {
     //***DEBUG***
-    std::cout << mSprites->at(0).sprite->getName() << std::endl;
+    // call sprite move() function to do their AI
+}
+
+// Render all non-player sprites to drawing buffer
+void Level::renderSprites() {
+    for (int i{}; i < mSprites->size(); ++i) {
+        mSprites->at(i).sprite->render();
+    }
+}
+
+// Render the level to the screen
+void Level::render() {
+    // center viewport on the Sprite we've been told to follow
+    centerViewport();
+
+    // put all viewport data into a rectangle for rendering
+    SDL_Rect vp{ mViewport.x, mViewport.y, FuGlobals::VIEWPORT_WIDTH, FuGlobals::VIEWPORT_HEIGHT };
+
+    // Draw the area of the level our viewport is pointing at
+    SDL_RenderCopyEx(mSDL.lock()->getRenderer(),
+        mBGTexture->getTexture(),
+        &vp,
+        NULL,
+        0,
+        NULL,
+        SDL_FLIP_NONE);
+
+    // Draw all non-player sprites
+    renderSprites();
+
+    //***DEBUG*** if debug on draw all collision rectangles so visible on screen
+    if constexpr (FuGlobals::DEBUG_MODE) drawColRects();
 }

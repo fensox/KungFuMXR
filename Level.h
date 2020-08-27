@@ -56,6 +56,9 @@ public:
 	// Processes all non-player sprites per frame
 	void moveSprites();
 
+	// Render all non-player sprites to drawing buffer
+	void renderSprites();
+
 	// Render the level
 	void render();
 
