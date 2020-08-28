@@ -4,8 +4,12 @@
 #include "Level.h"
 #include <memory>
 
-/* Runs the main game loop. */
+/* Runs the main game loop. This is the owner of various shared_ptr's including the current level,
+ * the player object, SDLMan object, etc. GameLoop doles out weak_ptr's of these objects for other
+ * game objects to use so thus acts as a communications hub for game objects to get information on each other.
+ */
 class GameLoop {
+
 public:
 	~GameLoop();
 

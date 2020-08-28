@@ -1,10 +1,11 @@
 #pragma once
+
 #include "Sprite.h"
 #include "SDLMan.h"
 #include <memory>
 
-class MisterX : public Sprite
-{
+class MisterX : public Sprite {
+
 public:
 	const decimal	WALK_VELOCITY_PER{ 100 };		// Walk velocity increase per real world second. Higher than WALK_MAX to overcome global friction constants.
 	const decimal	WALK_MAX{ 7 };					// Maximum velocity player can walk per real world second

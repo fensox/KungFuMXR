@@ -14,11 +14,10 @@
     Begun by Fensox June 2020.
 */
 namespace FensoxUtils {
-//private:
+
     // Initializes a static random number generator used in some of the functions.
 	static std::ranlux48 rneGen;
 
-//public:
 	// Static function to generate a random integer between the range specified in the parameters. Uses ranlux48 algorithm.
     static int getRandInt(int low, int high) {
 		std::uniform_int_distribution<int>  uniform_range(low, high);

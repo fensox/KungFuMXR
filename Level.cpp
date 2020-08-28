@@ -14,15 +14,6 @@ Level::Level(std::string filename, std::weak_ptr<SDLMan> sdlMan) {
     mColRects = std::make_unique<std::vector<SDL_Rect>>();
 }
 
-// Destructor
-Level::~Level() {
-    if constexpr (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: Level" << std::endl;
-    mColRects.reset();
-    mBGTexture.reset();
-    mFollowSprite.reset();
-    mSDL.reset();
-}
-
 // Struct to hold sprite info for one sprite for the current level. See level metadata file for member descriptions.
 struct Level::SpriteStruct {
     std::unique_ptr<Sprite> sprite{ nullptr };
@@ -31,6 +22,18 @@ struct Level::SpriteStruct {
     decimal playerX{ 0 };
     char greatLess{ 'G' };
 };
+
+// Destructor
+Level::~Level() {
+    if constexpr (FuGlobals::DEBUG_MODE) std::cerr << "Destructor: Level" << std::endl;
+    for (int i{}; i < mSprites->size(); ++i) mSprites->at(i).sprite.reset();
+    mColRects.reset();
+    mBGTexture.reset();
+    mFollowSprite.reset();
+    mSDL.reset();
+}
+
+
 
 // Loads in the level
 bool Level::load() {
@@ -161,18 +164,24 @@ bool Level::storeSprite(std::string value) {
     std::unique_ptr<Sprite> sprite{ loadSprite(name) };
     if (sprite == nullptr) return false;
 
+    // initialize the sprite
+    sprite->load();
+    sprite->setLevel( mLevel );
+    sprite->setX(spawnX);
+    sprite->setY(spawnY);
+
     // store data in a SpriteStruct
     SpriteStruct ss{ std::move(sprite), spawnX, spawnY, playerX, greatLess };
     mSprites->push_back( std::move(ss) );
 
     if constexpr (FuGlobals::DEBUG_MODE) {
-        std::cout << "Level::storeSprite data: " << name << ", " << spawnX << ", " << spawnY << ", " << playerX << ", " << greatLess << std::endl;
+        std::cout << "Level::Sprite data: " << name << ", " << spawnX << ", " << spawnY << ", " << playerX << ", " << greatLess << std::endl;
     }
 
     return success;
 }
 
-// Takes the name of a sprite and returns a pointer to the corresponding Sprite object or nullptr on a load failure.
+// Takes the name of a sprite and returns a pointer to the corresponding Sprite object or nullptr on failure.
 std::unique_ptr<Sprite> Level::loadSprite(std::string name) {
     using namespace FensoxUtils;
     
@@ -232,7 +241,7 @@ SDL_Point Level::getPlayStart() {
     return mPlayStart;
 }
 
-// Returns the viewport on the levels top-left coordinates and the viewport width/height.
+// Returns the viewport's top-left coordinates within the level.
 SDL_Point Level::getPosition() {
     return mViewport;
 }
@@ -240,15 +249,15 @@ SDL_Point Level::getPosition() {
 // Returns the level information represented as a string
 std::string Level::toString() {
     std::ostringstream str{};
-    str << "Level Name: " << mName << "\n";
-    str << "Metafile: " << mMetaFile << "\n";
-    str << "Background: " << mBGFile << "\n";
-    str << "Music: " << mMusicFile << "\n";
-    str << "Player Start: " << mPlayStart.x << ", " << mPlayStart.y << "\n";
-    str << "# Collision Rectangles: " << mColRects->size() << "\n";
-    str << "Collision Rectangles List: ";
+    str << "Level::Name: " << mName << "\n";
+    str << "Level::Metafile: " << mMetaFile << "\n";
+    str << "Level::Background: " << mBGFile << "\n";
+    str << "Level::Music: " << mMusicFile << "\n";
+    str << "Level::Player Start: " << mPlayStart.x << ", " << mPlayStart.y << "\n";
+    str << "Level::# Collision Rectangles: " << mColRects->size() << "\n";
+    str << "Level::Collision Rectangles List: ";
     for (int i{ 0 }; i < mColRects->size(); ++i) {
-        str << "\n" << mColRects->at(i).x << ", " << mColRects->at(i).y << ", " << mColRects->at(i).w << ", " << mColRects->at(i).h;
+        str << "\nLevel::" << mColRects->at(i).x << ", " << mColRects->at(i).y << ", " << mColRects->at(i).w << ", " << mColRects->at(i).h;
     }
     str << std::endl;
     return str.str();
@@ -262,6 +271,11 @@ SDL_Point Level::getSize() {
 // Set's the Sprite pointer that this level's viewport will stay centered on.
 void Level::setFollowSprite(std::weak_ptr<Sprite> follow) {
     mFollowSprite = follow;
+}
+
+// Set's the current Level being played.
+void Level::setLevel(std::weak_ptr<Level> level) {
+    mLevel = level;
 }
 
 // Centers the viewport on given x, y coordinates adjusting for level boundries and movement buffer specified in FuGlobals::VIEWPORT_BUFFER.
@@ -348,10 +362,11 @@ bool Level::isACollision(Line line) {
     return false;
 }
 
-// Processes all non-player sprites per frame
+// Processes all non-player sprites movement per frame
 void Level::moveSprites() {
-    //***DEBUG***
-    // call sprite move() function to do their AI
+    for (int i{}; i < mSprites->size(); ++i) {
+        mSprites->at(i).sprite->move();
+    }
 }
 
 // Render all non-player sprites to drawing buffer

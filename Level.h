@@ -17,17 +17,16 @@ class Sprite;
 	size if specifided in FuGlobals::VIEWPORT_WIDTH & VIEWPORT_HEIGHT. This viewport is scaled to fit display resolution.
 */
 class Level {
+
 public:
 	// Constructor takes path to metadata file for the level relative to game executable and an SDLMan pointer to hold for rendering.
 	// Note load() must be called after construction of this object before other functions will work.
+	//Level(std::string filename, std::weak_ptr<SDLMan> sdlMan, std::weak_ptr<GameLoop> gameLoop);
 	Level(std::string filename, std::weak_ptr<SDLMan> sdlMan);
 	Level() = delete;
 
 	// Destructor
 	~Level();
-
-	// Easier to work with typedef: A vector of SDL rectangle objects held by a smart pointer. Holds all hard collision objects for the level.
-	typedef std::unique_ptr<std::vector<SDL_Rect>> ColRects;
 
 	// Checks if the given point is contained in a collision rectangle for the level.
 	bool isACollision(const SDL_Point& pnt);
@@ -65,16 +64,28 @@ public:
 	// Set's the Sprite pointer that this level's viewport will stay centered on.
 	void setFollowSprite(std::weak_ptr<Sprite> follow);
 
+	// Set's the current Level being played.
+	void setLevel(std::weak_ptr<Level> level);
+
 	// Outputs the object information represented as a string
 	std::string toString();
 
 private:
+	// Easier to work with typedef: A vector of SDL rectangle objects held by a smart pointer. Holds all hard collision objects for the level.
+	typedef std::unique_ptr<std::vector<SDL_Rect>> ColRects;
+
+	// Holds all collision rectangles in a vector wrapped in a smart pointer.
+	ColRects mColRects{ nullptr };
+
 	// Struct to hold sprite info for one sprite for the current level. See level metadata file for member descriptions.
 	struct SpriteStruct;
 
+	// A pointer to the current Level object being played.
+	std::weak_ptr<Level> mLevel;
+
 	// Holds all non-player Sprite objects for the level in a vector of SpriteStruct.
 	std::unique_ptr<std::vector<SpriteStruct>> mSprites{ nullptr };
-	
+
 	// Holds the path and filename to the level's metadata file
 	std::string mMetaFile{};
 
@@ -96,20 +107,17 @@ private:
 	// Player starting coordinates as an SDL_Point in reference to the center of player
 	SDL_Point mPlayStart{};
 
-	// Holds the current viewport rectangle over the level. Get's centered on mFollowSprite member's position.
+	// Holds the current viewport's top-left coordinates within the level. Get's centered on mFollowSprite member's position during render.
 	SDL_Point mViewport{ 0, 0 };
 	
 	// Holds the last position viewport rectangle was in over the level. Assists with calculating movement buffer area in center of viewport.
 	SDL_Point mLastPos{ 0, 0 };
 
-	// Smart pointer to an SDLMan object used to draw the level.
-	std::weak_ptr<SDLMan> mSDL{ std::weak_ptr<SDLMan>() };
+	// Pointer to an SDLMan object used to draw the level.
+	std::weak_ptr<SDLMan> mSDL{};
 
-	// Smart pointer to a Sprite object this viewport will center on. Usually holds player sprite but could be any sprite i.e. a scripted scene, etc..
+	// Pointer to a Sprite object this viewport will center on. Usually holds player sprite but could be any sprite i.e. a scripted scene, etc..
 	std::weak_ptr<Sprite> mFollowSprite;
-
-	// Holds all collision rectangles in a vector wrapped in a smart pointer.
-	ColRects mColRects{nullptr};
 
 	// Initialize/reset all level variables. Used on game initialization and also to clear old data when loading a new level.
 	void resetLevel();
@@ -123,7 +131,7 @@ private:
 	// Helper function to take a comma delimited value from metadata file, convert to an SDL_Color, and store in our mTrans member. Returns success or failure.
 	bool storeTrans(std::string value);
 
-	// Takes the name of a sprite and returns a pointer to the corresponding Sprite object or nullptr on a load failure.
+	// Takes the name of a sprite and returns a pointer to the corresponding Sprite object or nullptr on failure.
 	std::unique_ptr<Sprite> loadSprite(std::string name);
 
 	// Load in the level's metadata file. Returns success.

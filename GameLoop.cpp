@@ -1,4 +1,5 @@
 #include "GameLoop.h"
+#include "MisterX.h"
 #include "SDLMan.h"
 #include "FuGlobals.h"
 #include <iostream>
@@ -17,7 +18,7 @@ bool GameLoop::initGameSystems() {
 	// Initialize our SDL wrapper class and a shared smart pointer to manage SDL things
 	mSDL = std::make_shared<SDLMan>("Kung Fu Mr. X's Revenge");
 
-	// Try to have SDLMan to initialize all systems
+	// Try to have SDLMan initialize all systems
 	return mSDL->init();;
 }
 
@@ -26,7 +27,7 @@ bool GameLoop::loadGameData() {
 	bool success{ true };
 
 	// Load the player
-	mPlayer = std::make_unique<MisterX>(mSDL);
+	mPlayer = std::make_shared<MisterX>(mSDL);
 	if (!mPlayer->load()) success = false;
 
 	//***DEBUG***
@@ -44,6 +45,7 @@ bool GameLoop::loadLevel(std::string lvlDataFile) {
 
 	// Load the requested level and give the player object it's start position and a smart pointer to our new level
 	mLevel = std::make_shared<Level>(lvlDataFile, mSDL);
+	mLevel->setLevel(mLevel);
 	if (!mLevel->load()) {
 		success = false;
 		std::cerr << "Failed in GameLoop::loadLevel. Level::load returned false." << std::endl;
@@ -114,7 +116,7 @@ void GameLoop::runGameLoop() {
 		mLevel->render();
 		mPlayer->render();
 
-		// update the screen
+		// flip drawing buffer to display
 		mSDL->refresh();
 	}
 }
