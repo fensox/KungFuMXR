@@ -123,6 +123,7 @@ void MisterX::handleInputKeyboard(const SDL_Keycode& key, bool press) {
             if (press) outputDebug();
             break;
         case SDLK_SPACE:
+            //***DEBUG*** For some reason holding down spacebar makes player jump repeatedly yet gamepad button doesn't even though they have same code.
             if (press && !mJumping && !mDucking) mJumping = true;
             break;
         case SDLK_DOWN:
@@ -197,7 +198,7 @@ void MisterX::moveLeft() {
         } else {
             setActionMode("WALK_LEFT", true);
         }
-    } else if (!leftBump()) {
+    } else {
         // if we have no vertical velocity make sure we are not in the jump animation
         if (mVeloc.down == 0 && mVeloc.up == 0 && getActionMode().compare("WALK_LEFT") != 0) {
             setActionMode("WALK_LEFT", true);
@@ -388,7 +389,7 @@ void MisterX::move() {
 
     kick();                 // Handle any requests to kick
 
-    Sprite::move();         // call Sprite move function to perform actual movement, handling collision detection, etc
+    Sprite::move();         // call Sprite move function to perform actual movement based on our velocities, handling collision detection, etc
 
     adjustForLevelBounds(); // Check player hasn't exceeded level bounds. Sprite class doesn't do this for us as other Sprites can leave level bounds.
 }

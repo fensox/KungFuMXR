@@ -61,11 +61,18 @@ public:
 	// Render the level
 	void render();
 
-	// Set's the Sprite pointer that this level's viewport will stay centered on.
+	// Set's the Sprite that this level's viewport will stay centered on. Parameter is a weak_ptr to the Sprite to follow. An overloaded version of this function exists to follow level Sprites.
 	void setFollowSprite(std::weak_ptr<Sprite> follow);
+
+	// Set's the Sprite that this level's viewport will stay centered on. Parameter set's which sprite to follow as an index value of the level's vector of Sprite objects.
+	// An overloaded version of this function exists to follow a sprite by pointer.
+	void setFollowSprite(int follow);
 
 	// Set's the current Level being played.
 	void setLevel(std::weak_ptr<Level> level);
+
+	// Set's the player object so the level can query player information.
+	void setPlayer(std::weak_ptr<Sprite> player);
 
 	// Outputs the object information represented as a string
 	std::string toString();
@@ -80,7 +87,7 @@ private:
 	// Struct to hold sprite info for one sprite for the current level. See level metadata file for member descriptions.
 	struct SpriteStruct;
 
-	// A pointer to the current Level object being played.
+	// A pointer to the current Level object being played (a pointer to ourself).
 	std::weak_ptr<Level> mLevel;
 
 	// Holds all non-player Sprite objects for the level in a vector of SpriteStruct.
@@ -118,6 +125,9 @@ private:
 
 	// Pointer to a Sprite object this viewport will center on. Usually holds player sprite but could be any sprite i.e. a scripted scene, etc..
 	std::weak_ptr<Sprite> mFollowSprite;
+
+	// Pointer to the player sprite. This get's passed to other level sprites for targeting AI.
+	std::weak_ptr<Sprite> mPlayer;
 
 	// Initialize/reset all level variables. Used on game initialization and also to clear old data when loading a new level.
 	void resetLevel();

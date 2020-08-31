@@ -216,6 +216,11 @@ const SDL_Rect& Sprite::getRect() {
     return mAnimMap[mActionMode].at(mCurrentFrame);
 }
 
+// Set's the target Sprite object. Used in AI routines as the target sprite to follow/attack, etc.
+void Sprite::setTargetSprite(std::weak_ptr<Sprite> targetSprite) {
+    mTargetSprite = targetSprite;
+}
+
 // Draws a mark on the screen for each collision point boundry. For debugging purposes.
 void Sprite::drawCollisionPoints() {
     // set draw color and mark size

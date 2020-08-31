@@ -7,11 +7,11 @@
 class MisterX : public Sprite {
 
 public:
-	const decimal	WALK_VELOCITY_PER{ 100 };		// Walk velocity increase per real world second. Higher than WALK_MAX to overcome global friction constants.
-	const decimal	WALK_MAX{ 7 };					// Maximum velocity player can walk per real world second
-	const Uint32	WALK_WAIT_TIME{ 250 };			// Milliseconds between change of animation 
-	const decimal	JUMP_VELOCITY{ 8.5 };			// Initial force a sprite generates to start a jump in pixels per second
-	const Uint32	ATTACK_TIME{ 100 };				// Milliseconds to hold an attack animation on screen before returning to former animation
+	static constexpr decimal	WALK_VELOCITY_PER	{ 100 };		// Walk velocity increase per real world second. Higher than WALK_MAX to overcome global friction constants.
+	static constexpr decimal	WALK_MAX			{ 5 };			// Maximum velocity can walk per real world second
+	static constexpr Uint32		WALK_WAIT_TIME		{ 250 };		// Milliseconds between change of animation 
+	static constexpr decimal	JUMP_VELOCITY		{ 8.5 };		// Initial force a sprite generates to start a jump in pixels per second
+	static constexpr Uint32		ATTACK_TIME			{ 100 };		// Milliseconds to hold an attack animation on screen before returning to former animation
 
 	// Use base Sprite constructor
 	MisterX(std::weak_ptr<SDLMan> sdlMan);

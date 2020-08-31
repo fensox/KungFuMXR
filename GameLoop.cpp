@@ -55,7 +55,10 @@ bool GameLoop::loadLevel(std::string lvlDataFile) {
 			mPlayer->setX(mLevel->getPlayStart().x);
 			mPlayer->setY(mLevel->getPlayStart().y);
 			mPlayer->setLevel(mLevel);
+			mLevel->setPlayer(mPlayer);
+			//***DEBUG***
 			mLevel->setFollowSprite(mPlayer);
+			//mLevel->setFollowSprite(0);
 		} else {
 			success = false;
 		}

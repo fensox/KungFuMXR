@@ -14,9 +14,10 @@ Level::Level(std::string filename, std::weak_ptr<SDLMan> sdlMan) {
     mColRects = std::make_unique<std::vector<SDL_Rect>>();
 }
 
-// Struct to hold sprite info for one sprite for the current level. See level metadata file for member descriptions.
+// Struct to hold sprite info for one sprite for the current level. See level metadata file for member descriptions. The Sprite member of the struct is
+// a shared_ptr so it has the option of being shared with the viewport and followed around for cut scenes, etc.
 struct Level::SpriteStruct {
-    std::unique_ptr<Sprite> sprite{ nullptr };
+    std::shared_ptr<Sprite> sprite{ nullptr };
     decimal spawnX{ 0 };
     decimal spawnY{ 0 };
     decimal playerX{ 0 };
@@ -161,7 +162,7 @@ bool Level::storeSprite(std::string value) {
     char greatLess{ vector[4].c_str()[0] };
     
     // get a Sprite object based on the provided name
-    std::unique_ptr<Sprite> sprite{ loadSprite(name) };
+    std::shared_ptr<Sprite> sprite{ loadSprite(name) };
     if (sprite == nullptr) return false;
 
     // initialize the sprite
@@ -236,6 +237,16 @@ bool Level::storeColRect(std::string value) {
     return true;
 }
 
+// Set's the player object so the level can query player information.
+void Level::setPlayer(std::weak_ptr<Sprite> player) {
+    mPlayer = player;
+
+    // loop through all level Sprite's and set their targeting sprite to the new player.
+    for (int i{}; i < mSprites->size(); ++i) {
+        mSprites->at(i).sprite->setTargetSprite(mPlayer);
+    }
+}
+
 // Return player start position
 SDL_Point Level::getPlayStart() {
     return mPlayStart;
@@ -271,6 +282,12 @@ SDL_Point Level::getSize() {
 // Set's the Sprite pointer that this level's viewport will stay centered on.
 void Level::setFollowSprite(std::weak_ptr<Sprite> follow) {
     mFollowSprite = follow;
+}
+
+// Set's the Sprite that this level's viewport will stay centered on. Parameter set's which sprite to follow as an index value of the level's vector of Sprite objects.
+// An overloaded version of this function exists to follow a sprite by pointer.
+void Level::setFollowSprite(int follow) {
+    mFollowSprite = mSprites->at(follow).sprite;
 }
 
 // Set's the current Level being played.

@@ -31,17 +31,17 @@
  * obtained with getFPS() or output to the console with outputFPS().
  *
  */
-class SDLMan : std::enable_shared_from_this<SDLMan> {
+class SDLMan {
 
 public:
-	const static Uint32 FPS_AVG			{ 250 };						// How many FPS calculations to store in an array for FPS averaging. Smooths FPS calc.
-	const static Uint32 FPS_INIT		{ 120 };						// Initial value to fill FPS averaging array with. Smooths initial few seconds of calculations depending on FPS_AVG size.
-	const static Uint32 MIXING_CHANNELS	{ 16 };							// How many audio mixing channels to allocate. Increase if getting "SDL_Mixer Error: No free channels available" errors.
-	const static Uint32 WINDOW_DEF_W	{ FuGlobals::VIEWPORT_WIDTH };	// Default window width
-	const static Uint32 WINDOW_DEF_H	{ FuGlobals::VIEWPORT_HEIGHT };	// Default window height
-	const static Uint32 VIEWPORT_W		{ FuGlobals::VIEWPORT_WIDTH };	// The width of the internal renderer. Scaked to fit window but all rendering happens at this width.
-	const static Uint32 VIEWPORT_H		{ FuGlobals::VIEWPORT_HEIGHT };	// The width of the internal renderer. Scaked to fit window but all rendering happens at this width.
-	const static bool	DEBUG_MODE		{ FuGlobals::DEBUG_MODE };		// Turns debugging mode on.
+	static constexpr Uint32 FPS_AVG			{ 250 };						// How many FPS calculations to store in an array for FPS averaging. Smooths FPS calc.
+	static constexpr Uint32 FPS_INIT		{ 125 };						// Initial value to fill FPS averaging array with. Smooths initial few seconds of calculations depending on FPS_AVG size.
+	static constexpr Uint32 MIXING_CHANNELS	{ 16 };							// How many audio mixing channels to allocate. Increase if getting "SDL_Mixer Error: No free channels available" errors.
+	static constexpr Uint32 WINDOW_DEF_W	{ FuGlobals::VIEWPORT_WIDTH };	// Default window width
+	static constexpr Uint32 WINDOW_DEF_H	{ FuGlobals::VIEWPORT_HEIGHT };	// Default window height
+	static constexpr Uint32 VIEWPORT_W		{ FuGlobals::VIEWPORT_WIDTH };	// The width of the internal renderer. Scaked to fit window but all rendering happens at this width.
+	static constexpr Uint32 VIEWPORT_H		{ FuGlobals::VIEWPORT_HEIGHT };	// The width of the internal renderer. Scaked to fit window but all rendering happens at this width.
+	static constexpr bool	DEBUG_MODE		{ FuGlobals::DEBUG_MODE };		// Turns debugging mode on.
 
 	// Constructor. Takes window caption string, bool to start with a fullscreen window, and width and height of starting window.
 	// If not full screen and no width and height supplied then defaults to global VIEWPORT_W & VIEWPORT_H size.
