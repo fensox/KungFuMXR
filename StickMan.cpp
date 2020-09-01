@@ -3,13 +3,14 @@
 
 // constructor
 StickMan::StickMan(std::weak_ptr<SDLMan> mSDL) : Sprite{ mSDL } {
-	// set our Stick Man specific members
+	// set our Stick Man specific data
 	mMetaFilename = "data/StickMan.dat";
 	mSpriteSheet = "data/MasterSS.png";
 	mStartingActionMode = "WALK_RIGHT";
 	mTrans = SDL_Color{ 255, 0, 255, 0 };
 	mName = "StickMan";
 	mScale = 3;
+    setHealth(100);
 
 	// set default action mode set for this sprite into our action mode member
 	setActionMode( mStartingActionMode, true );
@@ -30,19 +31,6 @@ bool StickMan::checkWalkTime() {
     } else {
         return false;
     }
-}
-
-// Extend Sprite's move() function for some AI then call Sprite's function for movement based on velocity, gravity, and collision detection, etc.
-void StickMan::move() {
-    // Walk towards the player
-    if (mTargetSprite.lock()->getX() > getX()) {
-        moveRight();
-    } else if (mTargetSprite.lock()->getX() < getX()) {
-        moveLeft();
-    }
-	
-	// Extend Sprite's move() function for some AI then call Sprite's function for gravity and collision detection, etc.
-	Sprite::move();
 }
 
 // Move to the right
@@ -75,4 +63,17 @@ void StickMan::moveLeft() {
         mVeloc.left += WALK_VELOCITY_PER / mSDL.lock()->getFPS();
         if (mVeloc.left > WALK_MAX) mVeloc.left = WALK_MAX;
     }
+}
+
+// Extend Sprite's move() function for some AI then call Sprite's function for movement based on velocity, gravity, and collision detection, etc.
+void StickMan::move() {
+    // Walk towards the player
+    if (mTargetSprite.lock()->getX() > getX()) {
+        moveRight();
+    } else if (mTargetSprite.lock()->getX() < getX()) {
+        moveLeft();
+    }
+
+    // Extend Sprite's move() function for some AI then call Sprite's function for gravity and collision detection, etc.
+    Sprite::move();
 }

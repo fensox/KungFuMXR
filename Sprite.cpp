@@ -116,6 +116,16 @@ std::string Sprite::toString() {
     return output.str();
 }
 
+// Set this sprite's health points.
+void Sprite::setHealth(int health) {
+    mHealth = health;
+}
+
+// Get this sprite's health points.
+int Sprite::getHealth() {
+    return mHealth;
+}
+
 // Set the action mode to enter into and also if it is a looping animation or not.
 void Sprite::setActionMode(std::string actionMode, bool looping) {
     mLastActionMode = mActionMode;

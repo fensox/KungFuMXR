@@ -147,7 +147,7 @@ protected:
 	// check level collision rectangles, boundries, etc..
 	std::weak_ptr<Level> mLevel;
 
-	// The Sprite object the AI will use as a target. Used for enemy sprite's move function AI. Unused for player sprite.
+	// The Sprite object the AI will use as a target. Used for program controlled sprite's move function AI.
 	std::weak_ptr<Sprite> mTargetSprite;
 
 	// Smart pointer to the SDLMan object passed in during construction.
@@ -164,6 +164,12 @@ protected:
 
 	// Instance of Velocity struct for this sprite
 	Velocity mVeloc{};
+
+	// Set this sprite's health points.
+	void setHealth(int health);
+
+	// Get this sprite's health points.
+	int getHealth();
 
 	// Check for collision downwards with level collision elements. Returns true if made contact with stable platform.
 	bool downBump();
@@ -196,6 +202,9 @@ private:
 
 	// Smart pointer to the Texture holding our sprite's sprite sheet.
 	std::unique_ptr<Texture> mTexture{ nullptr };
+
+	// Health points of the Sprite. Zero means dead.
+	int mHealth{ 100 };
 
 	// Holds the depth of this Sprite. Used for rendering of things in front/behind each other.
 	int mDepth{};

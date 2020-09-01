@@ -158,4 +158,7 @@ private:
 
 	// Outlines all the collision rectangles in the level so visible on screen. Debugging and level design utility function.
 	void drawColRects();
+
+	// Accepts a SpriteStruct and calculates if the player has reached the point where sprite should spawn. Returns the result.
+	bool isSpawnTime(SpriteStruct ss);
 };

@@ -20,7 +20,8 @@ struct Level::SpriteStruct {
     std::shared_ptr<Sprite> sprite{ nullptr };
     decimal spawnX{ 0 };
     decimal spawnY{ 0 };
-    decimal playerX{ 0 };
+    decimal triggerX{ 0 };
+    bool visible{ false };
     char greatLess{ 'G' };
 };
 
@@ -172,7 +173,7 @@ bool Level::storeSprite(std::string value) {
     sprite->setY(spawnY);
 
     // store data in a SpriteStruct
-    SpriteStruct ss{ std::move(sprite), spawnX, spawnY, playerX, greatLess };
+    SpriteStruct ss{ std::move(sprite), spawnX, spawnY, playerX, false, greatLess };
     mSprites->push_back( std::move(ss) );
 
     if constexpr (FuGlobals::DEBUG_MODE) {
@@ -381,16 +382,41 @@ bool Level::isACollision(Line line) {
 
 // Processes all non-player sprites movement per frame
 void Level::moveSprites() {
-    for (int i{}; i < mSprites->size(); ++i) {
-        mSprites->at(i).sprite->move();
+    for (std::size_t i{}; i < mSprites->size(); ++i) {
+        SpriteStruct& ss = mSprites->at(i);
+
+        if (isSpawnTime(ss)) ss.visible = true;
+
+        if (ss.visible) ss.sprite->move();
     }
 }
 
 // Render all non-player sprites to drawing buffer
 void Level::renderSprites() {
-    for (int i{}; i < mSprites->size(); ++i) {
-        mSprites->at(i).sprite->render();
+    for (std::size_t i{}; i < mSprites->size(); ++i) {
+        SpriteStruct ss{ mSprites->at(i) };
+        
+        if (ss.visible) ss.sprite->render();
     }
+}
+
+// Accepts a SpriteStruct and calculates if the player has reached the point where sprite should spawn. Returns the result.
+bool Level::isSpawnTime(SpriteStruct ss) {
+    decimal triggerX{ ss.triggerX };
+    decimal playerX{ mPlayer.lock()->getX() };
+    char gL{ ss.greatLess };
+
+    switch (gL) {
+        case 'G':
+            if (playerX > triggerX) return true;
+            break;
+
+        case 'L':
+            if (playerX < triggerX) return true;
+            break;
+    }
+
+    return false;
 }
 
 // Render the level to the screen
