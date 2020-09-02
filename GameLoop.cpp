@@ -89,7 +89,7 @@ void GameLoop::runGameLoop() {
 		lag += elapsed;
 
 		//***DEBUG***
-		if (FuGlobals::MUSIC) mSDL->toggleMusic();
+		if constexpr (FuGlobals::MUSIC) mSDL->toggleMusic();
 
 		// progress game logic without rendering to backbuffer until FPS target has been reached (for slow systems or network connections)
 		while (lag >= FuGlobals::FPS_TARGET) {
@@ -106,13 +106,13 @@ void GameLoop::runGameLoop() {
 			lag -= FuGlobals::FPS_TARGET;
 
 			//***DEBUG***
-			if (FuGlobals::SHOW_FPS) mSDL->outputFPS();
+			if constexpr (FuGlobals::SHOW_FPS) mSDL->outputFPS();
 
 			// have our SDL wrapper update it's FPS averaging calculations once per frame so our physics works correctly
 			mSDL->calculateFPS();
 
 			// if FPS target is set to 0 break out as we are going for as many frames as we can
-			if (FuGlobals::FPS_TARGET == 0) break;
+			if constexpr (FuGlobals::FPS_TARGET == 0) break;
 		}
 
 		// render to back buffer

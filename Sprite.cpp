@@ -379,37 +379,47 @@ void Sprite::render() {
 }
 
 // Check for collision downwards with level collision elements. Returns true if made contact with stable platform.
-bool Sprite::downBump() {
+bool Sprite::downBumpLevel() {
     // if we are rising up we don't need to do a downward collision check
     if (mVeloc.up > mVeloc.down) return false;
 
-    return mLevel.lock()->isACollision( getCollRectBtm() );
+    return mLevel.lock()->isACollisionLine( getCollRectBtm() );
 }
 
 // Check for right side collisions with level elements. Returns true if made contact with a collidable level object.
-bool Sprite::rightBump() {
-    return mLevel.lock()->isACollision( getCollRectRight() );
+bool Sprite::rightBumpLevel() {
+    return mLevel.lock()->isACollisionLine( getCollRectRight() );
 }
 
 // Checks if a right side collision is imminent 1 pixel beyond Sprite's collision boundry.
-bool Sprite::rightBumpImminent() {
+bool Sprite::rightBumpLevelImminent() {
     Line rightLine{ getCollRectRight() };
     ++rightLine.x1;
     ++rightLine.x2;
-    return mLevel.lock()->isACollision(rightLine);
+    return mLevel.lock()->isACollisionLine(rightLine);
 }
 
 // Checks for left side collisions with level elements. Returns true if made contact with a collidable level object.
-bool Sprite::leftBump() {
-    return mLevel.lock()->isACollision( getCollRectLeft() );
+bool Sprite::leftBumpLevel() {
+    return mLevel.lock()->isACollisionLine( getCollRectLeft() );
 }
 
 // Checks if a left side collision is imminent 1 pixel beyond Sprite's collision boundry.
-bool Sprite::leftBumpImminent() {
+bool Sprite::leftBumpLevelImminent() {
     Line leftLine{ getCollRectLeft() };
     --leftLine.x1;
     --leftLine.x2;
-    return mLevel.lock()->isACollision( leftLine );
+    return mLevel.lock()->isACollisionLine( leftLine );
+}
+
+// Returns true if a left side collision with another sprite.
+bool Sprite::leftBumpSprites() {
+    return mLevel.lock()->isACollisionSprite(getCollRectLeft(), *this);
+}
+
+// Returns true if a right side collision with another sprite.
+bool Sprite::rightBumpSprites() {
+    return mLevel.lock()->isACollisionSprite(getCollRectRight(), *this);
 }
 
 // Applies gravity to the sprite if parameter set to true otherwise checks if sprite just finished a fall and cleans up velocity variables.
@@ -446,10 +456,10 @@ void Sprite::applyFriction(bool standing) {
         if (mVeloc.right < 0) mVeloc.right = 0;
 }
 
-// Moves Sprite based on velocities adjusting for gravity, friction, and collisions. May be overridden or extended for custom movement routines.
+// Moves Sprite based on velocities adjusting for gravity, friction, and collisions. Override or extend for custom movement routines.
 void Sprite::move() {
     // check for a downward collision to see if we are on stable ground. This will affect gravity and friction application.
-    bool standing{ downBump() };
+    bool standing{ downBumpLevel() };
 
     // apply gravity
     applyGravity(standing);
@@ -461,42 +471,65 @@ void Sprite::move() {
     setX( getX() + mVeloc.right - mVeloc.left );
     setY( getY() + mVeloc.down - mVeloc.up );
 
-    // Final check for level collisions to remove the sprite from any floors or walls
-    correctFrame();
+    // check for collisions with level objects to remove the sprite from any floors or walls
+    correctFrameLevel();
+
+    // check for collisions with level sprites to prohibit them intersecting
+    correctFrameSprites();
 }
 
-//***DEBUG*** 
-// This correctFrame function can be optimized using lastXPos and lastYPos to determine which way we moved since last frame and allow us
-// to avoid doing collision detection in the other direction. May not matter that much but an option once game is complete.
-
-// After all movement for frame is calculated and implemented, adjusts Sprite position based on any collisions.
-void Sprite::correctFrame() {
-    bool colliding{};
-
+// After all movement for frame is made, adjust for any collisions with level geometry.
+void Sprite::correctFrameLevel() {
     // Correct for downward collision if we moved down this frame
-    colliding = downBump();
+    bool colliding{ downBumpLevel() };
     while (colliding) {
         // move up one pixel and see if we are still standing
         mYPos -= 1;
-        colliding = downBump();
+        colliding = downBumpLevel();
 
         // if not standing now then we are one pixel above a surface because of our testing, put it back to surface level and the loop will end
         if (!colliding) mYPos += 1;
     }
 
-    // correct for right side intersection
-    colliding = rightBump();
-    while (colliding) {
-        // move left one pixel and see if we are still colliding
-        mXPos -= 1;
-        colliding = rightBump();
+    // check for left or right collision depending on which way we moved this frame
+    if (getLastX() > getX()) {
+        // correct for left side intersection
+        colliding = leftBumpLevel();
+        while (colliding) {
+            // move left one pixel and see if we are still colliding
+            mXPos += 1;
+            colliding = leftBumpLevel();
+        }
+    } else if (getLastX() < getX()) {
+        // correct for right side intersection
+        colliding = rightBumpLevel();
+        while (colliding) {
+            // move left one pixel and see if we are still colliding
+            mXPos -= 1;
+            colliding = rightBumpLevel();
+        }
     }
+}
 
-    // correct for left side intersection
-    colliding = leftBump();
-    while (colliding) {
-        // move left one pixel and see if we are still colliding
-        mXPos += 1;
-        colliding = leftBump();
+// After movement for frame made, adjust for any collisions with other sprites
+void Sprite::correctFrameSprites() {
+    // check for left or right collision depending on which way we moved this frame
+    bool colliding{};
+    if (getLastX() > getX()) {
+        // correct for left side intersection
+        colliding = leftBumpSprites();
+        while (colliding) {
+            // move left one pixel and see if we are still colliding
+            mXPos += 1;
+            colliding = leftBumpSprites();
+        }
+    } else if (getLastX() < getX()) {
+        // correct for left side intersection
+        colliding = rightBumpSprites();
+        while (colliding) {
+            // move left one pixel and see if we are still colliding
+            mXPos -= 1;
+            colliding = rightBumpSprites();
+        }
     }
 }

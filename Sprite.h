@@ -171,20 +171,29 @@ protected:
 	// Get this sprite's health points.
 	int getHealth();
 
+	//***DEBUG*** test of universal collision detection function
+	bool isCollision(Level::collisionType, Level::collisionDirection, const Sprite& sprite);
+
 	// Check for collision downwards with level collision elements. Returns true if made contact with stable platform.
-	bool downBump();
+	bool downBumpLevel();
 
 	// Check for right side collisions with level elements. Returns true if made contact with a collidable level object.
-	bool rightBump();
+	bool rightBumpLevel();
 
 	// Checks if a right side collision is imminent 1 pixel beyond Sprite's collision boundry.
-	bool rightBumpImminent();
+	bool rightBumpLevelImminent();
 
 	// Checks for left side collisions with level elements. Returns true if made contact with a collidable level object.
-	bool leftBump();
+	bool leftBumpLevel();
 
 	// Checks if a left side collision is imminent 1 pixel beyond Sprite's collision boundry.
-	bool leftBumpImminent();
+	bool leftBumpLevelImminent();
+
+	// Returns true if a left side collision with another sprite.
+	bool leftBumpSprites();
+
+	// Returns true if a right side collision with another sprite.
+	bool rightBumpSprites();
 
 	// Applies gravity to the sprite depending on boolean parameter. Also checks if just finished a fall and cleans up some variables if so.
 	void applyGravity(bool standing);
@@ -236,7 +245,10 @@ private:
 	// Draw collision points as crosshairs. Useful for debugging purposes.
 	void drawCollisionPoints();
 	
-	// After all movement for frame is calculated and implemented, adjusts Sprite position based on any collisions.
-	void correctFrame();
+	// After all movement for frame is made, adjust for any collisions with level geometry.
+	void correctFrameLevel();
+
+	// After movement for frame made, adjust for any collisions with other sprites
+	void correctFrameSprites();
 
 };

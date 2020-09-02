@@ -28,17 +28,26 @@ public:
 	// Destructor
 	~Level();
 
+	//***DEBUG*** Testing
+	enum collisionType { LEVEL, SPRITE };
+	
+	enum collisionDirection { UP, DOWN, LEFT, RIGHT };
+
 	// Checks if the given point is contained in a collision rectangle for the level.
-	bool isACollision(const SDL_Point& pnt);
+	bool isACollisionPoint(const SDL_Point& pnt);
 
 	// Checks if the given point is contained in a collision rect for the level. Parameter of PointF is cast to integer type SDL_Point.
-	bool isACollision(PointF pnt);
+	bool isACollisionPoint(PointF pnt);
 
 	// Checks if the given rectangle is intersecting a collision rectangle for the level.
-	bool isACollision(const SDL_Rect& rect);
+	bool isACollisionRect(const SDL_Rect& rect);
 
 	// Checks if the given line is intersecting a collision rectangle for the level.
-	bool isACollision(Line line);
+	bool isACollisionLine(Line line);
+
+	// Checks if the given line is colliding with another sprite.
+	// Sprite parameter is to be sure sprite's are not checking for collisions with themselves.
+	bool isACollisionSprite(Line line, const Sprite& sprite);
 
 	// Load in the data filefor the level. Must be called before other functions for proper operation. Returns success or failure.
 	bool load();

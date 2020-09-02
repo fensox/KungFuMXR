@@ -24,7 +24,7 @@ void MisterX::outputDebug() {
     std::cout << "Velocity l,r,u,d:\t" << mVeloc.left << ", " << mVeloc.right << ", " << mVeloc.up << ", " << mVeloc.down << "\n";
     std::cout << "mActionMode:\t\t" << getActionMode() << "\n";
     std::cout << "mLastActionMode:\t" << getLastActionMode() << "\n";
-    std::cout << "Downbumping:\t\t" << std::boolalpha << downBump() << "\n";
+    std::cout << "Downbumping:\t\t" << std::boolalpha << downBumpLevel() << "\n";
     std::cout << "mDucking:\t\t" << std::boolalpha << mDucking << "\n";
     std::cout << "mAttacking:\t\t" << std::boolalpha << mAttacking << "\n";
     std::cout << "mJumping:\t\t" << std::boolalpha << mJumping << "\n";
@@ -166,7 +166,7 @@ void MisterX::moveRight() {
     // if the previous action was different set new mActionMode, set animation frame to 0, and don't move player position
     if ( (getActionMode() != "WALK_RIGHT") && (getActionMode() != "JUMP_RIGHT") ) {
         mFacingRight = true;
-        if (!downBump()) {
+        if (!downBumpLevel()) {
             setActionMode("JUMP_RIGHT", false);
         } else {
             setActionMode("WALK_RIGHT", true);
@@ -178,7 +178,7 @@ void MisterX::moveRight() {
         }
 
         // step animation frame if enough time has passed and we're not pressed up against an object
-        if ( checkWalkTime() && !rightBumpImminent() ) advanceFrame();
+        if ( checkWalkTime() && !rightBumpLevelImminent() ) advanceFrame();
 
         // increase velocity based on FPS calc to reach our per second goal
         mVeloc.right += WALK_VELOCITY_PER / mSDL.lock()->getFPS();
@@ -193,7 +193,7 @@ void MisterX::moveLeft() {
     // if the previous action was different set new mActionMode, mCurrentFrame 0, and don't move player position
     if ( (getActionMode() != "WALK_LEFT") && (getActionMode() != "JUMP_LEFT") ) {
         mFacingRight = false;
-        if (!downBump()) {
+        if (!downBumpLevel()) {
             setActionMode("JUMP_LEFT", false);
         } else {
             setActionMode("WALK_LEFT", true);
@@ -205,7 +205,7 @@ void MisterX::moveLeft() {
         }
 
         // step animation frame if enough time has passed and we're not pressed up against an object
-        if ( checkWalkTime() && !leftBumpImminent() ) advanceFrame();
+        if ( checkWalkTime() && !leftBumpLevelImminent() ) advanceFrame();
 
         // increase velocity based on FPS calc to reach our per second goal
         mVeloc.left += WALK_VELOCITY_PER / mSDL.lock()->getFPS();
@@ -244,7 +244,7 @@ void MisterX::jump() {
     if (mDucking || !mJumping) return;
 
     // only launch into a jump if we have something to launch off of
-    if (downBump()) {
+    if (downBumpLevel()) {
         // check if we are already in the jump animation. Which means we are just landing not taking off
         if ( getActionMode().compare("JUMP_RIGHT") == 0 ) {
             setActionMode("WALK_RIGHT", true);

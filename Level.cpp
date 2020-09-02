@@ -343,9 +343,10 @@ void Level::drawColRects() {
 }
 
 // Checks if the given point is contained in a collision rect for the level.
-bool Level::isACollision(const SDL_Point& pnt) {
+// Sprite parameter is to be sure sprite's are not checking for collisions with themselves.
+bool Level::isACollisionPoint(const SDL_Point& pnt) {
     // loop through all our level collision rectangles checking for a collision
-    for (int i{ 0 }; i < mColRects->size(); ++i) {
+    for (int i{}; i < mColRects->size(); ++i) {
         const SDL_Rect& r = mColRects->at(i);
         if (SDL_PointInRect(&pnt, &r)) return true;
     }
@@ -354,14 +355,16 @@ bool Level::isACollision(const SDL_Point& pnt) {
 }
 
 // Checks if the given point is contained in a collision rect for the level. Parameter of PointF is cast to integer type SDL_Point.
-bool Level::isACollision(PointF pnt) {
-    return isACollision(pnt.getSDL_Point());
+// Sprite parameter is to be sure sprite's are not checking for collisions with themselves.
+bool Level::isACollisionPoint(PointF pnt) {
+    return isACollisionPoint(pnt.getSDL_Point());
 }
 
 // Checks if the given rectangle is intersecting a collision rectangle for the level.
-bool Level::isACollision(const SDL_Rect& rect) {
+// Sprite parameter is to be sure sprite's are not checking for collisions with themselves.
+bool Level::isACollisionRect(const SDL_Rect& rect) {
     // loop through all our level collision rectangles checking for a collision
-    for (int i{ 0 }; i < mColRects->size(); ++i) {
+    for (int i{}; i < mColRects->size(); ++i) {
         const SDL_Rect& r = mColRects->at(i);
         if (SDL_HasIntersection(&rect, &r)) return true;
     }
@@ -370,7 +373,8 @@ bool Level::isACollision(const SDL_Rect& rect) {
 }
 
 // Checks if the given line is intersecting a collision rectangle for the level.
-bool Level::isACollision(Line line) {
+// Sprite parameter is to be sure sprite's are not checking for collisions with themselves.
+bool Level::isACollisionLine(Line line) {
     // loop through all our level collision rectangles checking for a collision
     for (int i{ 0 }; i < mColRects->size(); ++i) {
         const SDL_Rect& r = mColRects->at(i);
@@ -380,7 +384,22 @@ bool Level::isACollision(Line line) {
     return false;
 }
 
-// Processes all non-player sprites movement per frame
+// Checks if the given line is colliding with another sprite.
+// Sprite parameter is to be sure sprite's are not checking for collisions with themselves.
+bool Level::isACollisionSprite(Line line, const Sprite& sprite) {
+    // loop through all our level sprite's checking for a collision
+    for (int i{}; i < mSprites->size(); ++i) {
+        SpriteStruct& ss = mSprites->at(i);
+        if (ss.sprite.get() == &sprite) continue;
+
+        SDL_Rect r = ss.sprite->getCollisionRect();
+        if (SDL_IntersectRectAndLine(&r, &line.x1, &line.y1, &line.x2, &line.y2)) return true;
+    }
+
+    return false;
+}
+
+// Processes all non-player sprite movement per frame
 void Level::moveSprites() {
     for (std::size_t i{}; i < mSprites->size(); ++i) {
         SpriteStruct& ss = mSprites->at(i);

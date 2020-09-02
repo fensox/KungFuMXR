@@ -41,7 +41,7 @@ void StickMan::moveRight() {
         setActionMode("WALK_RIGHT", true);
     } else {
         // step animation frame if enough time has passed and we're not pressed up against an object
-        if (checkWalkTime() && !rightBumpImminent()) advanceFrame();
+        if (checkWalkTime() && !rightBumpLevelImminent()) advanceFrame();
 
         // increase velocity based on FPS calc to reach our per second goal
         mVeloc.right += WALK_VELOCITY_PER / mSDL.lock()->getFPS();
@@ -57,7 +57,7 @@ void StickMan::moveLeft() {
         setActionMode("WALK_LEFT", true);
     } else {
         // step animation frame if enough time has passed and we're not pressed up against an object
-        if (checkWalkTime() && !leftBumpImminent()) advanceFrame();
+        if (checkWalkTime() && !leftBumpLevelImminent()) advanceFrame();
 
         // increase velocity based on FPS calc to reach our per second goal
         mVeloc.left += WALK_VELOCITY_PER / mSDL.lock()->getFPS();
@@ -74,6 +74,6 @@ void StickMan::move() {
         moveLeft();
     }
 
-    // Extend Sprite's move() function for some AI then call Sprite's function for gravity and collision detection, etc.
+    // call parent function for gravity, friction, & collision detection
     Sprite::move();
 }
