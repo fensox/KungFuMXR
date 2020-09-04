@@ -244,6 +244,10 @@ void Sprite::drawCollisionPoints() {
     Line line{ getVPRelative(getCollRectBtm()) };
     mSDL.lock()->drawLine(line);
 
+    // draw top
+    line = getVPRelative(getCollRectTop());
+    mSDL.lock()->drawLine(line);
+
     // draw left compensating for viewport position
     line = getVPRelative(getCollRectLeft());
     mSDL.lock()->drawLine(line);
@@ -289,6 +293,23 @@ Line Sprite::getCollRectBtm() {
     int halfWidth = (line.x2 - line.x1) / 2;
     line.x1 += halfWidth - 2;
     line.x2 -= halfWidth + 2;
+
+    return line;
+}
+
+// Returns a line representing the bottom of the current collision rectangle. Used for downBump collision detection, drawing debugging rectangles, etc.
+Line Sprite::getCollRectTop() {
+    SDL_Rect rect{ getCollisionRect() };
+    Line line{
+        rect.x - rect.w / 2,
+        rect.y - rect.h / 2,
+        rect.x + rect.w / 2,
+        rect.y - rect.h / 2
+    };
+
+    // Shrink line a pixel in width to prevent right/left collisions from seeming like ceiling collisions
+    ++line.x1;
+    --line.x2;
 
     return line;
 }
@@ -374,52 +395,41 @@ void Sprite::render() {
                         NULL,
                         SDL_FLIP_NONE);
 
-    //***DEBUG*** Draw collision points as crosshairs if debug global is on.
+    //Draw collision points on screen if debug global is on.
     if constexpr (FuGlobals::DEBUG_MODE) drawCollisionPoints();
 }
 
-// Check for collision downwards with level collision elements. Returns true if made contact with stable platform.
-bool Sprite::downBumpLevel() {
-    // if we are rising up we don't need to do a downward collision check
-    if (mVeloc.up > mVeloc.down) return false;
+// Check's for collisions
+bool Sprite::isCollision(FuGlobals::ColType inType, FuGlobals::ColDirect inDirect, int inPixels) {
+    using namespace FuGlobals;
 
-    return mLevel.lock()->isACollisionLine( getCollRectBtm() );
-}
+    // get proper line to use for collision check and adjust line size per our inPixels parameter
+    Line line{};
+    switch (inDirect) {
+        case ColDirect::CD_LEFT:
+            line = getCollRectLeft();
+            line.x1 -= inPixels;
+            line.x2 -= inPixels;
+            break;
+        case ColDirect::CD_RIGHT:
+            line = getCollRectRight();
+            line.x1 += inPixels;
+            line.x2 += inPixels;
+            break;
+        case ColDirect::CD_DOWN:
+            line = getCollRectBtm();
+            line.y1 += inPixels;
+            line.y2 += inPixels;
+            break;
+        case ColDirect::CD_UP:
+            line = getCollRectTop();
+            line.y1 -= inPixels;
+            line.y2 -= inPixels;
+            break;
+    }
 
-// Check for right side collisions with level elements. Returns true if made contact with a collidable level object.
-bool Sprite::rightBumpLevel() {
-    return mLevel.lock()->isACollisionLine( getCollRectRight() );
-}
+    return mLevel.lock()->isACollisionLine(inType, line, *this);
 
-// Checks if a right side collision is imminent 1 pixel beyond Sprite's collision boundry.
-bool Sprite::rightBumpLevelImminent() {
-    Line rightLine{ getCollRectRight() };
-    ++rightLine.x1;
-    ++rightLine.x2;
-    return mLevel.lock()->isACollisionLine(rightLine);
-}
-
-// Checks for left side collisions with level elements. Returns true if made contact with a collidable level object.
-bool Sprite::leftBumpLevel() {
-    return mLevel.lock()->isACollisionLine( getCollRectLeft() );
-}
-
-// Checks if a left side collision is imminent 1 pixel beyond Sprite's collision boundry.
-bool Sprite::leftBumpLevelImminent() {
-    Line leftLine{ getCollRectLeft() };
-    --leftLine.x1;
-    --leftLine.x2;
-    return mLevel.lock()->isACollisionLine( leftLine );
-}
-
-// Returns true if a left side collision with another sprite.
-bool Sprite::leftBumpSprites() {
-    return mLevel.lock()->isACollisionSprite(getCollRectLeft(), *this);
-}
-
-// Returns true if a right side collision with another sprite.
-bool Sprite::rightBumpSprites() {
-    return mLevel.lock()->isACollisionSprite(getCollRectRight(), *this);
 }
 
 // Applies gravity to the sprite if parameter set to true otherwise checks if sprite just finished a fall and cleans up velocity variables.
@@ -458,8 +468,10 @@ void Sprite::applyFriction(bool standing) {
 
 // Moves Sprite based on velocities adjusting for gravity, friction, and collisions. Override or extend for custom movement routines.
 void Sprite::move() {
+    using namespace FuGlobals;
+
     // check for a downward collision to see if we are on stable ground. This will affect gravity and friction application.
-    bool standing{ downBumpLevel() };
+    bool standing{ isCollision(ColType::CT_LEVEL, ColDirect::CD_DOWN, 0) };
 
     // apply gravity
     applyGravity(standing);
@@ -480,12 +492,14 @@ void Sprite::move() {
 
 // After all movement for frame is made, adjust for any collisions with level geometry.
 void Sprite::correctFrameLevel() {
+    using namespace FuGlobals;
+
     // Correct for downward collision if we moved down this frame
-    bool colliding{ downBumpLevel() };
+    bool colliding{ isCollision(ColType::CT_LEVEL, ColDirect::CD_DOWN, 0) };
     while (colliding) {
         // move up one pixel and see if we are still standing
         mYPos -= 1;
-        colliding = downBumpLevel();
+        colliding = isCollision(ColType::CT_LEVEL, ColDirect::CD_DOWN, 0);
 
         // if not standing now then we are one pixel above a surface because of our testing, put it back to surface level and the loop will end
         if (!colliding) mYPos += 1;
@@ -494,42 +508,44 @@ void Sprite::correctFrameLevel() {
     // check for left or right collision depending on which way we moved this frame
     if (getLastX() > getX()) {
         // correct for left side intersection
-        colliding = leftBumpLevel();
+        colliding = isCollision(ColType::CT_LEVEL, ColDirect::CD_LEFT, 0);
         while (colliding) {
             // move left one pixel and see if we are still colliding
             mXPos += 1;
-            colliding = leftBumpLevel();
+            colliding = isCollision(ColType::CT_LEVEL, ColDirect::CD_LEFT, 0);
         }
     } else if (getLastX() < getX()) {
         // correct for right side intersection
-        colliding = rightBumpLevel();
+        colliding = isCollision(ColType::CT_LEVEL, ColDirect::CD_RIGHT, 0);
         while (colliding) {
             // move left one pixel and see if we are still colliding
             mXPos -= 1;
-            colliding = rightBumpLevel();
+            colliding = isCollision(ColType::CT_LEVEL, ColDirect::CD_RIGHT, 0);
         }
     }
 }
 
 // After movement for frame made, adjust for any collisions with other sprites
 void Sprite::correctFrameSprites() {
+    using namespace FuGlobals;
+
     // check for left or right collision depending on which way we moved this frame
     bool colliding{};
     if (getLastX() > getX()) {
         // correct for left side intersection
-        colliding = leftBumpSprites();
+        colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_LEFT, 0);
         while (colliding) {
             // move left one pixel and see if we are still colliding
             mXPos += 1;
-            colliding = leftBumpSprites();
+            colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_LEFT, 0);
         }
     } else if (getLastX() < getX()) {
         // correct for left side intersection
-        colliding = rightBumpSprites();
+        colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_RIGHT, 0);
         while (colliding) {
             // move left one pixel and see if we are still colliding
             mXPos -= 1;
-            colliding = rightBumpSprites();
+            colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_RIGHT, 0);
         }
     }
 }

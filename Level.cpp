@@ -342,8 +342,7 @@ void Level::drawColRects() {
     mSDL.lock()->setDrawColor(0, 0, 0, 255);
 }
 
-// Checks if the given point is contained in a collision rect for the level.
-// Sprite parameter is to be sure sprite's are not checking for collisions with themselves.
+// Checks if the given point is colliding with any level geometry
 bool Level::isACollisionPoint(const SDL_Point& pnt) {
     // loop through all our level collision rectangles checking for a collision
     for (int i{}; i < mColRects->size(); ++i) {
@@ -354,14 +353,12 @@ bool Level::isACollisionPoint(const SDL_Point& pnt) {
     return false;
 }
 
-// Checks if the given point is contained in a collision rect for the level. Parameter of PointF is cast to integer type SDL_Point.
-// Sprite parameter is to be sure sprite's are not checking for collisions with themselves.
+// Checks if the given point is colliding with any level geometry. Parameter of PointF is cast to integer type SDL_Point.
 bool Level::isACollisionPoint(PointF pnt) {
     return isACollisionPoint(pnt.getSDL_Point());
 }
 
-// Checks if the given rectangle is intersecting a collision rectangle for the level.
-// Sprite parameter is to be sure sprite's are not checking for collisions with themselves.
+// Checks if the given rectangle is colliding with any level geomtry.
 bool Level::isACollisionRect(const SDL_Rect& rect) {
     // loop through all our level collision rectangles checking for a collision
     for (int i{}; i < mColRects->size(); ++i) {
@@ -372,9 +369,8 @@ bool Level::isACollisionRect(const SDL_Rect& rect) {
     return false;
 }
 
-// Checks if the given line is intersecting a collision rectangle for the level.
-// Sprite parameter is to be sure sprite's are not checking for collisions with themselves.
-bool Level::isACollisionLine(Line line) {
+// Checks if the given line is colliding with any level geometry.
+bool Level::isACollisionLevel(Line line) {
     // loop through all our level collision rectangles checking for a collision
     for (int i{ 0 }; i < mColRects->size(); ++i) {
         const SDL_Rect& r = mColRects->at(i);
@@ -382,6 +378,28 @@ bool Level::isACollisionLine(Line line) {
     }
 
     return false;
+}
+
+// Checks if the given line is involved in a collision.
+// Paramaters are:
+//		ColType: the type of collision to check for, level geometry or against another sprite.
+//		Line: the line to use for the collision check.
+//		Sprite: if this is a check against other sprites, ignore the Sprite given in this parameter.
+// Returns true if a collision occurred.
+bool Level::isACollisionLine(FuGlobals::ColType inType, Line inLine, const Sprite &inIgnore) {
+    using namespace FuGlobals;
+
+    bool collision{ false };
+    switch (inType) {
+        case ColType::CT_LEVEL:
+            collision = isACollisionLevel(inLine);
+            break;
+        case ColType::CT_SPRITE:
+            collision = isACollisionSprite(inLine, inIgnore);
+            break;
+    }
+
+    return collision;
 }
 
 // Checks if the given line is colliding with another sprite.

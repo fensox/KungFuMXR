@@ -23,4 +23,6 @@ namespace FuGlobals {
 	static constexpr decimal	AIR_FRICTION			{ 38.2 };				// Amount of horizontal pixels/second the air slows a sprite when not standing on a solid surface.
 	static constexpr int		LEVEL_BOUNDS			{ 10 };					// Distance in pixels a player can get to the edge of the viewport when level boundry has been reached.
 
+	enum class ColType		{ CT_LEVEL, CT_SPRITE };							// Indicate collision either with another sprite or with level geometry
+	enum class ColDirect	{ CD_UP, CD_DOWN, CD_LEFT, CD_RIGHT };				// Direction to check for a collision
 }

@@ -47,6 +47,9 @@ public:
 	// Returns a line representing the right side of the current collision rectangle. Used for rightBump collision detection, drawing debugging rectangles, etc.
 	Line getCollRectRight();
 
+	// Returns a line representing the bottom of the current collision rectangle. Used for downBump collision detection, drawing debugging rectangles, etc.
+	Line getCollRectTop();
+
 	// Takes a rectangle with level relative coordinates and converts them to viewport relative. Returns a copy of the rectangle with updated coordinates.
 	SDL_Rect getVPRelative(const SDL_Rect& inRect);
 
@@ -171,29 +174,12 @@ protected:
 	// Get this sprite's health points.
 	int getHealth();
 
-	//***DEBUG*** test of universal collision detection function
-	bool isCollision(Level::collisionType, Level::collisionDirection, const Sprite& sprite);
-
-	// Check for collision downwards with level collision elements. Returns true if made contact with stable platform.
-	bool downBumpLevel();
-
-	// Check for right side collisions with level elements. Returns true if made contact with a collidable level object.
-	bool rightBumpLevel();
-
-	// Checks if a right side collision is imminent 1 pixel beyond Sprite's collision boundry.
-	bool rightBumpLevelImminent();
-
-	// Checks for left side collisions with level elements. Returns true if made contact with a collidable level object.
-	bool leftBumpLevel();
-
-	// Checks if a left side collision is imminent 1 pixel beyond Sprite's collision boundry.
-	bool leftBumpLevelImminent();
-
-	// Returns true if a left side collision with another sprite.
-	bool leftBumpSprites();
-
-	// Returns true if a right side collision with another sprite.
-	bool rightBumpSprites();
+	// Collision detection function. Paramaters are:
+	//		enum ColType: what to check for a collision with: level geometry or other sprites
+	//		enum ColDirect: indicates direction to check for collision
+	//		int inPixels: distance in pixels to check for a collision. i.e. value of 0 is an actual collision, a value of 1 would mean a collision is 1 pixel away
+	// Return value is whethar the collision is true.
+	bool isCollision(FuGlobals::ColType inType, FuGlobals::ColDirect inDirect, int inPixels);
 
 	// Applies gravity to the sprite depending on boolean parameter. Also checks if just finished a fall and cleans up some variables if so.
 	void applyGravity(bool standing);

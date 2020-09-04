@@ -20,11 +20,13 @@ MisterX::MisterX(std::weak_ptr<SDLMan> sdlMan) : Sprite{ sdlMan } {
 
 //***DEBUG*** Outputs some debugging info
 void MisterX::outputDebug() {
+    using namespace FuGlobals;
+
     std::cout << "Player x,y:\t\t" << getX() << ", " << getY() << "\n";
     std::cout << "Velocity l,r,u,d:\t" << mVeloc.left << ", " << mVeloc.right << ", " << mVeloc.up << ", " << mVeloc.down << "\n";
     std::cout << "mActionMode:\t\t" << getActionMode() << "\n";
     std::cout << "mLastActionMode:\t" << getLastActionMode() << "\n";
-    std::cout << "Downbumping:\t\t" << std::boolalpha << downBumpLevel() << "\n";
+    std::cout << "Downbumping:\t\t" << std::boolalpha << isCollision(ColType::CT_LEVEL, ColDirect::CD_DOWN, 0) << "\n";
     std::cout << "mDucking:\t\t" << std::boolalpha << mDucking << "\n";
     std::cout << "mAttacking:\t\t" << std::boolalpha << mAttacking << "\n";
     std::cout << "mJumping:\t\t" << std::boolalpha << mJumping << "\n";
@@ -161,12 +163,14 @@ void MisterX::handleInputKeyboard(const SDL_Keycode& key, bool press) {
 
 // Handles the player requesting to move to the right.
 void MisterX::moveRight() {
+    using namespace FuGlobals;
+
     if (mDucking || mAttacking || !mWalkingRight) return;
 
     // if the previous action was different set new mActionMode, set animation frame to 0, and don't move player position
     if ( (getActionMode() != "WALK_RIGHT") && (getActionMode() != "JUMP_RIGHT") ) {
         mFacingRight = true;
-        if (!downBumpLevel()) {
+        if (!isCollision(ColType::CT_LEVEL, ColDirect::CD_DOWN, 0)) {
             setActionMode("JUMP_RIGHT", false);
         } else {
             setActionMode("WALK_RIGHT", true);
@@ -178,7 +182,7 @@ void MisterX::moveRight() {
         }
 
         // step animation frame if enough time has passed and we're not pressed up against an object
-        if ( checkWalkTime() && !rightBumpLevelImminent() ) advanceFrame();
+        if (checkWalkTime() && !isCollision(ColType::CT_LEVEL, ColDirect::CD_RIGHT, 1)) advanceFrame();
 
         // increase velocity based on FPS calc to reach our per second goal
         mVeloc.right += WALK_VELOCITY_PER / mSDL.lock()->getFPS();
@@ -188,12 +192,14 @@ void MisterX::moveRight() {
 
 // Handles the player requesting to move to the left.
 void MisterX::moveLeft() {
+    using namespace FuGlobals;
+
     if ( mDucking || mAttacking || !mWalkingLeft) return;
 
     // if the previous action was different set new mActionMode, mCurrentFrame 0, and don't move player position
     if ( (getActionMode() != "WALK_LEFT") && (getActionMode() != "JUMP_LEFT") ) {
         mFacingRight = false;
-        if (!downBumpLevel()) {
+        if (!isCollision(ColType::CT_LEVEL, ColDirect::CD_DOWN, 0)) {
             setActionMode("JUMP_LEFT", false);
         } else {
             setActionMode("WALK_LEFT", true);
@@ -205,7 +211,7 @@ void MisterX::moveLeft() {
         }
 
         // step animation frame if enough time has passed and we're not pressed up against an object
-        if ( checkWalkTime() && !leftBumpLevelImminent() ) advanceFrame();
+        if ( checkWalkTime() && !isCollision(ColType::CT_LEVEL, ColDirect::CD_LEFT, 1)) advanceFrame();
 
         // increase velocity based on FPS calc to reach our per second goal
         mVeloc.left += WALK_VELOCITY_PER / mSDL.lock()->getFPS();
@@ -227,24 +233,28 @@ bool MisterX::checkWalkTime() {
 
 // Adjust the player position back inside the level if an out of bounds location has been detected.
 void MisterX::adjustForLevelBounds() {
-    int downBound{ mLevel.lock()->getSize().y - FuGlobals::LEVEL_BOUNDS };
-    int rightBound{ mLevel.lock()->getSize().x - FuGlobals::LEVEL_BOUNDS };
+    using namespace FuGlobals;
+
+    int downBound{ mLevel.lock()->getSize().y - LEVEL_BOUNDS };
+    int rightBound{ mLevel.lock()->getSize().x - LEVEL_BOUNDS };
     
     // x
-    if (getX() < FuGlobals::LEVEL_BOUNDS) setX( FuGlobals::LEVEL_BOUNDS );
+    if (getX() < LEVEL_BOUNDS) setX( LEVEL_BOUNDS );
     else if (getX() > rightBound) setX( rightBound );
 
     // y
-    if (getY() < FuGlobals::LEVEL_BOUNDS) setY( FuGlobals::LEVEL_BOUNDS );
+    if (getY() < LEVEL_BOUNDS) setY( LEVEL_BOUNDS );
     else if (getY() > downBound) setY( downBound );
 }
 
 // Handles player initiating a jump.
 void MisterX::jump() {
+    using namespace FuGlobals;
+
     if (mDucking || !mJumping) return;
 
     // only launch into a jump if we have something to launch off of
-    if (downBumpLevel()) {
+    if (isCollision(ColType::CT_LEVEL, ColDirect::CD_DOWN, 0)) {
         // check if we are already in the jump animation. Which means we are just landing not taking off
         if ( getActionMode().compare("JUMP_RIGHT") == 0 ) {
             setActionMode("WALK_RIGHT", true);

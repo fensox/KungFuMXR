@@ -21,33 +21,20 @@ class Level {
 public:
 	// Constructor takes path to metadata file for the level relative to game executable and an SDLMan pointer to hold for rendering.
 	// Note load() must be called after construction of this object before other functions will work.
-	//Level(std::string filename, std::weak_ptr<SDLMan> sdlMan, std::weak_ptr<GameLoop> gameLoop);
+	// Level(std::string filename, std::weak_ptr<SDLMan> sdlMan, std::weak_ptr<GameLoop> gameLoop);
 	Level(std::string filename, std::weak_ptr<SDLMan> sdlMan);
 	Level() = delete;
 
 	// Destructor
 	~Level();
 
-	//***DEBUG*** Testing
-	enum collisionType { LEVEL, SPRITE };
-	
-	enum collisionDirection { UP, DOWN, LEFT, RIGHT };
-
-	// Checks if the given point is contained in a collision rectangle for the level.
-	bool isACollisionPoint(const SDL_Point& pnt);
-
-	// Checks if the given point is contained in a collision rect for the level. Parameter of PointF is cast to integer type SDL_Point.
-	bool isACollisionPoint(PointF pnt);
-
-	// Checks if the given rectangle is intersecting a collision rectangle for the level.
-	bool isACollisionRect(const SDL_Rect& rect);
-
-	// Checks if the given line is intersecting a collision rectangle for the level.
-	bool isACollisionLine(Line line);
-
-	// Checks if the given line is colliding with another sprite.
-	// Sprite parameter is to be sure sprite's are not checking for collisions with themselves.
-	bool isACollisionSprite(Line line, const Sprite& sprite);
+	// Checks if the given line is involved in a collision.
+	// Paramaters are:
+	//		ColType: the type of collision to check for, level geometry or against another sprite.
+	//		Line: the line to use for the collision check.
+	//		Sprite: if this is a check against other sprites, ignore the Sprite given in this parameter.
+	// Returns true if a collision occurred.
+	bool isACollisionLine(FuGlobals::ColType inType, Line inLine, const Sprite &inIgnore);
 
 	// Load in the data filefor the level. Must be called before other functions for proper operation. Returns success or failure.
 	bool load();
@@ -170,4 +157,20 @@ private:
 
 	// Accepts a SpriteStruct and calculates if the player has reached the point where sprite should spawn. Returns the result.
 	bool isSpawnTime(SpriteStruct ss);
+
+	// Checks if the given line is colliding with another sprite.
+	// Sprite parameter is used to be sure sprite's are not checking for collisions with themselves.
+	bool isACollisionSprite(Line line, const Sprite& sprite);
+
+	// Checks if the given line is colliding with any level geometry.
+	bool isACollisionLevel(Line line);
+
+	// Checks if the given point is colliding with any level geometry.
+	bool isACollisionPoint(const SDL_Point& pnt);
+
+	// Checks if the given point is colliding with any level geometry. Parameter of PointF is cast to integer type SDL_Point.
+	bool isACollisionPoint(PointF pnt);
+
+	// Checks if the given rectangle is colliding with any level geomtry.
+	bool isACollisionRect(const SDL_Rect& rect);
 };

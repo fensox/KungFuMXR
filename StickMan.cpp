@@ -35,13 +35,15 @@ bool StickMan::checkWalkTime() {
 
 // Move to the right
 void StickMan::moveRight() {
+    using namespace FuGlobals;
+
     // if the previous action was different set new mActionMode, set animation frame to 0, and don't move position this frame
     if (getActionMode() != "WALK_RIGHT") {
         mFacingRight = true;
         setActionMode("WALK_RIGHT", true);
     } else {
         // step animation frame if enough time has passed and we're not pressed up against an object
-        if (checkWalkTime() && !rightBumpLevelImminent()) advanceFrame();
+        if (checkWalkTime() && !isCollision(ColType::CT_LEVEL, ColDirect::CD_RIGHT, 1)) advanceFrame();
 
         // increase velocity based on FPS calc to reach our per second goal
         mVeloc.right += WALK_VELOCITY_PER / mSDL.lock()->getFPS();
@@ -51,13 +53,15 @@ void StickMan::moveRight() {
 
 // Move to the left
 void StickMan::moveLeft() {
+    using namespace FuGlobals;
+
     // if the previous action was different set new mActionMode, mCurrentFrame 0, and don't move position this frame
     if (getActionMode() != "WALK_LEFT") {
         mFacingRight = false;
         setActionMode("WALK_LEFT", true);
     } else {
         // step animation frame if enough time has passed and we're not pressed up against an object
-        if (checkWalkTime() && !leftBumpLevelImminent()) advanceFrame();
+        if (checkWalkTime() && !isCollision(ColType::CT_LEVEL, ColDirect::CD_LEFT, 1)) advanceFrame();
 
         // increase velocity based on FPS calc to reach our per second goal
         mVeloc.left += WALK_VELOCITY_PER / mSDL.lock()->getFPS();
