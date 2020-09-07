@@ -414,6 +414,10 @@ bool Level::isACollisionSprite(Line line, const Sprite& sprite) {
         if (SDL_IntersectRectAndLine(&r, &line.x1, &line.y1, &line.x2, &line.y2)) return true;
     }
 
+    // check for collision with player (who is not kept in mSprites vector)
+    SDL_Rect r = mPlayer.lock()->getCollisionRect();
+    if (SDL_IntersectRectAndLine(&r, &line.x1, &line.y1, &line.x2, &line.y2)) return true;
+
     return false;
 }
 

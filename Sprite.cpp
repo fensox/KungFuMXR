@@ -399,7 +399,11 @@ void Sprite::render() {
     if constexpr (FuGlobals::DEBUG_MODE) drawCollisionPoints();
 }
 
-// Check's for collisions
+// Collision detection function. Paramaters are:
+//		enum ColType inType: what to check for a collision with: level geometry or other sprites
+//		enum ColDirect inDirect: indicates direction to check for collision
+//		int inPixels: distance in pixels to check for a collision. i.e. value of 0 is an actual collision, a value of 1 would mean a collision is 1 pixel away
+// Return value is whethar the collision is true.
 bool Sprite::isCollision(FuGlobals::ColType inType, FuGlobals::ColDirect inDirect, int inPixels) {
     using namespace FuGlobals;
 
@@ -429,7 +433,6 @@ bool Sprite::isCollision(FuGlobals::ColType inType, FuGlobals::ColDirect inDirec
     }
 
     return mLevel.lock()->isACollisionLine(inType, line, *this);
-
 }
 
 // Applies gravity to the sprite if parameter set to true otherwise checks if sprite just finished a fall and cleans up velocity variables.
@@ -531,16 +534,14 @@ void Sprite::correctFrameSprites() {
 
     // check for left or right collision depending on which way we moved this frame
     bool colliding{};
-    if (getLastX() > getX()) {
-        // correct for left side intersection
+    if (getLastX() > getX()) { // moving left collision check
         colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_LEFT, 0);
         while (colliding) {
-            // move left one pixel and see if we are still colliding
+            // move right one pixel and see if we are still colliding
             mXPos += 1;
             colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_LEFT, 0);
         }
-    } else if (getLastX() < getX()) {
-        // correct for left side intersection
+    } else if (getLastX() < getX()) { // moving right collision check
         colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_RIGHT, 0);
         while (colliding) {
             // move left one pixel and see if we are still colliding

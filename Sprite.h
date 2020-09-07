@@ -17,7 +17,6 @@ class Level;
 /* Provides basic Sprite functionality. Loading in sprite sheet meta info, animations, collision detection, basic movement with gravity, friction, and boundry checking. 
  * Includes some basic actions like walking and jumping. Derived sprite classes can build on these basic actions. */
 class Sprite {
-
 public:
 	/* Constructor. Derived classes should have a constructor that fills in all their sprite specific variables. See protected section in Sprite.h.
 	   After the Sprite derived is constructed a call to load() must be made before any other function calls will operate correctly.
@@ -175,8 +174,8 @@ protected:
 	int getHealth();
 
 	// Collision detection function. Paramaters are:
-	//		enum ColType: what to check for a collision with: level geometry or other sprites
-	//		enum ColDirect: indicates direction to check for collision
+	//		enum ColType inType: what to check for a collision with: level geometry or other sprites
+	//		enum ColDirect inDirect: indicates direction to check for collision
 	//		int inPixels: distance in pixels to check for a collision. i.e. value of 0 is an actual collision, a value of 1 would mean a collision is 1 pixel away
 	// Return value is whethar the collision is true.
 	bool isCollision(FuGlobals::ColType inType, FuGlobals::ColDirect inDirect, int inPixels);
