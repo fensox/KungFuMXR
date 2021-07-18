@@ -530,6 +530,9 @@ void Sprite::correctFrameLevel() {
 
 // After movement for frame made, adjust for any collisions with other sprites
 void Sprite::correctFrameSprites() {
+    // ***DEBUG*** Causes hang when this function is run...
+    //return;
+    
     using namespace FuGlobals;
 
     // check for left or right collision depending on which way we moved this frame
