@@ -462,6 +462,23 @@ bool Level::isSpawnTime(SpriteStruct ss) {
     return false;
 }
 
+// Render the HUD to the drawing buffer
+void Level::renderHUD() {
+    using namespace FuGlobals;
+
+    // render player health outline
+    SDL_Renderer* renderer{ mSDL.lock()->getRenderer() };
+    SDL_Rect playerHealthOutline{ 10, 10, PLAYER_HEALTH_WIDTH, PLAYER_HEALTH_HEIGHT };
+    mSDL.lock()->setDrawColor(255, 0, 0, PLAYER_HEALTH_ALPHA);
+    mSDL.lock()->drawRect(playerHealthOutline);
+
+    // render player health
+    int scaleFactor{ PLAYER_HEALTH_WIDTH / mPlayer.lock()->getHealthMax() };
+    int healthWidth{ mPlayer.lock()->getHealth() * scaleFactor };
+    mSDL.lock()->setDrawColor(255, 255, 0, PLAYER_HEALTH_ALPHA);
+    mSDL.lock()->drawFillRect(11, 11, healthWidth-2, PLAYER_HEALTH_HEIGHT - 2);
+}
+
 // Render the level to the screen
 void Level::render() {
     // center viewport on the Sprite we've been told to follow
@@ -481,6 +498,9 @@ void Level::render() {
 
     // Draw all non-player sprites
     renderSprites();
+
+    // Draw the HUD
+    renderHUD();
 
     //***DEBUG*** if debug on draw all collision rectangles so visible on screen
     if constexpr (FuGlobals::DEBUG_MODE) drawColRects();

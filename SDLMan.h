@@ -93,6 +93,12 @@ public:
 	// Draw's a rectangle outline with given SDL_Rect.
 	void drawRect(const SDL_Rect& rect);
 
+	// Draw's a filled rectangle with given SDL_Rect.
+	void drawFillRect(const SDL_Rect& rect);
+
+	// Draw's a filled rectangle with given integer coordinates and size.
+	void drawFillRect(int x, int y, int w, int h);
+
 	// Draw's a circle using the Midpoint Circle Algorithm. Found on Stack Exchange.
 	void drawCircle(int centerX, int centerY, int radius);
 

@@ -24,6 +24,7 @@ void MisterX::outputDebug() {
 
     std::cout << "Player x,y:\t\t" << getX() << ", " << getY() << "\n";
     std::cout << "Velocity l,r,u,d:\t" << mVeloc.left << ", " << mVeloc.right << ", " << mVeloc.up << ", " << mVeloc.down << "\n";
+    std::cout << "Health:\t\t\t" << getHealth() << "\n";
     std::cout << "mActionMode:\t\t" << getActionMode() << "\n";
     std::cout << "mLastActionMode:\t" << getLastActionMode() << "\n";
     std::cout << "Downbumping:\t\t" << std::boolalpha << isCollision(ColType::CT_LEVEL, ColDirect::CD_DOWN, 0) << "\n";

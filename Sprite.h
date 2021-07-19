@@ -112,6 +112,18 @@ public:
 	// Reverts action mode to the last action mode. Sets last action mode as mode we just changed out of. Swaps the two.
 	void revertLastActionMode();
 
+	// Set this sprite's health points.
+	void setHealth(int health);
+
+	// Get this sprite's health points.
+	int getHealth();
+
+	// Set this sprite's maximum health points.
+	void setHealthMax(int healthMax);
+
+	// Get this sprite's maximum health points.
+	int getHealthMax();
+
 	// Returns information about the Sprite object represented as a std::string for debugging purposes.
 	virtual std::string toString();
 
@@ -167,12 +179,6 @@ protected:
 	// Instance of Velocity struct for this sprite
 	Velocity mVeloc{};
 
-	// Set this sprite's health points.
-	void setHealth(int health);
-
-	// Get this sprite's health points.
-	int getHealth();
-
 	// Collision detection function. Paramaters are:
 	//		enum ColType inType: what to check for a collision with: level geometry or other sprites
 	//		enum ColDirect inDirect: indicates direction to check for collision
@@ -196,6 +202,9 @@ private:
 
 	// Smart pointer to the Texture holding our sprite's sprite sheet.
 	std::unique_ptr<Texture> mTexture{ nullptr };
+
+	// Maximum health points of the Sprite.
+	int mHealthMax{ 100 };
 
 	// Health points of the Sprite. Zero means dead.
 	int mHealth{ 100 };

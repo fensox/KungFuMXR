@@ -15,6 +15,9 @@ namespace FuGlobals {
 	static constexpr int		VIEWPORT_WIDTH			{ 1280 };				// Internal rendering width - independant of window size. Scaled to fit whatever window needed.
 	static constexpr int		VIEWPORT_HEIGHT			{ 720 };				// Internal rendering height - independant of window size. Scaled to fit whatever window needed.
 	static constexpr int		VIEWPORT_BUFFER			{ 75 };					// Pixel sized area in center of viewport sprite can move without scrolling viewport.
+	static constexpr int		PLAYER_HEALTH_WIDTH		{ 500 };				// Pixel width of player health bar for HUD (health scaled to fit)
+	static constexpr int		PLAYER_HEALTH_HEIGHT	{ 35 };					// Pixel height of player health bar for HUD
+	static constexpr int		PLAYER_HEALTH_ALPHA		{ 126 };				// Alpha transparency of player health HUD (0-255)
 
 	static constexpr int		JOYSTICK_DEAD_ZONE		{ 8000 };				// Analog joystick dead zone
 	static constexpr decimal	GRAVITY					{ 15 };					// Gravity defined as pixels/second of downward velocity to add to sprites

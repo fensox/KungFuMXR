@@ -209,6 +209,7 @@ SDL_Point SDLMan::getSize(Texture &text) {
 
 // Set's the current draw color of the renderer with RGB values between 0 and 255. Optional alpha transparency value defaults to 255 opaque.
 void SDLMan::setDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
+	SDL_SetRenderDrawBlendMode(mRenderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(mRenderer, r, g, b, a);
 }
 
@@ -240,6 +241,17 @@ void SDLMan::drawRect(int x, int y, int w, int h) {
 // Draw's a rectangle outline with given SDL_Rect.
 void SDLMan::drawRect(const SDL_Rect& rect) {
 	SDL_RenderDrawRect(mRenderer, &rect);
+}
+
+// Draw's a filled rectangle with given SDL_Rect.
+void SDLMan::drawFillRect(const SDL_Rect& rect) {
+	SDL_RenderFillRect(mRenderer, &rect);
+}
+
+// Draw's a filled rectangle with given integer coordinates and size.
+void SDLMan::drawFillRect(int x, int y, int w, int h) {
+	const SDL_Rect rect{ x, y, w, h };
+	SDL_RenderFillRect(mRenderer, &rect);
 }
 
 // Draw's a circle using the Midpoint Circle Algorithm found on Stack Exchange.

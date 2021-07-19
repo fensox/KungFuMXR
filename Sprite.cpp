@@ -116,6 +116,16 @@ std::string Sprite::toString() {
     return output.str();
 }
 
+// Set this sprite's maximum health points.
+void Sprite::setHealthMax(int healthMax) {
+    mHealthMax = healthMax;
+}
+
+// Get this sprite's maximum health points.
+int Sprite::getHealthMax() {
+    return mHealthMax;
+}
+
 // Set this sprite's health points.
 void Sprite::setHealth(int health) {
     mHealth = health;
@@ -377,7 +387,7 @@ void Sprite::render() {
     decimal scaledW = clip.w * mScale;
     decimal scaledH = clip.h * mScale;
 
-    // create a destination rect cenetering texture on our position
+    // create a destination rect centering texture on our position
     decimal x{ mXPos - (scaledW / 2) };
     decimal y{ mYPos - (scaledH / 2) };
     mDest = { static_cast<int>(x), static_cast<int>(y), static_cast<int>(scaledW), static_cast<int>(scaledH) };
@@ -483,6 +493,7 @@ void Sprite::move() {
     applyFriction(standing);
 
     // add up how much we are trying to move and make the change to our position
+    
     setX( getX() + mVeloc.right - mVeloc.left );
     setY( getY() + mVeloc.down - mVeloc.up );
 
@@ -530,26 +541,24 @@ void Sprite::correctFrameLevel() {
 
 // After movement for frame made, adjust for any collisions with other sprites
 void Sprite::correctFrameSprites() {
-    // ***DEBUG*** Causes hang when this function is run...
-    //return;
-    
     using namespace FuGlobals;
 
     // check for left or right collision depending on which way we moved this frame
     bool colliding{};
+    int frameWidth{ getCollisionRect().w / 2 };
     if (getLastX() > getX()) { // moving left collision check
-        colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_LEFT, 0);
+        colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_LEFT, -frameWidth);
         while (colliding) {
             // move right one pixel and see if we are still colliding
             mXPos += 1;
-            colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_LEFT, 0);
+            colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_LEFT, -frameWidth);
         }
     } else if (getLastX() < getX()) { // moving right collision check
-        colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_RIGHT, 0);
+        colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_RIGHT, frameWidth);
         while (colliding) {
             // move left one pixel and see if we are still colliding
             mXPos -= 1;
-            colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_RIGHT, 0);
+            colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_RIGHT, frameWidth);
         }
     }
 }

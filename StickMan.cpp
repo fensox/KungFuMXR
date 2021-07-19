@@ -43,7 +43,13 @@ void StickMan::moveRight() {
         setActionMode("WALK_RIGHT", true);
     } else {
         // step animation frame if enough time has passed and we're not pressed up against an object
-        if (checkWalkTime() && !isCollision(ColType::CT_LEVEL, ColDirect::CD_RIGHT, 1)) advanceFrame();
+        int frameWidth{ (getCollisionRect().w / 2) + 1 };
+        if (checkWalkTime()
+            && !isCollision(ColType::CT_LEVEL, ColDirect::CD_RIGHT, frameWidth)
+            && !isCollision(ColType::CT_SPRITE, ColDirect::CD_RIGHT, frameWidth))
+        {
+            advanceFrame();
+        }
 
         // increase velocity based on FPS calc to reach our per second goal
         mVeloc.right += WALK_VELOCITY_PER / mSDL.lock()->getFPS();
@@ -61,7 +67,13 @@ void StickMan::moveLeft() {
         setActionMode("WALK_LEFT", true);
     } else {
         // step animation frame if enough time has passed and we're not pressed up against an object
-        if (checkWalkTime() && !isCollision(ColType::CT_LEVEL, ColDirect::CD_LEFT, 1)) advanceFrame();
+        int frameWidth{ (getCollisionRect().w / 2) + 1 };
+        if (checkWalkTime()
+            && !isCollision(ColType::CT_LEVEL, ColDirect::CD_LEFT, frameWidth)
+            && !isCollision(ColType::CT_SPRITE, ColDirect::CD_LEFT, frameWidth))
+        {
+            advanceFrame();
+        }
 
         // increase velocity based on FPS calc to reach our per second goal
         mVeloc.left += WALK_VELOCITY_PER / mSDL.lock()->getFPS();
@@ -71,7 +83,7 @@ void StickMan::moveLeft() {
 
 // Extend Sprite's move() function for some AI then call Sprite's function for movement based on velocity, gravity, and collision detection, etc.
 void StickMan::move() {
-    // Walk towards the player
+    // Walk towards the player if we are not colliding with them
     if (mTargetSprite.lock()->getX() > getX()) {
         moveRight();
     } else if (mTargetSprite.lock()->getX() < getX()) {

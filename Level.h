@@ -54,6 +54,9 @@ public:
 	// Render all non-player sprites to drawing buffer
 	void renderSprites();
 
+	// Render the HUD to the drawing buffer
+	void renderHUD();
+
 	// Render the level
 	void render();
 
