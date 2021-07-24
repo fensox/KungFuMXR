@@ -413,8 +413,9 @@ void Sprite::render() {
 //		enum ColType inType: what to check for a collision with: level geometry or other sprites
 //		enum ColDirect inDirect: indicates direction to check for collision
 //		int inPixels: distance in pixels to check for a collision. i.e. value of 0 is an actual collision, a value of 1 would mean a collision is 1 pixel away
+// 	    std::weak_ptr<Sprite> colSprite: Optional pointer to hold the Sprite we collided with.
 // Return value is whethar the collision is true.
-bool Sprite::isCollision(FuGlobals::ColType inType, FuGlobals::ColDirect inDirect, int inPixels) {
+bool Sprite::isCollision(FuGlobals::ColType inType, FuGlobals::ColDirect inDirect, int inPixels, std::weak_ptr<Sprite> colSprite) {
     using namespace FuGlobals;
 
     // get proper line to use for collision check and adjust line size per our inPixels parameter

@@ -77,6 +77,9 @@ void GameLoop::runGameLoop() {
 	double previous = SDL_GetTicks();	// holds current time in milliseconds since SDL init - game loop speed/FPS management
 	double lag = 0;						// will hold lag between game time elapsed and real time elapsed - game loop speed/FPS management
 	
+	// Start music if toggled on
+	if constexpr (FuGlobals::MUSIC) mSDL->toggleMusic();
+	
 	// Start the main loop
 	// Game loop uses "Fixed update time step, variable rendering" method written about
 	// in the book Game Programming Patterns by Robert Nystrom. Adjust performance
@@ -87,9 +90,6 @@ void GameLoop::runGameLoop() {
 		double elapsed = current - previous;
 		previous = current;
 		lag += elapsed;
-
-		//***DEBUG***
-		if constexpr (FuGlobals::MUSIC) mSDL->toggleMusic();
 
 		// progress game logic without rendering to backbuffer until FPS target has been reached (for slow systems or network connections)
 		while (lag >= FuGlobals::FPS_TARGET) {

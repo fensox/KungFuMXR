@@ -141,4 +141,11 @@ namespace FensoxUtils {
 
         return vector;
     }
+
+    // Takes a std::weak_ptr and returns whethar it is uninitialized or not. For testing if a weak_ptr is "null" so to speak.
+    template <typename T>
+    static inline bool is_uninitialized(std::weak_ptr<T> const& weak) {
+        using wt = std::weak_ptr<T>;
+        return !weak.owner_before(wt{}) && !wt{}.owner_before(weak);
+    }
 };

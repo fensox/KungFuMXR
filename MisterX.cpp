@@ -8,8 +8,8 @@ MisterX::MisterX(std::weak_ptr<SDLMan> sdlMan) : Sprite{ sdlMan } {
 	// set our Mr. X specific members
 	mMetaFilename = "data/MisterX.dat";
 	mSpriteSheet = "data/MasterSS.png";
-    mStartingActionMode = "WALK_LEFT";
-	mTrans = SDL_Color{ 255, 0, 255, 0 };
+    setActionMode("WALK_LEFT", true);
+    mTrans = SDL_Color{ 255, 0, 255, 0 };
 	mName = "MisterX";
     mScale = 3;
 
@@ -18,7 +18,7 @@ MisterX::MisterX(std::weak_ptr<SDLMan> sdlMan) : Sprite{ sdlMan } {
     mSDL.lock()->addSoundEffect("MRX_KICK", "data/mrx_kick.wav");
 };
 
-//***DEBUG*** Outputs some debugging info
+//**DEBUG** Outputs some debugging info
 void MisterX::outputDebug() {
     using namespace FuGlobals;
 
@@ -27,6 +27,8 @@ void MisterX::outputDebug() {
     std::cout << "Health:\t\t\t" << getHealth() << "\n";
     std::cout << "mActionMode:\t\t" << getActionMode() << "\n";
     std::cout << "mLastActionMode:\t" << getLastActionMode() << "\n";
+    std::cout << "mCurrentFrame:\t\t" << mCurrentFrame << "\n";
+    std::cout << "getRect x, y:\t\t" << getRect().x << ", " << getRect().y << "\n";
     std::cout << "Downbumping:\t\t" << std::boolalpha << isCollision(ColType::CT_LEVEL, ColDirect::CD_DOWN, 0) << "\n";
     std::cout << "mDucking:\t\t" << std::boolalpha << mDucking << "\n";
     std::cout << "mAttacking:\t\t" << std::boolalpha << mAttacking << "\n";
@@ -34,7 +36,7 @@ void MisterX::outputDebug() {
     std::cout << "FPS:\t\t\t" << mSDL.lock()->getFPS() << "\n" << std::endl;
 }
 
-// Handles jopystick input from the player.
+// Handles joystick input from the player.
 void MisterX::handleInputAnalogStick(const SDL_ControllerAxisEvent e) {
     using namespace FuGlobals;
 
@@ -135,7 +137,6 @@ void MisterX::handleInputKeyboard(const SDL_Keycode& key, bool press) {
         case SDLK_LEFT:
             mWalkingLeft = press;
             break;
-
         case SDLK_RIGHT:
             mWalkingRight = press;
             break;
@@ -274,7 +275,7 @@ void MisterX::jump() {
             // increase our upward velocity
             mVeloc.down = 0;
             mVeloc.up = JUMP_VELOCITY; 
-            //***DEBUG*** need to adjust above to be FPS bases so jump height doesn't change depending on performance! Like moveRight and moveLeft
+            //***DEBUG*** need to adjust above to be FPS based so jump height doesn't change depending on performance! Like moveRight and moveLeft
             // ... work's if framerate is capped at 120fps but on a slow device that can't make 120fps jump height will be smaller
         }
     }
@@ -385,6 +386,20 @@ void MisterX::duck() {
     }
 }
 
+// Process any attack damage player does to other sprites
+void MisterX::processAttack() {
+    using namespace FuGlobals;
+
+    //if (!mAttacking) return;
+
+    std::weak_ptr<Sprite> colSprite = std::weak_ptr<Sprite>();
+    if (isCollision(ColType::CT_SPRITE, ColDirect::CD_LEFT, 5, colSprite) ) {
+        if ( !FensoxUtils::is_uninitialized(colSprite) ) {
+            std::cout << "Colliding with sprite: " << colSprite.lock()->getName() << std::endl;
+        }
+    }
+}
+
 // Moves player based on velocities adjusting for gravity, friction, and collisions. Extends then calls the Sprite class
 // default move function for a few custom player effects like respecting level boundries that other sprites do not need to do.
 void MisterX::move() {
@@ -403,4 +418,6 @@ void MisterX::move() {
     Sprite::move();         // call Sprite move function to perform actual movement based on our velocities, handling collision detection, etc
 
     adjustForLevelBounds(); // Check player hasn't exceeded level bounds. Sprite class doesn't do this for us as other Sprites can leave level bounds.
+
+    processAttack();        // Process any attack damage player does to other sprites
 }

@@ -385,8 +385,9 @@ bool Level::isACollisionLevel(Line line) {
 //		ColType: the type of collision to check for, level geometry or against another sprite.
 //		Line: the line to use for the collision check.
 //		Sprite: if this is a check against other sprites, ignore the Sprite given in this parameter.
+// 	    std::weak_ptr<Sprite> colSprite: Optional pointer to hold the Sprite we collided with.
 // Returns true if a collision occurred.
-bool Level::isACollisionLine(FuGlobals::ColType inType, Line inLine, const Sprite &inIgnore) {
+bool Level::isACollisionLine(FuGlobals::ColType inType, Line inLine, const Sprite &inIgnore, std::weak_ptr<Sprite> colSprite) {
     using namespace FuGlobals;
 
     bool collision{ false };
@@ -395,7 +396,7 @@ bool Level::isACollisionLine(FuGlobals::ColType inType, Line inLine, const Sprit
             collision = isACollisionLevel(inLine);
             break;
         case ColType::CT_SPRITE:
-            collision = isACollisionSprite(inLine, inIgnore);
+            collision = isACollisionSprite(inLine, inIgnore, colSprite);
             break;
     }
 
@@ -403,21 +404,30 @@ bool Level::isACollisionLine(FuGlobals::ColType inType, Line inLine, const Sprit
 }
 
 // Checks if the given line is colliding with another sprite.
-// Sprite parameter is to be sure sprite's are not checking for collisions with themselves.
-bool Level::isACollisionSprite(Line line, const Sprite& sprite) {
+// Parameters are:
+// 		Line: the line used to perform the collision check.
+//		Sprite: a reference to the Sprite calling this function to be sure sprite's are not checking for collisions with themselves.
+//		std::weak_ptr<Sprite>: optional parameter to be filled with the Sprite we collided with.
+bool Level::isACollisionSprite(Line line, const Sprite& sprite, std::weak_ptr<Sprite> colSprite) {
     // loop through all our level sprite's checking for a collision
     for (int i{}; i < mSprites->size(); ++i) {
         SpriteStruct& ss = mSprites->at(i);
-        if (ss.sprite.get() == &sprite) continue;
+        if (ss.sprite.get() == &sprite) continue; // skip if checking for collision against ourselves
 
         SDL_Rect r = ss.sprite->getCollisionRect();
-        if (SDL_IntersectRectAndLine(&r, &line.x1, &line.y1, &line.x2, &line.y2)) return true;
+        if (SDL_IntersectRectAndLine(&r, &line.x1, &line.y1, &line.x2, &line.y2)) {
+            colSprite = std::weak_ptr<Sprite>(ss.sprite);
+            return true;
+        }
     }
 
     // check for collision with player (who is not kept in mSprites vector) only if we are not the player ourselves
     if ( !(mPlayer.lock().get() == &sprite) ) {
         SDL_Rect r = mPlayer.lock()->getCollisionRect();
-        if (SDL_IntersectRectAndLine(&r, &line.x1, &line.y1, &line.x2, &line.y2)) return true;
+        if (SDL_IntersectRectAndLine(&r, &line.x1, &line.y1, &line.x2, &line.y2)) {
+            colSprite = std::weak_ptr<Sprite>(mPlayer);
+            return true;
+        }
     }
 
     return false;

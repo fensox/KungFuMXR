@@ -128,7 +128,7 @@ public:
 	virtual std::string toString();
 
 protected:
-	//***DEBUG*** Get rid of this and make a constructor that takes all of it so we could potential load it all from a file and not have to hard
+	//**DEBUG** Get rid of this and make a constructor that takes all of it so we could potential load it all from a file and not have to hard
 	//code it all. Either constructor takes all these parameters or it takes a struct that holds them all.
 
 	/**********************************************************************************
@@ -183,8 +183,9 @@ protected:
 	//		enum ColType inType: what to check for a collision with: level geometry or other sprites
 	//		enum ColDirect inDirect: indicates direction to check for collision
 	//		int inPixels: distance in pixels to check for a collision. i.e. value of 0 is an actual collision, a value of 1 would mean a collision is 1 pixel away
-	// Return value is whethar the collision is true.
-	bool isCollision(FuGlobals::ColType inType, FuGlobals::ColDirect inDirect, int inPixels);
+	// 	    std::weak_ptr<Sprite> colSprite: Optional pointer to hold the Sprite we collided with.
+	// Return value is a whethar a collision is true
+	bool isCollision(FuGlobals::ColType inType, FuGlobals::ColDirect inDirect, int inPixels, std::weak_ptr<Sprite> colSprite = std::weak_ptr<Sprite>());
 
 	// Applies gravity to the sprite depending on boolean parameter. Also checks if just finished a fall and cleans up some variables if so.
 	void applyGravity(bool standing);

@@ -81,6 +81,9 @@ private:
 	// Adjust the player position back inside the level if an out of bounds location has been detected.
 	void adjustForLevelBounds();
 
+	// Process any attack damage player does to other sprites
+	void processAttack();
+
 	// Return bool whethar enough time has passed to change walk animation.
 	bool checkWalkTime();
 
