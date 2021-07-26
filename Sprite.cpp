@@ -413,9 +413,9 @@ void Sprite::render() {
 //		enum ColType inType: what to check for a collision with: level geometry or other sprites
 //		enum ColDirect inDirect: indicates direction to check for collision
 //		int inPixels: distance in pixels to check for a collision. i.e. value of 0 is an actual collision, a value of 1 would mean a collision is 1 pixel away
-// 	    std::weak_ptr<Sprite> colSprite: Optional pointer to hold the Sprite we collided with.
+// 	    std::shared_ptr<Sprite> colSprite: Optional parameter to be filled w/ pointer to the Sprite we collided with.
 // Return value is whethar the collision is true.
-bool Sprite::isCollision(FuGlobals::ColType inType, FuGlobals::ColDirect inDirect, int inPixels, std::weak_ptr<Sprite> colSprite) {
+bool Sprite::isCollision(FuGlobals::ColType inType, FuGlobals::ColDirect inDirect, int inPixels, std::weak_ptr<Sprite> &colSprite) {
     using namespace FuGlobals;
 
     // get proper line to use for collision check and adjust line size per our inPixels parameter
@@ -443,7 +443,13 @@ bool Sprite::isCollision(FuGlobals::ColType inType, FuGlobals::ColDirect inDirec
             break;
     }
 
-    return mLevel.lock()->isACollisionLine(inType, line, *this);
+    return mLevel.lock()->isACollisionLine(inType, line, *this, colSprite);
+}
+
+// Overloaded version of Sprite::isCollision that does not contain the pointer to the collided w/ sprite.
+bool Sprite::isCollision(FuGlobals::ColType inType, FuGlobals::ColDirect inDirect, int inPixels) {
+    std::weak_ptr<Sprite> tmp = {};
+    return isCollision(inType, inDirect, inPixels, tmp);
 }
 
 // Applies gravity to the sprite if parameter set to true otherwise checks if sprite just finished a fall and cleans up velocity variables.

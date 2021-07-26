@@ -385,9 +385,9 @@ bool Level::isACollisionLevel(Line line) {
 //		ColType: the type of collision to check for, level geometry or against another sprite.
 //		Line: the line to use for the collision check.
 //		Sprite: if this is a check against other sprites, ignore the Sprite given in this parameter.
-// 	    std::weak_ptr<Sprite> colSprite: Optional pointer to hold the Sprite we collided with.
+// 	    std::shared_ptr<Sprite> colSprite: Optional pointer to hold the Sprite we collided with.
 // Returns true if a collision occurred.
-bool Level::isACollisionLine(FuGlobals::ColType inType, Line inLine, const Sprite &inIgnore, std::weak_ptr<Sprite> colSprite) {
+bool Level::isACollisionLine(FuGlobals::ColType inType, Line inLine, const Sprite &inIgnore, std::weak_ptr<Sprite> &colSprite) {
     using namespace FuGlobals;
 
     bool collision{ false };
@@ -407,8 +407,8 @@ bool Level::isACollisionLine(FuGlobals::ColType inType, Line inLine, const Sprit
 // Parameters are:
 // 		Line: the line used to perform the collision check.
 //		Sprite: a reference to the Sprite calling this function to be sure sprite's are not checking for collisions with themselves.
-//		std::weak_ptr<Sprite>: optional parameter to be filled with the Sprite we collided with.
-bool Level::isACollisionSprite(Line line, const Sprite& sprite, std::weak_ptr<Sprite> colSprite) {
+//		std::shared_ptr<Sprite>: optional parameter to be filled with the Sprite we collided with.
+bool Level::isACollisionSprite(Line line, const Sprite& sprite, std::weak_ptr<Sprite> &colSprite) {
     // loop through all our level sprite's checking for a collision
     for (int i{}; i < mSprites->size(); ++i) {
         SpriteStruct& ss = mSprites->at(i);
@@ -416,7 +416,7 @@ bool Level::isACollisionSprite(Line line, const Sprite& sprite, std::weak_ptr<Sp
 
         SDL_Rect r = ss.sprite->getCollisionRect();
         if (SDL_IntersectRectAndLine(&r, &line.x1, &line.y1, &line.x2, &line.y2)) {
-            colSprite = std::weak_ptr<Sprite>(ss.sprite);
+            colSprite = ss.sprite;
             return true;
         }
     }
@@ -425,7 +425,7 @@ bool Level::isACollisionSprite(Line line, const Sprite& sprite, std::weak_ptr<Sp
     if ( !(mPlayer.lock().get() == &sprite) ) {
         SDL_Rect r = mPlayer.lock()->getCollisionRect();
         if (SDL_IntersectRectAndLine(&r, &line.x1, &line.y1, &line.x2, &line.y2)) {
-            colSprite = std::weak_ptr<Sprite>(mPlayer);
+            colSprite = mPlayer;
             return true;
         }
     }

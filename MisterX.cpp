@@ -390,13 +390,14 @@ void MisterX::duck() {
 void MisterX::processAttack() {
     using namespace FuGlobals;
 
-    //if (!mAttacking) return;
+    if (!mAttacking) return;
 
-    std::weak_ptr<Sprite> colSprite = std::weak_ptr<Sprite>();
+    std::weak_ptr<Sprite> colSprite;
     if (isCollision(ColType::CT_SPRITE, ColDirect::CD_LEFT, 5, colSprite) ) {
         if ( !FensoxUtils::is_uninitialized(colSprite) ) {
             std::cout << "Colliding with sprite: " << colSprite.lock()->getName() << std::endl;
         }
+        
     }
 }
 

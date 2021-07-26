@@ -33,9 +33,9 @@ public:
 	//		ColType: the type of collision to check for, level geometry or against another sprite.
 	//		Line: the line to use for the collision check.
 	//		Sprite: if this is a check against other sprites, ignore the Sprite given in this parameter.
-	// 	    std::weak_ptr<Sprite> colSprite: Optional pointer to hold the Sprite we collided with.
+	// 	    std::shared_ptr<Sprite> colSprite: Optional pointer to hold the Sprite we collided with.
 	// Returns true if a collision occurred.
-	bool isACollisionLine(FuGlobals::ColType inType, Line inLine, const Sprite &inIgnore, std::weak_ptr<Sprite> colSprite = std::weak_ptr<Sprite>());
+	bool isACollisionLine(FuGlobals::ColType inType, Line inLine, const Sprite& inIgnore, std::weak_ptr<Sprite> &colSprite);
 
 	// Load in the data filefor the level. Must be called before other functions for proper operation. Returns success or failure.
 	bool load();
@@ -167,7 +167,7 @@ private:
 	// 		Line: the line used to perform the collision check.
 	//		Sprite: a reference to the Sprite calling this function to be sure sprite's are not checking for collisions with themselves.
 	//		std::weak_ptr<Sprite>: optional parameter to be filled with the Sprite we collided with.
-	bool isACollisionSprite(Line line, const Sprite& sprite, std::weak_ptr<Sprite> colSprite = std::weak_ptr<Sprite>());
+	bool isACollisionSprite(Line line, const Sprite& sprite, std::weak_ptr<Sprite> &colSprite);
 
 	// Checks if the given line is colliding with any level geometry.
 	bool isACollisionLevel(Line line);
