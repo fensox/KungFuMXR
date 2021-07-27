@@ -321,6 +321,7 @@ void MisterX::punch() {
         revertLastActionMode();
         mPunching = false;
         mAttacking = false;
+        mAttackDmgDone = false;
     }
 }
 
@@ -363,6 +364,7 @@ void MisterX::kick() {
         revertLastActionMode();
         mKicking = false;
         mAttacking = false;
+        mAttackDmgDone = false;
     }
 }
 
@@ -390,14 +392,32 @@ void MisterX::duck() {
 void MisterX::processAttack() {
     using namespace FuGlobals;
 
-    if (!mAttacking) return;
+    if (!mAttacking || mAttackDmgDone) return;
 
+    // Detect a successful attack based on our direction
     std::weak_ptr<Sprite> colSprite;
-    if (isCollision(ColType::CT_SPRITE, ColDirect::CD_LEFT, 5, colSprite) ) {
-        if ( !FensoxUtils::is_uninitialized(colSprite) ) {
-            std::cout << "Colliding with sprite: " << colSprite.lock()->getName() << std::endl;
+    if (mFacingRight && isCollision(ColType::CT_SPRITE, ColDirect::CD_RIGHT, -1, colSprite)) {
+        mAttackDmgDone = true;
+    } else if (!mFacingRight && isCollision(ColType::CT_SPRITE, ColDirect::CD_LEFT, -1, colSprite)) {
+        mAttackDmgDone = true;
+    }
+
+    // Give the damage to the opponent
+    int damage{0};
+    if (mPunching) damage = ATTACK_DMG_PUNCH;
+    if (mKicking) damage = ATTACK_DMG_KICK;
+    if (mAttackDmgDone && !FensoxUtils::is_uninitialized(colSprite)) {
+        colSprite.lock()->adjustHealth(-damage);
+    }
+
+    //***DEBUG***
+    if constexpr (FuGlobals::DEBUG_MODE) {
+        if (mAttackDmgDone) {        
+            std::cout << "Colliding with sprite: " << colSprite.lock()->getName() << "\n";
+            std::cout << "mPunching: " << std::boolalpha << mPunching << "\n";
+            std::cout << "mKicking: " << std::boolalpha << mKicking << "\n";
+            std::cout << std::endl;
         }
-        
     }
 }
 

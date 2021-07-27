@@ -92,4 +92,6 @@ void StickMan::move() {
 
     // call parent function for gravity, friction, & collision detection
     Sprite::move();
+
+    std::cout << getHealth() << std::endl;
 }

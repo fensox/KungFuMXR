@@ -118,6 +118,9 @@ public:
 	// Get this sprite's health points.
 	int getHealth();
 
+	// Adjusts the sprite's health points by the given amount
+	void adjustHealth(int amount);
+
 	// Set this sprite's maximum health points.
 	void setHealthMax(int healthMax);
 
@@ -153,6 +156,12 @@ protected:
 
 	// Unordered map to hold key/value pairs of action names (the key) and their animation frame coordinates on the sprite sheet (the value).
 	ClipsMap mAnimMap{};
+
+	// Indicates if we are in the middle of an attack.
+	bool mAttacking{ false };
+
+	// Indicates if we already caused damage during this attack (prevents one attack anim from causing multiple strikes)
+	bool mAttackDmgDone{ false };
 
 	// Advances the current action mode animation frame ahead or starts at the beginning if at end of animation frames or a new action has been started.
 	void advanceFrame();
@@ -193,6 +202,9 @@ protected:
 
 	// Applies friction to the sprite's velocity.
 	void applyFriction(bool standing);
+
+	// Check's for health reaching 0 and begins death animation.
+	virtual void processDeath();
 
 private:
 	// Center position of sprite within the level. This is not viewport relative but level relative. This is not derived from

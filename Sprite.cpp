@@ -136,6 +136,12 @@ int Sprite::getHealth() {
     return mHealth;
 }
 
+// Adjusts the sprite's health points by the given amount
+void Sprite::adjustHealth(int amount) {
+    mHealth += amount;
+    if (mHealth < 0) mHealth = 0;
+}
+
 // Set the action mode to enter into and also if it is a looping animation or not.
 void Sprite::setActionMode(std::string actionMode, bool looping) {
     mLastActionMode = mActionMode;
@@ -509,6 +515,9 @@ void Sprite::move() {
 
     // check for collisions with level sprites to prohibit them intersecting
     correctFrameSprites();
+
+    // check and process death of Sprite. Can be overridden.
+    processDeath();
 }
 
 // After all movement for frame is made, adjust for any collisions with level geometry.
@@ -568,4 +577,9 @@ void Sprite::correctFrameSprites() {
             colliding = isCollision(ColType::CT_SPRITE, ColDirect::CD_RIGHT, frameWidth);
         }
     }
+}
+
+// Check's for health reaching 0 and begins death animation.
+void Sprite::processDeath() {
+    if (mHealth = 0) std::cout << mName << " is dead!" << std::endl;
 }

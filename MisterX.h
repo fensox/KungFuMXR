@@ -12,6 +12,8 @@ public:
 	static constexpr Uint32		WALK_WAIT_TIME		{ 250 };		// Milliseconds between change of animation 
 	static constexpr decimal	JUMP_VELOCITY		{ 8.5 };		// Initial force a sprite generates to start a jump in pixels per second
 	static constexpr Uint32		ATTACK_TIME			{ 100 };		// Milliseconds to hold an attack animation on screen before returning to former animation
+	static constexpr int		ATTACK_DMG_PUNCH	{ 10 };			// Damage to opponent health from a punch attack
+	static constexpr int		ATTACK_DMG_KICK		{ 10 };			// Damage to opponent health from a kick attack
 
 	// Use base Sprite constructor
 	MisterX(std::weak_ptr<SDLMan> sdlMan);
@@ -50,9 +52,6 @@ private:
 
 	// indicates if an attack key has been released. Prevents player from just holding down button and having a turbo attack.
 	bool mAttackReleased{ true };
-
-	// indicates if we are in the middle of an attack.
-	bool mAttacking{ false };
 
 	// Holds the SDL ticks the last time an animation frame changed for the walking action
 	Uint32 mLastAnimStep{};
